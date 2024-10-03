@@ -1,0 +1,25 @@
+name: commit_test
+on:
+  push: #设置触发规则
+    branches:
+      - main
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code #这部分是为了从github自动clone代码
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Install build tools #这部分是安装依赖
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake
+      - name: Run test #需要执行的命令
+        run: |
+          cd src
+          ./build.sh
+          ./bin/test_bin
+

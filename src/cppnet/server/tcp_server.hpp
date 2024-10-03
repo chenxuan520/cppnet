@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../socket/socket.hpp"
+#include <errno.h>
 #include <functional>
 #include <memory>
 #include <string>
@@ -7,54 +9,45 @@
 #include <unordered_map>
 namespace cppnet {
 
-using RecvCallBack = std::function<void(const std::string &data, int &id)>;
-using TimerCallback = std ::function<int(std::unordered_map<int, std::string> &,
-                                         std::unordered_map<int, int> &)>;
-
 class TcpServer {
+public:
+  /**
+   * @brief: Event enum.
+   */
+  enum Event {
+    kEventAccept = 0,
+    kEventRead = 1,
+    kEventWrite = 2,
+    kEventLeave = 3,
+  };
+  using EventCallBack = std::function<void(Event, TcpServer &, Socket)>;
+
 public:
   TcpServer() = default;
   TcpServer(const std::string &ip, uint16_t port);
+  TcpServer(Address &addr);
   virtual ~TcpServer();
   /**
    * @brief: Init tcp server. Create epfd, bind serverfd, set serverfd non block
    * and register serverfd to epoll.
    */
-  void Init();
+  int Init();
   /**
    * @brief: Closes tcp server. Close epfd and serverfd.
    */
   void Stop();
   /**
-   * @brief: Tcp server send msg to peer.
+   * @brief: Register callback function when event happens.
    */
-  int SendData(int fd, std::string msg);
-  /**
-   * @brief: Register callback function when recv peer data.
-   */
-  void RegisterRecvCallback(RecvCallBack recv_callback);
-  /**
-   * @brief: Register callback function when timer ticks.
-   */
-  void RegisterTimerCallback(TimerCallback timer_callback);
-  /**
-   * @brief: Unregister callback function of recv.
-   */
-  void ResetRecvCallback();
-  /**
-   * @brief: Unregister callback function of handle_timer.
-   */
-  void ResetTimerCallback();
+  void Register(EventCallBack cb);
   /**
    * @brief: Epoll event loop.
    */
   void EpollLoop();
 
 protected:
-  int CreateEpoll();
-  int CreateSocket();
-  int CreateTimer();
-  int SetSocketNonblock(int fd);
+  Socket CreateEpoll();
+  Socket CreateSocket();
   int Listen(int fd);
   int UpdateEpollEvents(int efd, int op, int fd, int events);
   int DeleteEpollEvents(int efd, int fd);
@@ -63,26 +56,24 @@ protected:
   void HandleAccept();
   void HandleRead(int fd);
   void HandleWrite(int fd);
-  bool Reset();
-  bool ResetTimer(int timerfd);
+  void HandleLeave(int fd);
 
 private:
-  // Dot seperated ip address. eg: 127.0.0.1
-  std::string ip_;
-  // port
-  uint16_t port_{0};
+  // server address
+  Address addr_;
   // epoll file descriptor
-  int epfd_{-1};
+  Socket epfd_{-1};
   // server file descriptor
-  int listenfd_{-1};
-  // time file descriptor
-  int timerfd_{-1};
+  Socket listenfd_{-1};
   // epoll loop flag, if false then exit
   bool loop_flag_{true};
-  // callback function when recv data
-  RecvCallBack recv_callbak_{nullptr};
-  // callback function when timer ticks
-  TimerCallback handle_timer_callbak_{nullptr};
+  // event callback function
+  EventCallBack event_callback_;
+
+private:
+  int max_connect_queue_{10};
+  int max_event_num_{10};
+  int epoll_timeout_{-1};
 };
 
 } // namespace cppnet

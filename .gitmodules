@@ -1,0 +1,3 @@
+[submodule "src/third_party/cpptest"]
+	path = src/third_party/cpptest
+	url = https://gitee.com/chenxuan520/cpptest
