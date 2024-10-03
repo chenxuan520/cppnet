@@ -17,10 +17,15 @@ public:
   enum Event {
     kEventAccept = 0,
     kEventRead = 1,
-    kEventWrite = 2,
-    kEventLeave = 3,
+    kEventLeave = 2,
   };
   using EventCallBack = std::function<void(Event, TcpServer &, Socket)>;
+
+  enum RC {
+    kSuccess = 0,
+    kSysErr = -1,
+    kLogicErr = -2,
+  };
 
 public:
   TcpServer() = default;
@@ -37,13 +42,38 @@ public:
    */
   void Stop();
   /**
+   * @brief: Clean all resources.
+   */
+  void Clean();
+  /**
    * @brief: Register callback function when event happens.
    */
   void Register(EventCallBack cb);
   /**
    * @brief: Epoll event loop.
+   * @return: 0 if success, -1 if failed.
    */
-  void EpollLoop();
+  int EpollLoop();
+  /**
+   * @brief: Close file descriptor.With remove from epoll.
+   */
+  int RemoveSoc(const Socket &fd);
+  /**
+   * @brief: Add file descriptor to epoll.
+   */
+  int AddSoc(const Socket &fd);
+
+public:
+  inline void set_max_connect_queue(int max_connect_queue) {
+    max_connect_queue_ = max_connect_queue;
+  }
+  inline void set_max_event_num(int max_event_num) {
+    max_event_num_ = max_event_num;
+  }
+  inline void set_epoll_timeout(int epoll_timeout) {
+    epoll_timeout_ = epoll_timeout;
+  }
+  inline std::string err_msg() const { return err_msg_; }
 
 protected:
   Socket CreateEpoll();
@@ -51,11 +81,9 @@ protected:
   int Listen(int fd);
   int UpdateEpollEvents(int efd, int op, int fd, int events);
   int DeleteEpollEvents(int efd, int fd);
-  int CloseFd(int fd);
 
   void HandleAccept();
   void HandleRead(int fd);
-  void HandleWrite(int fd);
   void HandleLeave(int fd);
 
 private:
@@ -68,11 +96,16 @@ private:
   // epoll loop flag, if false then exit
   bool loop_flag_{true};
   // event callback function
-  EventCallBack event_callback_;
+  EventCallBack event_callback_{nullptr};
+  // err msg
+  std::string err_msg_;
 
 private:
+  // default max connect queue is 10
   int max_connect_queue_{10};
-  int max_event_num_{10};
+  // default max event number is 128
+  int max_event_num_{128};
+  // default epoll timeout is -1, epoll_wait will block until event
   int epoll_timeout_{-1};
 };
 

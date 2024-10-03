@@ -55,12 +55,26 @@ public:
    */
   int Read(std::string &buf, size_t len) const;
   /**
+   * @brief: Read data from socket.
+   * @param buf: buffer to store data.
+   * @param len: buffer length.
+   * @return: read length.
+   */
+  int Read(void *buf, size_t len) const;
+  /**
    * @brief: Write data to socket.
    * @param buf: buffer to store data.
    * @param len: buffer length.
    * @return: write length.
    */
   int Write(const std::string &buf) const;
+  /**
+   * @brief: Write data to socket.
+   * @param buf: buffer to store data.
+   * @param len: buffer length.
+   * @return: write length.
+   */
+  int Write(const void *buf, size_t len) const;
   /**
    * @brief: Set socket nonblock.
    */

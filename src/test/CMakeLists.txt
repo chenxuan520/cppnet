@@ -16,7 +16,7 @@ include_directories(../third_party/cpptest)
 # add source
 aux_source_directory(../cppnet/server DIR_SRCS)
 aux_source_directory(../cppnet/timer DIR_SRCS)
-aux_source_directory(../cppnet/client DIR_SRCS)
+aux_source_directory(../cppnet/utils DIR_SRCS)
 aux_source_directory(../cppnet/socket DIR_SRCS)
 
 set(EXECUTABLE_OUTPUT_PATH ../../bin)

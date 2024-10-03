@@ -1,4 +1,5 @@
 #include "socket.hpp"
+#include <cstring>
 #include <fcntl.h>
 #include <sys/socket.h>
 
@@ -50,6 +51,9 @@ int Socket::Connect(Address &addr) const {
 }
 
 int Socket::Close() {
+  if (status_ != kInit) {
+    return -1;
+  }
   status_ = kClosed;
   return ::close(fd_);
 }
@@ -66,10 +70,19 @@ int Socket::Read(std::string &buf, size_t len) const {
   if (status_ != kInit) {
     return -1;
   }
-  char *data = new char[len];
+  char *data = new char[len + 1];
+  memset(data, 0, len + 1);
   auto rc = ::read(fd_, data, len);
   buf = data;
+  delete[] data;
   return rc;
+}
+
+int Socket::Read(void *buf, size_t len) const {
+  if (status_ != kInit) {
+    return -1;
+  }
+  return ::read(fd_, buf, len);
 }
 
 int Socket::Write(const std::string &buf) const {
@@ -77,6 +90,13 @@ int Socket::Write(const std::string &buf) const {
     return -1;
   }
   return ::write(fd_, buf.c_str(), buf.size());
+}
+
+int Socket::Write(const void *buf, size_t len) const {
+  if (status_ != kInit) {
+    return -1;
+  }
+  return ::write(fd_, buf, len);
 }
 
 int Socket::SetReuseAddr() const {
