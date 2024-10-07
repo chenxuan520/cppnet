@@ -1,4 +1,5 @@
 #include "tcp_server.hpp"
+#include "../utils/const.hpp"
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <iostream>
@@ -45,7 +46,7 @@ Socket TcpServer::CreateSocket() {
   }
 
   // when use LT mode, must set non block
-  rc = listenfd.SetNonBlock();
+  rc = listenfd.SetNoBlock();
   if (rc < 0) {
     err_msg_ = "[syserr]:" + std::string(strerror(errno));
     return kSysErr;
@@ -117,8 +118,16 @@ void TcpServer::HandleAccept() {
     return;
   }
 
-  auto rc = UpdateEpollEvents(epfd_.fd(), EPOLL_CTL_ADD, new_socket.fd(),
-                              EPOLLIN | EPOLLET | EPOLLRDHUP);
+  // ET mode need set to non block
+  auto rc = new_socket.SetNoBlock();
+  if (rc < 0) {
+    err_msg_ = "[syserr]:" + std::string(strerror(errno));
+    new_socket.Close();
+    return;
+  }
+
+  rc = UpdateEpollEvents(epfd_.fd(), EPOLL_CTL_ADD, new_socket.fd(),
+                         EPOLLIN | EPOLLET | EPOLLRDHUP);
   if (rc < 0) {
     err_msg_ = "[syserr]:" + std::string(strerror(errno));
     new_socket.Close();
@@ -198,7 +207,7 @@ int TcpServer::Init() {
     return kSysErr;
   }
 
-  auto retval = listenfd_.SetNonBlock();
+  auto retval = listenfd_.SetNoBlock();
   if (retval < 0) {
     err_msg_ = "[syserr]:" + std::string(strerror(errno));
     listenfd_.Close();

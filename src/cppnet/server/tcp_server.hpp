@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../socket/socket.hpp"
+#include "./io_multiplexing/io_multiplexing_factory.hpp"
 #include <errno.h>
 #include <functional>
 #include <memory>
@@ -21,10 +22,13 @@ public:
   };
   using EventCallBack = std::function<void(Event, TcpServer &, Socket)>;
 
-  enum RC {
-    kSuccess = 0,
-    kSysErr = -1,
-    kLogicErr = -2,
+  /**
+   * @brief: IOMultiplexing mode.
+   */
+  enum Mode {
+    kIOMultiplexing,
+    kMultiThread,
+    kMultiProcess,
   };
 
 public:

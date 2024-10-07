@@ -78,7 +78,7 @@ public:
   /**
    * @brief: Set socket nonblock.
    */
-  int SetNonBlock() const;
+  int SetNoBlock() const;
   /**
    * set socket reuse addr
    */

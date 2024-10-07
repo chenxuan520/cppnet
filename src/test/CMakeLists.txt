@@ -14,6 +14,7 @@ include_directories(../third_party/cpptest)
 # link_directories()
 
 # add source
+aux_source_directory(../cppnet/server/io_multiplexing DIR_SRCS)
 aux_source_directory(../cppnet/server DIR_SRCS)
 aux_source_directory(../cppnet/timer DIR_SRCS)
 aux_source_directory(../cppnet/utils DIR_SRCS)

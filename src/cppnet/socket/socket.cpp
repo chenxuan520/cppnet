@@ -58,7 +58,7 @@ int Socket::Close() {
   return ::close(fd_);
 }
 
-int Socket::SetNonBlock() const {
+int Socket::SetNoBlock() const {
   int flags = fcntl(fd_, F_GETFL, 0);
   if (flags == -1) {
     return -1;
