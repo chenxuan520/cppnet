@@ -3,14 +3,17 @@
 
 namespace cppnet {
 
-std::shared_ptr<IOMultiplexingBase>
-IOMultiplexingFactory::Create(const IOMultiplexingType type) {
-  switch (type) {
-  case IOMultiplexingType::kEpoll:
-    return std::make_shared<Epoll>();
-  default:
-    return nullptr;
-  }
+std::shared_ptr<IOMultiplexingBase> IOMultiplexingFactory::CreateDefault() {
+#ifdef __linux__
+  // linux use epoll
+  return std::make_shared<Epoll>();
+#elif __APPLE__
+  // macos use kqueue
+  return nullptr;
+#elif _WIN32
+  // windows use select
+  return nullptr;
+#endif
 }
 
 } // namespace cppnet

@@ -29,6 +29,7 @@ public:
     kIOMultiplexing,
     kMultiThread,
     kMultiProcess,
+    kMixed,
   };
 
 public:
@@ -103,6 +104,8 @@ private:
   EventCallBack event_callback_{nullptr};
   // err msg
   std::string err_msg_;
+  // server mode
+  Mode mode_{kIOMultiplexing};
 
 private:
   // default max connect queue is 10

@@ -9,8 +9,7 @@ public:
   /*
    * @brief: Create IOMultiplexingBase.
    */
-  static std::shared_ptr<IOMultiplexingBase>
-  Create(const IOMultiplexingType type);
+  static std::shared_ptr<IOMultiplexingBase> CreateDefault();
 };
 
 } // namespace cppnet

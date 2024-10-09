@@ -11,14 +11,25 @@ int Epoll::Init() {
   epoll_fd_ = CreateEpoll();
   if (epoll_fd_.status() == Socket::kInit) {
     err_msg_ = "[syserr]:" + std::string(strerror(errno));
-    return -1;
+    return kSysErr;
   }
-  return 0;
+  return kSuccess;
 }
 
 int Epoll::MonitorSoc(const Socket &fd) {
-  return UpdateEpollEvents(epoll_fd_.fd(), EPOLL_CTL_ADD, fd.fd(),
-                           EPOLLIN | EPOLLET | EPOLLRDHUP);
+  if (trigger_type_ == kEdgeTrigger) {
+    auto rc = fd.SetNoBlock();
+    if (rc < 0) {
+      err_msg_ = "[syserr]:" + std::string(strerror(errno));
+      return kSysErr;
+    }
+    return UpdateEpollEvents(epoll_fd_.fd(), EPOLL_CTL_ADD, fd.fd(),
+                             EPOLLIN | EPOLLET | EPOLLRDHUP);
+  } else {
+    return UpdateEpollEvents(epoll_fd_.fd(), EPOLL_CTL_ADD, fd.fd(),
+                             EPOLLIN | EPOLLRDHUP);
+  }
+  return kSuccess;
 }
 
 int Epoll::RemoveSoc(const Socket &fd) {
@@ -36,7 +47,7 @@ int Epoll::Loop(NotifyCallBack callback) {
         continue;
       }
       err_msg_ = "[syserr]:" + std::string(strerror(errno));
-      return -1;
+      return kSysErr;
     }
     for (int i = 0; i < nfds; ++i) {
       if (callback != nullptr) {
@@ -44,7 +55,7 @@ int Epoll::Loop(NotifyCallBack callback) {
       }
     }
   }
-  return 0;
+  return kSuccess;
 }
 
 Socket Epoll::CreateEpoll() { return epoll_create1(0); }
