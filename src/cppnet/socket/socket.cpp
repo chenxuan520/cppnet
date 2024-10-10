@@ -21,6 +21,15 @@ int Socket::Init() {
   return 0;
 }
 
+int Socket::InitUdp() {
+  fd_ = ::socket(AF_INET, SOCK_DGRAM, 0);
+  if (fd_ < 0) {
+    return -1;
+  }
+  status_ = kInit;
+  return 0;
+}
+
 Socket Socket::Accept(Address &addr, socklen_t *plen) const {
   if (status_ != kInit) {
     return Socket(-1);
@@ -66,6 +75,14 @@ int Socket::SetNoBlock() const {
   return fcntl(fd_, F_SETFL, flags | O_NONBLOCK);
 }
 
+int Socket::SetBlock() const {
+  int flags = fcntl(fd_, F_GETFL, 0);
+  if (flags == -1) {
+    return -1;
+  }
+  return fcntl(fd_, F_SETFL, flags & ~O_NONBLOCK);
+}
+
 int Socket::Read(std::string &buf, size_t len) const {
   if (status_ != kInit) {
     return -1;
@@ -85,6 +102,29 @@ int Socket::Read(void *buf, size_t len) const {
   return ::read(fd_, buf, len);
 }
 
+int Socket::ReadUdp(std::string &buf, size_t len, Address &addr) const {
+  if (status_ != kInit) {
+    return -1;
+  }
+  int addr_len = sizeof(sockaddr);
+  char *data = new char[len + 1];
+  memset(data, 0, len + 1);
+  auto rc =
+      ::recvfrom(fd_, data, len, 0, addr.GetSockAddr(), (socklen_t *)&addr_len);
+  buf = data;
+  delete[] data;
+  return rc;
+}
+
+int Socket::ReadUdp(void *buf, size_t len, Address &addr) const {
+  if (status_ != kInit) {
+    return -1;
+  }
+  int addr_len = sizeof(sockaddr);
+  return ::recvfrom(fd_, buf, len, 0, addr.GetSockAddr(),
+                    (socklen_t *)&addr_len);
+}
+
 int Socket::Write(const std::string &buf) const {
   if (status_ != kInit) {
     return -1;
@@ -97,6 +137,21 @@ int Socket::Write(const void *buf, size_t len) const {
     return -1;
   }
   return ::write(fd_, buf, len);
+}
+
+int Socket::WriteUdp(const std::string &buf, Address &addr) const {
+  if (status_ != kInit) {
+    return -1;
+  }
+  return ::sendto(fd_, buf.c_str(), buf.size(), 0, addr.GetSockAddr(),
+                  sizeof(sockaddr));
+}
+
+int Socket::WriteUdp(const void *buf, size_t len, Address &addr) const {
+  if (status_ != kInit) {
+    return -1;
+  }
+  return ::sendto(fd_, buf, len, 0, addr.GetSockAddr(), sizeof(sockaddr));
 }
 
 int Socket::SetReuseAddr() const {

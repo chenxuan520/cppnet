@@ -50,7 +50,7 @@ public:
   /**
    * @brief: Stop loop.
    */
-  void Stop() { loop_flag_ = false; }
+  virtual void Stop() { loop_flag_ = false; }
 
 public:
   /**

@@ -23,6 +23,11 @@ public:
    */
   int Init();
   /**
+   * @brief: Init socket with udp
+   * @return: 0 if success, -1 if failed.
+   */
+  int InitUdp();
+  /**
    * @brief: try to connect to server.
    * @param addr: server address.
    * @param len: address length.
@@ -62,6 +67,22 @@ public:
    */
   int Read(void *buf, size_t len) const;
   /**
+   * @brief: Read data from socket.
+   * @param buf: buffer to store data.
+   * @param len: buffer length.
+   * @param address: udp read from
+   * @return: read length.
+   */
+  int ReadUdp(std::string &buf, size_t len,Address& addr) const;
+  /**
+   * @brief: Read data from udp socket.
+   * @param buf: buffer to store data.
+   * @param len: buffer length.
+   * @param address: udp read from
+   * @return: read length.
+   */
+  int ReadUdp(void *buf, size_t len,Address& addr) const;
+  /**
    * @brief: Write data to socket.
    * @param buf: buffer to store data.
    * @param len: buffer length.
@@ -76,9 +97,29 @@ public:
    */
   int Write(const void *buf, size_t len) const;
   /**
+   * @brief: Write data to udp socket.
+   * @param buf: buffer to store data.
+   * @param len: buffer length.
+   * @param addr: udp write to
+   * @return: write length.
+   */
+  int WriteUdp(const std::string &buf, Address &addr) const;
+  /**
+   * @brief: Write data to udp socket.
+   * @param buf: buffer to store data.
+   * @param len: buffer length.
+   * @param addr: udp write to
+   * @return: write length.
+   */
+  int WriteUdp(const void *buf, size_t len, Address &addr) const;
+  /**
    * @brief: Set socket nonblock.
    */
   int SetNoBlock() const;
+  /**
+   * @brief: Set socket block
+   */
+  int SetBlock() const;
   /**
    * set socket reuse addr
    */
