@@ -9,12 +9,6 @@
 #include <ostream>
 #include <signal.h>
 #include <string.h>
-#include <sys/epoll.h>
-#include <sys/select.h>
-#include <sys/socket.h>
-#include <sys/timerfd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <unistd.h>
 
 namespace cppnet {
@@ -26,15 +20,6 @@ TcpServer::TcpServer(Address &addr) : addr_(addr) {}
 TcpServer::~TcpServer() {
   Stop();
   Clean();
-}
-
-Socket TcpServer::CreateEpoll() {
-  int epfd = epoll_create1(0);
-  if (epfd < 0) {
-    err_msg_ = "[syserr]:" + std::string(strerror(errno));
-    return kSysErr;
-  }
-  return epfd;
 }
 
 Socket TcpServer::CreateSocket() {
@@ -78,34 +63,12 @@ int TcpServer::Listen(int fd) {
   return kSuccess;
 }
 
-int TcpServer::UpdateEpollEvents(int efd, int op, int fd, int events) {
-  struct epoll_event ev;
-  ev.events = events;
-  ev.data.fd = fd;
-  auto rc = epoll_ctl(efd, op, fd, &ev);
-  if (rc < 0) {
-    err_msg_ = "[syserr]:" + std::string(strerror(errno));
-    return kSysErr;
-  }
-  return kSuccess;
-}
-
-int TcpServer::DeleteEpollEvents(int efd, int fd) {
-  auto rc = epoll_ctl(efd, EPOLL_CTL_DEL, fd, nullptr);
-  if (rc < 0) {
-    err_msg_ = "[syserr]:" + std::string(strerror(errno));
-    return kSysErr;
-  }
-  return kSuccess;
-}
-
 int TcpServer::RemoveSoc(const Socket &soc) {
-  return DeleteEpollEvents(epfd_.fd(), soc.fd());
+  return io_multiplexing_->RemoveSoc(soc);
 }
 
 int TcpServer::AddSoc(const Socket &soc) {
-  return UpdateEpollEvents(epfd_.fd(), EPOLL_CTL_ADD, soc.fd(),
-                           EPOLLIN | EPOLLET | EPOLLRDHUP);
+  return io_multiplexing_->MonitorSoc(soc);
 }
 
 void TcpServer::HandleAccept() {
@@ -126,8 +89,8 @@ void TcpServer::HandleAccept() {
     return;
   }
 
-  rc = UpdateEpollEvents(epfd_.fd(), EPOLL_CTL_ADD, new_socket.fd(),
-                         EPOLLIN | EPOLLET | EPOLLRDHUP);
+  // add to epoll
+  rc = io_multiplexing_->MonitorSoc(new_socket);
   if (rc < 0) {
     err_msg_ = "[syserr]:" + std::string(strerror(errno));
     new_socket.Close();
@@ -156,47 +119,43 @@ void TcpServer::HandleLeave(int fd) {
 }
 
 int TcpServer::EpollLoop() {
-  if (epfd_.status() != Socket::kInit || listenfd_.status() != Socket::kInit) {
+  if (listenfd_.status() != Socket::kInit) {
     err_msg_ = "[logicerr]:epfd or listenfd not init";
     return kLogicErr;
   }
 
-  // set loop flag to true,could be stopped by Stop()
-  loop_flag_ = true;
-  struct epoll_event events[max_event_num_];
-  while (loop_flag_) {
-    int nfds = epoll_wait(epfd_.fd(), events, max_event_num_, epoll_timeout_);
-    if (nfds < 0) {
-      err_msg_ = "[syserr]:" + std::string(strerror(errno));
-      return kSysErr;
-    }
+  if (io_multiplexing_ == nullptr) {
+    err_msg_ = "[logicerr]:io multiplexing not init";
+    return kLogicErr;
+  }
 
-    for (int i = 0; i < nfds; ++i) {
-      if (events[i].data.fd == listenfd_.fd()) {
-        HandleAccept();
-      } else if (events[i].events & EPOLLRDHUP || events[i].events & EPOLLERR ||
-                 events[i].events & EPOLLHUP) {
-        // must deal leave event before read event, because read event may be
-        // triggered after leave event
-        HandleLeave(events[i].data.fd);
-      } else if (events[i].events & EPOLLIN) {
-        HandleRead(events[i].data.fd);
-      } else {
-        // unknown event,dismiss
-      }
+  auto callback = [this](IOMultiplexingBase &, Socket fd,
+                         IOMultiplexingBase::IOEvent event) {
+    if (fd == listenfd_) {
+      HandleAccept();
+    } else if (event == IOMultiplexingBase::kIOEventRead) {
+      HandleRead(fd.fd());
+    } else if (event == IOMultiplexingBase::kIOEventLeave) {
+      HandleLeave(fd.fd());
     }
+  };
+
+  auto rc = io_multiplexing_->Loop(callback);
+  if (rc < 0) {
+    err_msg_ = "[syserr]:" + std::string(strerror(errno));
+    return kSysErr;
   }
   return kSuccess;
 }
 
-void TcpServer::Stop() { loop_flag_ = false; }
+void TcpServer::Stop() { io_multiplexing_->Stop(); }
 
 void TcpServer::Clean() {
-  if (epfd_.status() == Socket::kInit) {
-    epfd_.Close();
-  }
   if (listenfd_.status() == Socket::kInit) {
     listenfd_.Close();
+  }
+  if (io_multiplexing_ != nullptr) {
+    io_multiplexing_->Close();
   }
 }
 
@@ -221,21 +180,27 @@ int TcpServer::Init() {
     return kSysErr;
   }
 
-  epfd_ = CreateEpoll();
-  if (epfd_.status() != Socket::kInit) {
-    err_msg_ = "[syserr]:" + std::string(strerror(errno));
+  io_multiplexing_ = IOMultiplexingFactory::CreateDefault();
+  if (io_multiplexing_ == nullptr) {
+    err_msg_ = "[logicerr]:io multiplexing not init";
+    listenfd_.Close();
+    return kLogicErr;
+  }
+
+  retval = io_multiplexing_->Init();
+  if (retval < 0) {
+    err_msg_ = io_multiplexing_->err_msg();
     listenfd_.Close();
     return kSysErr;
   }
 
-  retval = UpdateEpollEvents(epfd_.fd(), EPOLL_CTL_ADD, listenfd_.fd(),
-                             EPOLLIN | EPOLLET | EPOLLRDHUP);
+  retval = io_multiplexing_->MonitorSoc(listenfd_);
   if (retval < 0) {
+    err_msg_ = io_multiplexing_->err_msg();
     listenfd_.Close();
-    epfd_.Close();
     return kSysErr;
   }
-  return 0;
+  return kSuccess;
 }
 
 } // namespace cppnet

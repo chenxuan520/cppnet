@@ -73,7 +73,7 @@ public:
    * @param address: udp read from
    * @return: read length.
    */
-  int ReadUdp(std::string &buf, size_t len,Address& addr) const;
+  int ReadUdp(std::string &buf, size_t len, Address &addr) const;
   /**
    * @brief: Read data from udp socket.
    * @param buf: buffer to store data.
@@ -81,7 +81,7 @@ public:
    * @param address: udp read from
    * @return: read length.
    */
-  int ReadUdp(void *buf, size_t len,Address& addr) const;
+  int ReadUdp(void *buf, size_t len, Address &addr) const;
   /**
    * @brief: Write data to socket.
    * @param buf: buffer to store data.
@@ -128,6 +128,12 @@ public:
 public:
   inline int fd() const { return fd_; }
   inline Status status() const { return status_; }
+
+public:
+  /**
+   * @brief: Compare operator.
+   */
+  bool operator==(const Socket &rhs) const { return fd_ == rhs.fd_; }
 
 private:
   int fd_ = -1;

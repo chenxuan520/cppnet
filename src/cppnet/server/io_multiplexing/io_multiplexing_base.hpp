@@ -16,7 +16,12 @@ enum IOMultiplexingType {
 
 class IOMultiplexingBase {
 public:
-  using NotifyCallBack = std::function<void(IOMultiplexingBase &, Socket)>;
+  enum IOEvent {
+    kIOEventRead = 1,
+    kIOEventLeave = 2,
+  };
+  using NotifyCallBack =
+      std::function<void(IOMultiplexingBase &, Socket, IOEvent)>;
 
 public:
   /**

@@ -9,7 +9,7 @@ Epoll::TriggerType Epoll::trigger_type_ = Epoll::TriggerType::kEdgeTrigger;
 
 int Epoll::Init() {
   epoll_fd_ = CreateEpoll();
-  if (epoll_fd_.status() == Socket::kInit) {
+  if (epoll_fd_.status() != Socket::kInit) {
     err_msg_ = "[syserr]:" + std::string(strerror(errno));
     return kSysErr;
   }
@@ -50,8 +50,10 @@ int Epoll::Loop(NotifyCallBack callback) {
       return kSysErr;
     }
     for (int i = 0; i < nfds; ++i) {
-      if (callback != nullptr) {
-        callback(*this, evs[i].data.fd);
+      if (evs[i].events & EPOLLERR || evs[i].events & EPOLLHUP) {
+        callback(*this, evs[i].data.fd, kIOEventLeave);
+      } else if (evs[i].events & EPOLLIN) {
+        callback(*this, evs[i].data.fd, kIOEventRead);
       }
     }
   }

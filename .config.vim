@@ -54,11 +54,11 @@ let g:Term_project_task=[
 			\'name'       : 'debug',
 			\'command'    : './build.sh Debug',
 			\'mode'       : 'quickfix',
-			\'path'       : s:pwd,
+			\'path'       : s:root.'/src',
 			\'close'      : 1,
 			\'type'       : 'split',
 			\'key'        : '\5',
-			\'end_script' : 'cclose|packadd termdebug|Termdebug a.out',
+			\'end_script' : 'cclose|packadd termdebug|Termdebug ./bin/test_bin',
 			\},
 			\{
 			\'name'       : 'coc',

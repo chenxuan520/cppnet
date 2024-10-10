@@ -1,5 +1,8 @@
 #include "kqueue.hpp"
 #include "utils/const.hpp"
+
+#ifdef __APPLE__
+
 #include <sys/event.h>
 
 namespace cppnet {
@@ -61,3 +64,5 @@ int KQueue::Loop(NotifyCallBack callback) {
 void KQueue::Close() { kq_fd_.Close(); }
 
 } // namespace cppnet
+
+#endif

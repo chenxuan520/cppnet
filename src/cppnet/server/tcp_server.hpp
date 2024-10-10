@@ -1,7 +1,9 @@
 #pragma once
 
 #include "../socket/socket.hpp"
+#include "io_multiplexing/io_multiplexing_factory.hpp"
 #include <functional>
+#include <memory>
 #include <string>
 namespace cppnet {
 
@@ -76,11 +78,8 @@ public:
   inline std::string err_msg() const { return err_msg_; }
 
 protected:
-  Socket CreateEpoll();
   Socket CreateSocket();
   int Listen(int fd);
-  int UpdateEpollEvents(int efd, int op, int fd, int events);
-  int DeleteEpollEvents(int efd, int fd);
 
   void HandleAccept();
   void HandleRead(int fd);
@@ -89,8 +88,6 @@ protected:
 private:
   // server address
   Address addr_;
-  // epoll file descriptor
-  Socket epfd_{-1};
   // server file descriptor
   Socket listenfd_{-1};
   // epoll loop flag, if false then exit
@@ -101,6 +98,8 @@ private:
   std::string err_msg_;
   // server mode
   Mode mode_{kIOMultiplexing};
+  // io multiplexing
+  std::shared_ptr<IOMultiplexingBase> io_multiplexing_{nullptr};
 
 private:
   // default max connect queue is 10
