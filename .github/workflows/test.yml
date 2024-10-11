@@ -7,16 +7,27 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    strategy:
+      matrix: # 会分开成两个任务分别执行
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code #这部分是为了从github自动clone代码
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: true
-      - name: Install build tools #这部分是安装依赖
+
+      - name: Install ubuntu build tools #这部分是安装依赖
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake
+
+      - name: Install macos build tools #这部分是安装依赖
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install cmake
+
       - name: Run test #需要执行的命令
         run: |
           cd src
