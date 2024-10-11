@@ -50,7 +50,7 @@ int Epoll::Loop(NotifyCallBack callback) {
       return kSysErr;
     }
     for (int i = 0; i < nfds; ++i) {
-      if (evs[i].events & EPOLLERR || evs[i].events & EPOLLHUP) {
+      if (evs[i].events & EPOLLRDHUP || evs[i].events & EPOLLERR) {
         callback(*this, evs[i].data.fd, kIOEventLeave);
       } else if (evs[i].events & EPOLLIN) {
         callback(*this, evs[i].data.fd, kIOEventRead);

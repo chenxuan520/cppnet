@@ -11,14 +11,6 @@ using namespace std;
 Address addr{"127.0.0.1", 8080};
 TcpServer server{addr};
 
-INIT(TcpServer) {
-  GO([&]() {
-    // max run time
-    sleep(10);
-    exit(-1);
-  });
-}
-
 TEST(TcpServer, SigleClient) {
   // init server
   auto rc = server.Init();

@@ -7,13 +7,13 @@
 namespace cppnet {
 
 std::string Host::GetLocalName() {
-  char ip[32] = {0};
+  char ip[512] = {0};
   gethostname(ip, sizeof(ip));
   return ip;
 }
 
 std::string Host::GetLocalIP() {
-  char ip[32] = {0};
+  char ip[512] = {0};
   gethostname(ip, sizeof(ip));
   struct hostent *host = gethostbyname(ip);
   if (host == nullptr) {

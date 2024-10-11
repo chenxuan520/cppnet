@@ -7,5 +7,6 @@
 - [ ] 支持设置连接的超时时间
 - [ ] 支持UDP协议(添加测试)
 - [ ] 支持Http协议(彻底迁移 cppweb -> cppnet)
-- [ ] 抽象出epoll层
+- [x] 抽象出epoll层
 - [ ] 支持SSL
+- [ ] accept 改造

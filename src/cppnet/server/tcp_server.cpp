@@ -30,13 +30,6 @@ Socket TcpServer::CreateSocket() {
     return kSysErr;
   }
 
-  // when use LT mode, must set non block
-  rc = listenfd.SetNoBlock();
-  if (rc < 0) {
-    err_msg_ = "[syserr]:" + std::string(strerror(errno));
-    return kSysErr;
-  }
-
   // set reuse addr to avoid time wait delay
   rc = listenfd.SetReuseAddr();
   if (rc < 0) {
@@ -133,10 +126,10 @@ int TcpServer::EpollLoop() {
                          IOMultiplexingBase::IOEvent event) {
     if (fd == listenfd_) {
       HandleAccept();
-    } else if (event == IOMultiplexingBase::kIOEventRead) {
-      HandleRead(fd.fd());
     } else if (event == IOMultiplexingBase::kIOEventLeave) {
       HandleLeave(fd.fd());
+    } else if (event == IOMultiplexingBase::kIOEventRead) {
+      HandleRead(fd.fd());
     }
   };
 
