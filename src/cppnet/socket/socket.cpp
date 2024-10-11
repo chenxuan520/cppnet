@@ -30,11 +30,11 @@ int Socket::InitUdp() {
   return 0;
 }
 
-Socket Socket::Accept(Address &addr, socklen_t *plen) const {
+Socket Socket::Accept(Address &addr) const {
   if (status_ != kInit) {
     return Socket(-1);
   }
-  auto accept_fd = ::accept(fd_, addr.GetSockAddr(), plen);
+  auto accept_fd = ::accept(fd_, addr.GetSockAddr(), addr.GetAddrLen());
   return Socket(accept_fd);
 }
 

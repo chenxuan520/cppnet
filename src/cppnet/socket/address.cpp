@@ -14,4 +14,10 @@ void Address::GetIPAndPort(std::string &ip, uint16_t &port) {
   port = ntohs(addr_.sin_port);
 }
 
+socklen_t *Address::GetAddrLen() {
+  static socklen_t len = 0;
+  len = sizeof(sockaddr_in);
+  return &len;
+}
+
 } // namespace cppnet

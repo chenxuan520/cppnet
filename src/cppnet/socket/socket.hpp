@@ -43,7 +43,7 @@ public:
    * @param addr: server address.
    * @param plen: pointer of address length.
    */
-  Socket Accept(Address &addr, socklen_t *plen) const;
+  Socket Accept(Address &addr) const;
   /**
    * @brief: Close socket.
    */

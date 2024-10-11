@@ -1,3 +1,5 @@
+#ifdef __linux__
+
 #include "epoll.hpp"
 #include "utils/const.hpp"
 #include <cstring>
@@ -39,6 +41,11 @@ int Epoll::RemoveSoc(const Socket &fd) {
 void Epoll::Close() { epoll_fd_.Close(); }
 
 int Epoll::Loop(NotifyCallBack callback) {
+  if (callback == nullptr) {
+    err_msg_ = "[logicerr]:" + std::string("callback is nullptr");
+    return kLogicErr;
+  }
+
   while (loop_flag_) {
     struct epoll_event evs[max_event_num_];
     int nfds = epoll_wait(epoll_fd_.fd(), evs, max_event_num_, -1);
@@ -50,8 +57,12 @@ int Epoll::Loop(NotifyCallBack callback) {
       return kSysErr;
     }
     for (int i = 0; i < nfds; ++i) {
-      if (evs[i].events & EPOLLRDHUP || evs[i].events & EPOLLERR) {
+      if (evs[i].events & EPOLLRDHUP) {
         callback(*this, evs[i].data.fd, kIOEventLeave);
+
+      } else if (evs[i].events & EPOLLERR) {
+        callback(*this, evs[i].data.fd, kIOEventError);
+
       } else if (evs[i].events & EPOLLIN) {
         callback(*this, evs[i].data.fd, kIOEventRead);
       }
@@ -70,3 +81,5 @@ int Epoll::UpdateEpollEvents(int epfd, int op, int fd, int event) {
 }
 
 } // namespace cppnet
+
+#endif

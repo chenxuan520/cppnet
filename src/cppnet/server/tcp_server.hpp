@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../socket/socket.hpp"
-#include "io_multiplexing/io_multiplexing_factory.hpp"
+#include "io_multiplexing/io_multiplexing_base.hpp"
 #include <functional>
 #include <memory>
 #include <string>
@@ -16,6 +16,7 @@ public:
     kEventAccept = 0,
     kEventRead = 1,
     kEventLeave = 2,
+    kEventError = 3,
   };
   using EventCallBack = std::function<void(Event, TcpServer &, Socket)>;
 
@@ -52,10 +53,10 @@ public:
    */
   void Register(EventCallBack cb);
   /**
-   * @brief: Epoll event loop.
+   * @brief: Event loop.
    * @return: 0 if success, -1 if failed.
    */
-  int EpollLoop();
+  int EventLoop();
   /**
    * @brief: Close file descriptor.With remove from epoll.
    */
@@ -84,6 +85,7 @@ protected:
   void HandleAccept();
   void HandleRead(int fd);
   void HandleLeave(int fd);
+  void HandleError(int fd);
 
 private:
   // server address

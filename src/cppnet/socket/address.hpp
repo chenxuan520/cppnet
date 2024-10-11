@@ -15,6 +15,7 @@ public:
 public:
   sockaddr_in *GetAddr() { return &addr_; }
   sockaddr *GetSockAddr() { return reinterpret_cast<sockaddr *>(&addr_); }
+  static socklen_t *GetAddrLen();
 
 private:
   sockaddr_in addr_;

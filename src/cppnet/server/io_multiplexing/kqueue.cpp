@@ -1,8 +1,7 @@
-#include "kqueue.hpp"
-#include "utils/const.hpp"
-
 #ifdef __APPLE__
 
+#include "kqueue.hpp"
+#include "utils/const.hpp"
 #include <sys/event.h>
 
 namespace cppnet {
@@ -13,7 +12,7 @@ KQueue::~KQueue() { Close(); }
 
 int KQueue::Init() {
   kq_fd_ = kqueue();
-  if (kq_fd_.status() == Socket::kInit) {
+  if (kq_fd_.status() != Socket::kInit) {
     err_msg_ = "[syserr]:" + std::string(strerror(errno));
     return kSysErr;
   }
@@ -41,8 +40,13 @@ int KQueue::RemoveSoc(const Socket &fd) {
 }
 
 int KQueue::Loop(NotifyCallBack callback) {
+  if (callback == nullptr) {
+    err_msg_ = "[logicerr]:" + std::string("callback is nullptr");
+    return kLogicErr;
+  }
+
   while (loop_flag_) {
-    struct kevent evs[1024];
+    struct kevent evs[max_event_num_];
     int nfds = kevent(kq_fd_.fd(), nullptr, 0, evs, 1024, nullptr);
     if (nfds < 0) {
       if (errno == EINTR) {
@@ -51,10 +55,12 @@ int KQueue::Loop(NotifyCallBack callback) {
       return kSysErr;
     }
     for (int i = 0; i < nfds; ++i) {
-      if (evs[i].filter == EVFILT_READ) {
-        if (callback != nullptr) {
-          callback(*this, evs[i].ident);
-        }
+      if (evs[i].flags & EV_EOF) {
+        callback(*this, evs[i].ident, kIOEventLeave);
+      } else if (evs[i].flags & EV_ERROR) {
+        callback(*this, evs[i].ident, kIOEventError);
+      } else if (evs[i].filter == EVFILT_READ) {
+        callback(*this, evs[i].ident, kIOEventRead);
       }
     }
   }

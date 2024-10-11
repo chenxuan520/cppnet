@@ -3,7 +3,6 @@
 #include <atomic>
 #include <string>
 #include <unistd.h>
-#include <vector>
 
 using namespace cppnet;
 using namespace std;
@@ -66,7 +65,7 @@ TEST(TcpServer, SigleClient) {
   });
 
   // run server
-  server.EpollLoop();
+  server.EventLoop();
 }
 
 TEST(TcpServer, MultiClient) {
@@ -150,7 +149,7 @@ TEST(TcpServer, MultiClient) {
   }
 
   // run server
-  rc = server.EpollLoop();
+  rc = server.EventLoop();
   MUST_EQUAL(rc, 0);
 
   wait_group.Wait();

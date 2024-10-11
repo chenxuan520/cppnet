@@ -19,6 +19,7 @@ public:
   enum IOEvent {
     kIOEventRead = 1,
     kIOEventLeave = 2,
+    kIOEventError = 3,
   };
   using NotifyCallBack =
       std::function<void(IOMultiplexingBase &, Socket, IOEvent)>;

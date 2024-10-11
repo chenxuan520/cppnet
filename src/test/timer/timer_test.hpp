@@ -45,7 +45,7 @@ TEST(Timer, CreateTimer) {
   });
 
   // start epoll loop
-  rc = server.EpollLoop();
+  rc = server.EventLoop();
   MUST_TRUE(rc == 0, server.err_msg());
 
   // check timer event

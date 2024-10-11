@@ -1,13 +1,7 @@
 #include "tcp_server.hpp"
 #include "../utils/const.hpp"
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <iostream>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <ostream>
-#include <signal.h>
+#include "io_multiplexing/io_multiplexing_factory.hpp"
+
 #include <string.h>
 #include <unistd.h>
 
@@ -66,11 +60,11 @@ int TcpServer::AddSoc(const Socket &soc) {
 
 void TcpServer::HandleAccept() {
   Address addr;
-  socklen_t in_len = sizeof(in_addr);
 
-  auto new_socket = listenfd_.Accept(addr, &in_len);
+  auto new_socket = listenfd_.Accept(addr);
   if (new_socket.status() != Socket::kInit) {
     err_msg_ = "[syserr]:" + std::string(strerror(errno));
+    event_callback_(kEventError, *this, new_socket);
     return;
   }
 
@@ -78,6 +72,7 @@ void TcpServer::HandleAccept() {
   auto rc = new_socket.SetNoBlock();
   if (rc < 0) {
     err_msg_ = "[syserr]:" + std::string(strerror(errno));
+    event_callback_(kEventError, *this, new_socket);
     new_socket.Close();
     return;
   }
@@ -86,32 +81,34 @@ void TcpServer::HandleAccept() {
   rc = io_multiplexing_->MonitorSoc(new_socket);
   if (rc < 0) {
     err_msg_ = "[syserr]:" + std::string(strerror(errno));
+    event_callback_(kEventError, *this, new_socket);
     new_socket.Close();
     return;
   }
 
-  if (event_callback_) {
-    event_callback_(kEventAccept, *this, new_socket);
-  }
+  event_callback_(kEventAccept, *this, new_socket);
 }
 
 void TcpServer::HandleRead(int fd) {
-  if (event_callback_) {
-    Socket soc(fd);
-    event_callback_(kEventRead, *this, soc);
-  }
+  Socket soc(fd);
+  event_callback_(kEventRead, *this, soc);
 }
 
 void TcpServer::HandleLeave(int fd) {
   Socket soc(fd);
-  if (event_callback_) {
-    event_callback_(kEventLeave, *this, soc);
-  }
+  event_callback_(kEventLeave, *this, soc);
   RemoveSoc(soc);
   soc.Close();
 }
 
-int TcpServer::EpollLoop() {
+void TcpServer::HandleError(int fd) {
+  Socket soc(fd);
+  event_callback_(kEventError, *this, soc);
+  RemoveSoc(soc);
+  soc.Close();
+}
+
+int TcpServer::EventLoop() {
   if (listenfd_.status() != Socket::kInit) {
     err_msg_ = "[logicerr]:epfd or listenfd not init";
     return kLogicErr;
@@ -122,21 +119,32 @@ int TcpServer::EpollLoop() {
     return kLogicErr;
   }
 
-  auto callback = [this](IOMultiplexingBase &, Socket fd,
-                         IOMultiplexingBase::IOEvent event) {
-    if (fd == listenfd_) {
-      HandleAccept();
-    } else if (event == IOMultiplexingBase::kIOEventLeave) {
-      HandleLeave(fd.fd());
-    } else if (event == IOMultiplexingBase::kIOEventRead) {
-      HandleRead(fd.fd());
-    }
-  };
+  switch (mode_) {
 
-  auto rc = io_multiplexing_->Loop(callback);
-  if (rc < 0) {
-    err_msg_ = "[syserr]:" + std::string(strerror(errno));
-    return kSysErr;
+  case kIOMultiplexing: {
+    auto callback = [this](IOMultiplexingBase &, Socket fd,
+                           IOMultiplexingBase::IOEvent event) {
+      if (fd == listenfd_) {
+        HandleAccept();
+      } else if (event == IOMultiplexingBase::kIOEventLeave) {
+        HandleLeave(fd.fd());
+      } else if (event == IOMultiplexingBase::kIOEventRead) {
+        HandleRead(fd.fd());
+      } else if (event == IOMultiplexingBase::kIOEventError) {
+        HandleError(fd.fd());
+      } else {
+        err_msg_ = "[logicerr]:unknown event";
+      }
+    };
+    auto rc = io_multiplexing_->Loop(callback);
+    if (rc < 0) {
+      err_msg_ = "[syserr]:" + std::string(strerror(errno));
+      return kSysErr;
+    }
+  } break;
+
+  default:
+    return kSuccess;
   }
   return kSuccess;
 }
@@ -193,6 +201,11 @@ int TcpServer::Init() {
     listenfd_.Close();
     return kSysErr;
   }
+  return kSuccess;
+
+  // init default callback
+  event_callback_ = [](Event, TcpServer &, Socket) {};
+
   return kSuccess;
 }
 
