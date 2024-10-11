@@ -7,7 +7,7 @@
 
 namespace cppnet {
 
-Epoll::TriggerType Epoll::trigger_type_ = Epoll::TriggerType::kEdgeTrigger;
+Epoll::TriggerType Epoll::trigger_type_ = Epoll::TriggerType::kLevelTrigger;
 
 int Epoll::Init() {
   epoll_fd_ = CreateEpoll();

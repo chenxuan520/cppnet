@@ -10,6 +10,9 @@ public:
   Address() = default;
   Address(const std::string &ip, uint16_t port);
   Address(sockaddr_in addr) : addr_(addr){};
+  /**
+   * @brief: Get ip and port from addr_.
+   */
   void GetIPAndPort(std::string &ip, uint16_t &port);
 
 public:

@@ -68,17 +68,8 @@ void TcpServer::HandleAccept() {
     return;
   }
 
-  // ET mode need set to non block
-  auto rc = new_socket.SetNoBlock();
-  if (rc < 0) {
-    err_msg_ = "[syserr]:" + std::string(strerror(errno));
-    event_callback_(kEventError, *this, new_socket);
-    new_socket.Close();
-    return;
-  }
-
   // add to epoll
-  rc = io_multiplexing_->MonitorSoc(new_socket);
+  auto rc = io_multiplexing_->MonitorSoc(new_socket);
   if (rc < 0) {
     err_msg_ = "[syserr]:" + std::string(strerror(errno));
     event_callback_(kEventError, *this, new_socket);

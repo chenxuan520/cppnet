@@ -121,9 +121,13 @@ public:
    */
   int SetBlock() const;
   /**
-   * set socket reuse addr
+   * @brief: set socket reuse addr
    */
   int SetReuseAddr() const;
+  /**
+   * @brief: get addr from socket
+   */
+  int GetAddr(Address &addr) const;
 
 public:
   inline int fd() const { return fd_; }

@@ -160,4 +160,12 @@ int Socket::SetReuseAddr() const {
                       sizeof(reuse_addr_on));
 }
 
+int Socket::GetAddr(Address &addr) const {
+  if (status_ != kInit) {
+    return -1;
+  }
+  socklen_t addr_len = sizeof(sockaddr);
+  return getpeername(fd_, addr.GetSockAddr(), addr.GetAddrLen());
+}
+
 } // namespace cppnet

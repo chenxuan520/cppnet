@@ -19,7 +19,7 @@ std::shared_ptr<IOMultiplexingBase> IOMultiplexingFactory::CreateDefault() {
   return std::make_shared<KQueue>();
 #elif _WIN32
   // windows use select
-  return nullptr;
+  return std::make_shared<Select>();
 #endif
 }
 

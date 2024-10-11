@@ -1,4 +1,5 @@
 #pragma once
+#include "utils/const.hpp"
 #include <atomic>
 #include <condition_variable>
 #include <functional>
@@ -9,81 +10,117 @@
 
 namespace cppnet {
 
+// Because of template,so cannot use cpp file
 template <class T = void *> class ThreadPool {
-public: // a struct for you to add task
+public:
+  /**
+   * @brief: Task of ThreadPool
+   */
   struct Task {
-    std::function<void(T)> task_;
-    T arg_;
+    std::function<void(T)> task_func_;
+    T task_arg_;
   };
+
+public:
+  /**
+   * @brief: Constructor
+   * @param thread_num: The number of threads
+   */
+  ThreadPool(unsigned thread_num) { Init(thread_num); }
+  ThreadPool() = default;
+  ~ThreadPool() {
+    Stop();
+    for (unsigned i = 0; i < threads_.size(); i++) {
+      threads_[i].join();
+    }
+  }
+  /**
+   * @brief: Init
+   * @param thread_num: The number of threads
+   */
+  void Init(unsigned thread_num = 10) {
+    this->thread_num_ = thread_num;
+    for (unsigned i = 0; i < thread_num; i++) {
+      threads_.push_back(std::move(std::thread(Worker, this)));
+    }
+  }
+  /**
+   * @brief: Add task
+   * @param task: Task
+   */
+  int AddTask(Task task) {
+    if (!is_continue_ || thread_num_ == 0) {
+      err_msg_ = "[logicerr]:threadpoll is not init";
+      return kLogicErr;
+    }
+    std::unique_lock<std::mutex> guard(que_lock_);
+    task_que_.push(task);
+    cond_.notify_one();
+    return kSuccess;
+  }
+  /**
+   * @brief: Stop
+   */
+  void Stop() {
+    is_continue_ = false;
+    this->cond_.notify_all();
+  }
+  /**
+   * @brief: Get busy and task number
+   * @param busy: busy number
+   * @param task: task number
+   */
+  void GetBusyAndTaskNum(unsigned &busy, unsigned &task) {
+    std::unique_lock<std::mutex> guard(this->que_lock_);
+    task = this->task_que_.size();
+    busy = this->busy_now_;
+  }
+
+public:
+  inline void MutexLock() { user_lock_.lock(); }
+  inline void MutexUnlock() { user_lock_.unlock(); }
+  inline void MutexTryLock() { user_lock_.try_lock(); }
+
+private:
+  static void Worker(void *arg) {
+    ThreadPool &pool = *(ThreadPool *)arg;
+    Task task = {0, 0};
+    while (1) {
+      {
+        std::unique_lock<std::mutex> guard(pool.que_lock_);
+        if (pool.is_continue_ && pool.task_que_.size() == 0) {
+          pool.cond_.wait(guard, [&]() -> bool {
+            return pool.task_que_.size() > 0 || pool.is_continue_ == false;
+          });
+        }
+        if (pool.is_continue_ == false) {
+          return;
+        }
+        if (pool.task_que_.size() == 0) {
+          continue;
+        }
+        task = pool.task_que_.front();
+        pool.task_que_.pop();
+      }
+
+      pool.busy_now_++;
+      if (task.task_func_ != NULL) {
+        task.task_func_(task.task_arg_);
+      }
+      pool.busy_now_--;
+    }
+  }
 
 private:
   std::mutex que_lock_;
   std::mutex user_lock_;
   std::condition_variable cond_;
   std::queue<Task> task_que_;
-  unsigned thread_num_;
-  std::atomic<unsigned> busy_now_;
-  std::atomic<bool> is_continue_;
-  std::vector<std::thread *> arr;
-  const char *error;
-
-public:
-  ThreadPool(unsigned threadNum = 10) {
-    error = NULL;
-    this->thread_num_ = threadNum;
-    for (unsigned i = 0; i < threadNum; i++)
-      arr.push_back(new std::thread(worker, this));
-    is_continue_ = true;
-    busy_now_ = 0;
-  }
-  ~ThreadPool() {
-    stopPool();
-    for (unsigned i = 0; i < arr.size(); i++) {
-      arr[i]->join();
-      delete arr[i];
-    }
-  }
-  inline void mutexLock() { user_lock_.lock(); }
-  inline void mutexUnlock() { user_lock_.unlock(); }
-  void addTask(Task task) {
-    std::unique_lock<std::mutex> guard(this->que_lock_);
-    this->task_que_.push(task);
-    this->cond_.notify_one();
-  }
-  void stopPool() {
-    is_continue_ = false;
-    this->cond_.notify_all();
-  }
-  void getBusyAndTask(unsigned &busy, unsigned &task) {
-    std::unique_lock<std::mutex> guard(this->que_lock_);
-    task = this->task_que_.size();
-    busy = this->busy_now_;
-  }
-
-private:
-  static void worker(void *arg) {
-    ThreadPool &pool = *(ThreadPool *)arg;
-    Task task = {0, 0};
-    while (1) {
-      {
-        std::unique_lock<std::mutex> guard(pool.que_lock_);
-        if (pool.is_continue_ && pool.task_que_.size() == 0)
-          pool.cond_.wait(guard, [&]() -> bool {
-            return pool.task_que_.size() > 0 || pool.is_continue_ == false;
-          });
-        if (pool.is_continue_ == false)
-          return;
-        if (pool.task_que_.size() == 0)
-          continue;
-        task = pool.task_que_.front();
-        pool.task_que_.pop();
-      }
-      pool.busy_now_++;
-      if (task.task_ != NULL)
-        task.task_(task.arg_);
-      pool.busy_now_--;
-    }
-  }
+  unsigned thread_num_{0};
+  std::atomic<unsigned> busy_now_{0};
+  std::atomic<bool> is_continue_{true};
+  std::vector<std::thread> threads_;
+  std::string err_msg_;
 };
 
 } // namespace cppnet
