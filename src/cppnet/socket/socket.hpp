@@ -56,16 +56,18 @@ public:
    * @brief: Read data from socket.
    * @param buf: buffer to store data.
    * @param len: buffer length.
+   * @param complete: if must need recv len data
    * @return: read length.
    */
-  int Read(std::string &buf, size_t len) const;
+  int Read(std::string &buf, size_t len, bool complete = false) const;
   /**
    * @brief: Read data from socket.
    * @param buf: buffer to store data.
    * @param len: buffer length.
+   * @param complete: if must need recv len data
    * @return: read length.
    */
-  int Read(void *buf, size_t len) const;
+  int Read(void *buf, size_t len, bool complete = false) const;
   /**
    * @brief: Read data from socket.
    * @param buf: buffer to store data.

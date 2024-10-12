@@ -62,16 +62,21 @@ public:
   /**
    * @brief: Get error message.
    */
-  std::string err_msg() const { return err_msg_; }
+  inline std::string err_msg() const { return err_msg_; }
   /**
    * @brief: Set max event number.
    */
   inline void set_max_event_num(int num) { max_event_num_ = num; }
+  /**
+   * @brief: Set wait timeout.
+   */
+  inline void set_wait_timeout(int timeout) { wait_timeout_ = timeout; }
 
 protected:
   std::string err_msg_;
   bool loop_flag_ = true;
   int max_event_num_ = 1024;
+  int wait_timeout_ = -1;
 };
 
 } // namespace cppnet

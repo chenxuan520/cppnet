@@ -48,7 +48,7 @@ int Epoll::Loop(NotifyCallBack callback) {
 
   while (loop_flag_) {
     struct epoll_event evs[max_event_num_];
-    int nfds = epoll_wait(epoll_fd_.fd(), evs, max_event_num_, -1);
+    int nfds = epoll_wait(epoll_fd_.fd(), evs, max_event_num_, wait_timeout_);
     if (nfds < 0) {
       if (errno == EINTR) {
         continue;

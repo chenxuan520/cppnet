@@ -47,7 +47,19 @@ int KQueue::Loop(NotifyCallBack callback) {
 
   while (loop_flag_) {
     struct kevent evs[max_event_num_];
-    int nfds = kevent(kq_fd_.fd(), nullptr, 0, evs, 1024, nullptr);
+    timespec *ts = nullptr;
+    if (wait_timeout_ > 0) {
+      ts = new timespec;
+      ts->tv_sec = wait_timeout_ / 1000;
+      ts->tv_nsec = (wait_timeout_ % 1000) * 1000000;
+    }
+
+    int nfds = kevent(kq_fd_.fd(), nullptr, 0, evs, max_event_num_, ts);
+
+    if (ts != nullptr) {
+      delete ts;
+    }
+
     if (nfds < 0) {
       if (errno == EINTR) {
       }

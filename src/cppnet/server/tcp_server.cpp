@@ -1,6 +1,7 @@
 #include "tcp_server.hpp"
 #include "../utils/const.hpp"
 #include "io_multiplexing/io_multiplexing_factory.hpp"
+#include "utils/threadpoll.hpp"
 
 #include <string.h>
 #include <unistd.h>
@@ -68,13 +69,20 @@ void TcpServer::HandleAccept() {
     return;
   }
 
-  // add to epoll
-  auto rc = io_multiplexing_->MonitorSoc(new_socket);
-  if (rc < 0) {
-    err_msg_ = "[syserr]:" + std::string(strerror(errno));
-    event_callback_(kEventError, *this, new_socket);
-    new_socket.Close();
-    return;
+  switch (mode_) {
+
+  case kIOMultiplexing: {
+    auto rc = io_multiplexing_->MonitorSoc(new_socket);
+    if (rc < 0) {
+      err_msg_ = "[syserr]:" + std::string(strerror(errno));
+      event_callback_(kEventError, *this, new_socket);
+      new_socket.Close();
+      return;
+    }
+  } break;
+
+  default:
+    break;
   }
 
   event_callback_(kEventAccept, *this, new_socket);
@@ -134,13 +142,47 @@ int TcpServer::EventLoop() {
     }
   } break;
 
+  case kMultiThread: {
+    auto callback = [&](Socket fd) {
+      event_callback_(kEventAccept, *this, fd);
+      return;
+    };
+
+    while (loop_flag_) {
+      Address addr;
+      auto accept_fd = listenfd_.Accept(addr);
+      if (accept_fd.status() != Socket::kInit) {
+        err_msg_ = "[syserr]:" + std::string(strerror(errno));
+        event_callback_(kEventError, *this, accept_fd);
+        return kSysErr;
+      }
+
+      thread_pool_->AddTask({callback, accept_fd});
+    }
+    thread_pool_->Stop();
+  }
+
   default:
     return kSuccess;
   }
   return kSuccess;
 }
 
-void TcpServer::Stop() { io_multiplexing_->Stop(); }
+void TcpServer::Stop() {
+  if (listenfd_.status() != Socket::kInit) {
+    err_msg_ = "[logicerr]:epfd or listenfd not init";
+    return;
+  }
+  loop_flag_ = false;
+  switch (mode_) {
+  case kIOMultiplexing: {
+    io_multiplexing_->Stop();
+  } break;
+
+  default:
+    break;
+  }
+}
 
 void TcpServer::Clean() {
   if (listenfd_.status() == Socket::kInit) {
@@ -151,51 +193,102 @@ void TcpServer::Clean() {
   }
 }
 
+int TcpServer::WakeUp() {
+  if (loop_flag_) {
+    err_msg_ = "[logicerr]:server is running";
+    return kLogicErr;
+  }
+
+  switch (mode_) {
+  case kMultiThread:
+  case kMixed: {
+    Socket soc;
+    auto rc = soc.Init();
+    if (soc.status() != Socket::kInit) {
+      err_msg_ = "[syserr]:" + std::string(strerror(errno));
+      return kSysErr;
+    }
+    rc = soc.Connect(addr_);
+    if (rc < 0) {
+      err_msg_ = "[syserr]:" + std::string(strerror(errno));
+      return kSysErr;
+    }
+    rc = soc.Close();
+    if (rc < 0) {
+      err_msg_ = "[syserr]:" + std::string(strerror(errno));
+      return kSysErr;
+    }
+  } break;
+  default:
+    // io_multiplexing do not need
+    break;
+  }
+  return kSuccess;
+}
+
 int TcpServer::Init() {
+  loop_flag_ = true;
   listenfd_ = CreateSocket();
   if (listenfd_.status() != Socket::kInit) {
     err_msg_ = "[syserr]:" + std::string(strerror(errno));
     return kSysErr;
   }
 
-  auto retval = listenfd_.SetNoBlock();
+  auto retval = listenfd_.Listen(max_connect_queue_);
   if (retval < 0) {
     err_msg_ = "[syserr]:" + std::string(strerror(errno));
     listenfd_.Close();
     return kSysErr;
   }
 
-  retval = listenfd_.Listen(max_connect_queue_);
+  retval = InitMode();
   if (retval < 0) {
     err_msg_ = "[syserr]:" + std::string(strerror(errno));
-    listenfd_.Close();
-    return kSysErr;
-  }
-
-  io_multiplexing_ = IOMultiplexingFactory::CreateDefault();
-  if (io_multiplexing_ == nullptr) {
-    err_msg_ = "[logicerr]:io multiplexing not init";
-    listenfd_.Close();
-    return kLogicErr;
-  }
-
-  retval = io_multiplexing_->Init();
-  if (retval < 0) {
-    err_msg_ = io_multiplexing_->err_msg();
-    listenfd_.Close();
-    return kSysErr;
-  }
-
-  retval = io_multiplexing_->MonitorSoc(listenfd_);
-  if (retval < 0) {
-    err_msg_ = io_multiplexing_->err_msg();
     listenfd_.Close();
     return kSysErr;
   }
   return kSuccess;
 
-  // init default callback
-  event_callback_ = [](Event, TcpServer &, Socket) {};
+  return kSuccess;
+}
+
+int TcpServer::InitMode() {
+
+  switch (mode_) {
+  case kIOMultiplexing: {
+    io_multiplexing_ = IOMultiplexingFactory::CreateDefault();
+    if (io_multiplexing_ == nullptr) {
+      err_msg_ = "[logicerr]:io multiplexing not init";
+      listenfd_.Close();
+      return kLogicErr;
+    }
+
+    auto retval = io_multiplexing_->Init();
+    if (retval < 0) {
+      err_msg_ = io_multiplexing_->err_msg();
+      listenfd_.Close();
+      return kSysErr;
+    }
+
+    retval = io_multiplexing_->MonitorSoc(listenfd_);
+    if (retval < 0) {
+      err_msg_ = io_multiplexing_->err_msg();
+      listenfd_.Close();
+      return kSysErr;
+    }
+
+    // init default callback
+    event_callback_ = [](Event, TcpServer &, Socket) {};
+  } break;
+
+  case kMultiThread: {
+    thread_pool_ = std::make_shared<ThreadPool<Socket>>();
+    thread_pool_->Init();
+  } break;
+
+  default:
+    return kSuccess;
+  }
 
   return kSuccess;
 }

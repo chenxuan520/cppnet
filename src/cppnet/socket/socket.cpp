@@ -83,23 +83,48 @@ int Socket::SetBlock() const {
   return fcntl(fd_, F_SETFL, flags & ~O_NONBLOCK);
 }
 
-int Socket::Read(std::string &buf, size_t len) const {
+int Socket::Read(std::string &buf, size_t len, bool complete) const {
   if (status_ != kInit) {
     return -1;
   }
   char *data = new char[len + 1];
   memset(data, 0, len + 1);
-  auto rc = ::read(fd_, data, len);
+  auto recv_len = 0;
+
+  if (complete) {
+    while (recv_len < len) {
+      auto rc = ::read(fd_, data + recv_len, len - recv_len);
+      if (rc <= 0) {
+        break;
+      }
+      recv_len += rc;
+    }
+  } else {
+    recv_len = ::read(fd_, data, len);
+  }
+
   buf = data;
   delete[] data;
-  return rc;
+  return recv_len;
 }
 
-int Socket::Read(void *buf, size_t len) const {
+int Socket::Read(void *buf, size_t len, bool complete) const {
   if (status_ != kInit) {
     return -1;
   }
-  return ::read(fd_, buf, len);
+  auto recv_len = 0;
+  if (complete) {
+    while (recv_len < len) {
+      auto rc = ::read(fd_, (char *)buf + recv_len, len - recv_len);
+      if (rc <= 0) {
+        break;
+      }
+      recv_len += rc;
+    }
+    return recv_len;
+  } else {
+    return ::read(fd_, buf, len);
+  }
 }
 
 int Socket::ReadUdp(std::string &buf, size_t len, Address &addr) const {

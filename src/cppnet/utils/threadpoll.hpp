@@ -28,21 +28,30 @@ public:
    */
   ThreadPool(unsigned thread_num) { Init(thread_num); }
   ThreadPool() = default;
-  ~ThreadPool() {
-    Stop();
-    for (unsigned i = 0; i < threads_.size(); i++) {
-      threads_[i].join();
-    }
-  }
+  ~ThreadPool() { Stop(); }
   /**
    * @brief: Init
    * @param thread_num: The number of threads
    */
   void Init(unsigned thread_num = 10) {
+    threads_.clear();
     this->thread_num_ = thread_num;
     for (unsigned i = 0; i < thread_num; i++) {
       threads_.push_back(std::move(std::thread(Worker, this)));
     }
+  }
+  /**
+   * @brief: Resize number of thread
+   * @param thread_num: The number of threads
+   */
+  void Resize(unsigned thread_num) {
+    if (thread_num_ == thread_num || thread_num == 0) {
+      return;
+    }
+    Stop();
+    thread_num_ = thread_num;
+    threads_.clear();
+    Init(thread_num);
   }
   /**
    * @brief: Add task
@@ -62,8 +71,14 @@ public:
    * @brief: Stop
    */
   void Stop() {
+    if (!is_continue_) {
+      return;
+    }
     is_continue_ = false;
     this->cond_.notify_all();
+    for (unsigned i = 0; i < threads_.size(); i++) {
+      threads_[i].join();
+    }
   }
   /**
    * @brief: Get busy and task number

@@ -1,4 +1,7 @@
+#ifdef __linux__
 #include "server/io_multiplexing/epoll.hpp"
+#endif
+
 #include "server/tcp_server.hpp"
 #include "test.h"
 #include <atomic>
@@ -178,4 +181,88 @@ TEST(TcpServer, MultiClient) {
     DEBUG("count " << count << " sum " << sum);
     MUST_EQUAL(count, sum);
   }
+}
+
+TEST(TcpServer, MultiThread) {
+  // init msg
+  string msg = "hello world";
+
+  // init server
+  server.set_mode(TcpServer::kMultiThread);
+  auto rc = server.Init();
+  MUST_TRUE(rc == 0, server.err_msg());
+  DEFER([]() {
+    server.Clean();
+    server.set_mode(TcpServer::kIOMultiplexing);
+  });
+
+  // init event function
+  auto event_func = [&](TcpServer::Event event, TcpServer &server, Socket fd) {
+    if (event == TcpServer::kEventAccept) {
+      Address addr_cli;
+      auto rc = fd.GetAddr(addr_cli);
+      MUST_EQUAL(rc, 0);
+      string ip;
+      uint16_t port = 0;
+      addr_cli.GetIPAndPort(ip, port);
+      MUST_TRUE(port != 8080, "port need not equal 8080");
+      DEBUG(fd.fd() << " accept " << ip << ":" << port);
+
+      // read
+      string buf;
+      rc = fd.Read(buf, msg.size());
+      MUST_TRUE(rc == msg.size(), strerror(errno));
+      DEBUG(fd.fd() << " read " << buf);
+
+      // write
+      rc = fd.Write(msg);
+      MUST_TRUE(rc == msg.size(), strerror(errno));
+
+      // close
+      rc = fd.Close();
+      MUST_EQUAL(rc, 0);
+      DEBUG(fd.fd() << " close");
+      server.Stop();
+    } else {
+      DEBUG(fd.fd() << " error " << event);
+      FATAL(server.err_msg());
+    }
+  };
+  server.Register(event_func);
+
+  // init client
+  Socket client;
+  rc = client.Init();
+  MUST_EQUAL(rc, 0);
+
+  // thread to run client
+  GO_JOIN([&]() {
+    // connect
+    auto cli_rc = client.Connect(addr);
+    MUST_EQUAL(cli_rc, 0);
+    DEBUG("client connect");
+
+    // write
+    cli_rc = client.Write(msg);
+    MUST_TRUE(cli_rc == msg.size(), strerror(errno));
+    DEBUG("client write");
+
+    // read back
+    string buf;
+    cli_rc = client.Read(buf, msg.size());
+    MUST_TRUE(cli_rc == msg.size(), strerror(errno));
+    DEBUG("client read " << buf);
+
+    // close
+    cli_rc = client.Close();
+    MUST_EQUAL(cli_rc, 0);
+    DEBUG("client exit");
+
+    // wakeup server
+    server.WakeUp();
+  });
+
+  // run server
+  rc = server.EventLoop();
+  MUST_EQUAL(rc, 0);
 }

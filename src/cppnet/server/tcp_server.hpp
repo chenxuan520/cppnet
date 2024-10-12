@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../socket/socket.hpp"
+#include "../utils/threadpoll.hpp"
 #include "io_multiplexing/io_multiplexing_base.hpp"
 #include <functional>
 #include <memory>
@@ -26,7 +27,6 @@ public:
   enum Mode {
     kIOMultiplexing,
     kMultiThread,
-    kMultiProcess,
     kMixed,
   };
 
@@ -65,21 +65,27 @@ public:
    * @brief: Add file descriptor to epoll.
    */
   int AddSoc(const Socket &fd);
+  /**
+   * @brief: Wake up server,use after stop optional to quit
+   */
+  int WakeUp();
 
 public:
+  inline void set_mode(Mode mode) { mode_ = mode; }
   inline void set_max_connect_queue(int max_connect_queue) {
     max_connect_queue_ = max_connect_queue;
   }
-  inline void set_max_event_num(int max_event_num) {
-    max_event_num_ = max_event_num;
-  }
-  inline void set_epoll_timeout(int epoll_timeout) {
-    epoll_timeout_ = epoll_timeout;
-  }
   inline std::string err_msg() const { return err_msg_; }
+  inline std::shared_ptr<IOMultiplexingBase> io_multiplexing() {
+    return io_multiplexing_;
+  }
+  inline std::shared_ptr<ThreadPool<Socket>> thread_pool() {
+    return thread_pool_;
+  }
 
 protected:
   Socket CreateSocket();
+  int InitMode();
   int Listen(int fd);
 
   void HandleAccept();
@@ -102,14 +108,12 @@ private:
   Mode mode_{kIOMultiplexing};
   // io multiplexing
   std::shared_ptr<IOMultiplexingBase> io_multiplexing_{nullptr};
+  // threadpool
+  std::shared_ptr<ThreadPool<Socket>> thread_pool_{nullptr};
 
 private:
   // default max connect queue is 10
   int max_connect_queue_{10};
-  // default max event number is 128
-  int max_event_num_{128};
-  // default epoll timeout is -1, epoll_wait will block until event
-  int epoll_timeout_{-1};
 };
 
 } // namespace cppnet
