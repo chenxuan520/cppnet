@@ -260,6 +260,7 @@ TEST(TcpServer, MultiThread) {
     DEBUG("client exit");
 
     // wakeup server
+    server.Stop();
     server.WakeUp();
   });
 

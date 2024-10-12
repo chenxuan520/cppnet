@@ -1,6 +1,7 @@
 #pragma once
 
 #include "address.hpp"
+#include <cstring>
 #include <sys/socket.h>
 #include <unistd.h>
 
