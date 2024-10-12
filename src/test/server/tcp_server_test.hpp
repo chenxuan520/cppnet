@@ -217,6 +217,7 @@ TEST(TcpServer, MultiThread) {
       // write
       rc = fd.Write(msg);
       MUST_TRUE(rc == msg.size(), strerror(errno));
+      DEBUG(fd.fd() << " write " << msg);
 
       // close
       rc = fd.Close();

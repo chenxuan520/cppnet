@@ -1,7 +1,6 @@
 #include "tcp_server.hpp"
 #include "../utils/const.hpp"
 #include "io_multiplexing/io_multiplexing_factory.hpp"
-#include "utils/threadpoll.hpp"
 
 #include <string.h>
 #include <unistd.h>
@@ -21,20 +20,20 @@ Socket TcpServer::CreateSocket() {
   Socket listenfd;
   auto rc = listenfd.Init();
   if (rc < 0) {
-    err_msg_ = "[syserr]:" + std::string(strerror(errno));
+    err_msg_ = "[syserr]:" + listenfd_.GetSysErr();
     return kSysErr;
   }
 
   // set reuse addr to avoid time wait delay
   rc = listenfd.SetReuseAddr();
   if (rc < 0) {
-    err_msg_ = "[syserr]:" + std::string(strerror(errno));
+    err_msg_ = "[syserr]:" + listenfd_.GetSysErr();
     return kSysErr;
   }
 
   rc = listenfd.Bind(addr_);
   if (rc < 0) {
-    err_msg_ = "[syserr]:" + std::string(strerror(errno));
+    err_msg_ = "[syserr]:" + listenfd_.GetSysErr();
     return kSysErr;
   }
 
@@ -42,14 +41,6 @@ Socket TcpServer::CreateSocket() {
 }
 
 void TcpServer::Register(EventCallBack cb) { event_callback_ = cb; }
-
-int TcpServer::Listen(int fd) {
-  if (::listen(fd, max_connect_queue_) < 0) {
-    err_msg_ = "[syserr]:" + std::string(strerror(errno));
-    return kSysErr;
-  }
-  return kSuccess;
-}
 
 int TcpServer::RemoveSoc(const Socket &soc) {
   return io_multiplexing_->RemoveSoc(soc);
@@ -64,7 +55,7 @@ void TcpServer::HandleAccept() {
 
   auto new_socket = listenfd_.Accept(addr);
   if (new_socket.status() != Socket::kInit) {
-    err_msg_ = "[syserr]:" + std::string(strerror(errno));
+    err_msg_ = "[syserr]:" + new_socket.GetSysErr();
     event_callback_(kEventError, *this, new_socket);
     return;
   }
@@ -74,7 +65,7 @@ void TcpServer::HandleAccept() {
   case kIOMultiplexing: {
     auto rc = io_multiplexing_->MonitorSoc(new_socket);
     if (rc < 0) {
-      err_msg_ = "[syserr]:" + std::string(strerror(errno));
+      err_msg_ = "[syserr]:" + io_multiplexing_->err_msg();
       event_callback_(kEventError, *this, new_socket);
       new_socket.Close();
       return;
@@ -152,7 +143,7 @@ int TcpServer::EventLoop() {
       Address addr;
       auto accept_fd = listenfd_.Accept(addr);
       if (accept_fd.status() != Socket::kInit) {
-        err_msg_ = "[syserr]:" + std::string(strerror(errno));
+        err_msg_ = "[syserr]:" + listenfd_.GetSysErr();
         event_callback_(kEventError, *this, accept_fd);
         return kSysErr;
       }
@@ -205,17 +196,17 @@ int TcpServer::WakeUp() {
     Socket soc;
     auto rc = soc.Init();
     if (soc.status() != Socket::kInit) {
-      err_msg_ = "[syserr]:" + std::string(strerror(errno));
+      err_msg_ = "[syserr]:" + soc.GetSysErr();
       return kSysErr;
     }
     rc = soc.Connect(addr_);
     if (rc < 0) {
-      err_msg_ = "[syserr]:" + std::string(strerror(errno));
+      err_msg_ = "[syserr]:" + soc.GetSysErr();
       return kSysErr;
     }
     rc = soc.Close();
     if (rc < 0) {
-      err_msg_ = "[syserr]:" + std::string(strerror(errno));
+      err_msg_ = "[syserr]:" + soc.GetSysErr();
       return kSysErr;
     }
   } break;
@@ -230,26 +221,18 @@ int TcpServer::Init() {
   loop_flag_ = true;
   listenfd_ = CreateSocket();
   if (listenfd_.status() != Socket::kInit) {
-    err_msg_ = "[syserr]:" + std::string(strerror(errno));
+    err_msg_ = "[syserr]:" + listenfd_.GetSysErr();
     return kSysErr;
   }
 
   auto retval = listenfd_.Listen(max_connect_queue_);
   if (retval < 0) {
-    err_msg_ = "[syserr]:" + std::string(strerror(errno));
+    err_msg_ = "[syserr]:" + listenfd_.GetSysErr();
     listenfd_.Close();
     return kSysErr;
   }
 
-  retval = InitMode();
-  if (retval < 0) {
-    err_msg_ = "[syserr]:" + std::string(strerror(errno));
-    listenfd_.Close();
-    return kSysErr;
-  }
-  return kSuccess;
-
-  return kSuccess;
+  return InitMode();
 }
 
 int TcpServer::InitMode() {
@@ -265,14 +248,14 @@ int TcpServer::InitMode() {
 
     auto retval = io_multiplexing_->Init();
     if (retval < 0) {
-      err_msg_ = io_multiplexing_->err_msg();
+      err_msg_ = "[syserr]:" + io_multiplexing_->err_msg();
       listenfd_.Close();
       return kSysErr;
     }
 
     retval = io_multiplexing_->MonitorSoc(listenfd_);
     if (retval < 0) {
-      err_msg_ = io_multiplexing_->err_msg();
+      err_msg_ = "[syserr]:" + io_multiplexing_->err_msg();
       listenfd_.Close();
       return kSysErr;
     }

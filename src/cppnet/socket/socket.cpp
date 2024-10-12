@@ -89,20 +89,7 @@ int Socket::Read(std::string &buf, size_t len, bool complete) const {
   }
   char *data = new char[len + 1];
   memset(data, 0, len + 1);
-  auto recv_len = 0;
-
-  if (complete) {
-    while (recv_len < len) {
-      auto rc = ::read(fd_, data + recv_len, len - recv_len);
-      if (rc <= 0) {
-        break;
-      }
-      recv_len += rc;
-    }
-  } else {
-    recv_len = ::read(fd_, data, len);
-  }
-
+  auto recv_len = Read(data, len, complete);
   buf = data;
   delete[] data;
   return recv_len;
@@ -134,8 +121,7 @@ int Socket::ReadUdp(std::string &buf, size_t len, Address &addr) const {
   int addr_len = sizeof(sockaddr);
   char *data = new char[len + 1];
   memset(data, 0, len + 1);
-  auto rc =
-      ::recvfrom(fd_, data, len, 0, addr.GetSockAddr(), (socklen_t *)&addr_len);
+  auto rc = ReadUdp(data, len, addr);
   buf = data;
   delete[] data;
   return rc;
@@ -151,10 +137,7 @@ int Socket::ReadUdp(void *buf, size_t len, Address &addr) const {
 }
 
 int Socket::Write(const std::string &buf) const {
-  if (status_ != kInit) {
-    return -1;
-  }
-  return ::write(fd_, buf.c_str(), buf.size());
+  return Write(buf.c_str(), buf.size());
 }
 
 int Socket::Write(const void *buf, size_t len) const {
@@ -165,11 +148,7 @@ int Socket::Write(const void *buf, size_t len) const {
 }
 
 int Socket::WriteUdp(const std::string &buf, Address &addr) const {
-  if (status_ != kInit) {
-    return -1;
-  }
-  return ::sendto(fd_, buf.c_str(), buf.size(), 0, addr.GetSockAddr(),
-                  sizeof(sockaddr));
+  return WriteUdp(buf.c_str(), buf.size(), addr);
 }
 
 int Socket::WriteUdp(const void *buf, size_t len, Address &addr) const {

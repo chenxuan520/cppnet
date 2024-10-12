@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../socket/socket.hpp"
-#include "../utils/threadpoll.hpp"
+#include "../utils/threadpool.hpp"
 #include "io_multiplexing/io_multiplexing_base.hpp"
 #include <functional>
 #include <memory>
@@ -71,6 +71,9 @@ public:
   int WakeUp();
 
 public:
+  /**
+   * @brief: Set server mode.Need to be called before Init.
+   */
   inline void set_mode(Mode mode) { mode_ = mode; }
   inline void set_max_connect_queue(int max_connect_queue) {
     max_connect_queue_ = max_connect_queue;
@@ -86,7 +89,6 @@ public:
 protected:
   Socket CreateSocket();
   int InitMode();
-  int Listen(int fd);
 
   void HandleAccept();
   void HandleRead(int fd);

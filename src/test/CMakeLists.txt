@@ -10,6 +10,9 @@ set(CMAKE_CXX_STANDARD 17)
 include_directories(../cppnet)
 include_directories(../third_party/cpptest)
 
+# include_directories(/opt/homebrew/Cellar/openssl@3/3.3.2/include)
+# add_definitions(-DCPPNET_OPENSSL)
+
 # link dir add
 # link_directories()
 

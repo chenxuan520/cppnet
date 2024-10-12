@@ -3,6 +3,7 @@
 #include "address.hpp"
 #include <sys/socket.h>
 #include <unistd.h>
+
 namespace cppnet {
 
 class Socket {
@@ -10,7 +11,7 @@ public:
   enum Status {
     kUninit = 0,
     kInit = 1,
-    kClosed = 3,
+    kClosed = 2,
   };
 
 public:
@@ -130,6 +131,10 @@ public:
    * @brief: get addr from socket
    */
   int GetAddr(Address &addr) const;
+  /**
+   * @brief: get system error string
+   */
+  static inline std::string GetSysErr() { return strerror(errno); }
 
 public:
   inline int fd() const { return fd_; }
