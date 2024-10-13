@@ -147,7 +147,16 @@ public:
    */
   bool operator==(const Socket &rhs) const { return fd_ == rhs.fd_; }
 
-private:
+protected:
+  virtual inline int IORead(void *buf, size_t len) const {
+    return ::read(fd_, buf, len);
+  }
+
+  virtual inline int IOWrite(const void *buf, size_t len) const {
+    return ::write(fd_, buf, len);
+  }
+
+protected:
   int fd_ = -1;
   Status status_ = kUninit;
 };

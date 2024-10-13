@@ -211,12 +211,12 @@ TEST(TcpServer, MultiThread) {
       // read
       string buf;
       rc = fd.Read(buf, msg.size());
-      MUST_TRUE(rc == msg.size(), strerror(errno));
+      MUST_TRUE(rc == msg.size(), "read error");
       DEBUG(fd.fd() << " read " << buf);
 
       // write
       rc = fd.Write(msg);
-      MUST_TRUE(rc == msg.size(), strerror(errno));
+      MUST_TRUE(rc == msg.size(), "write error");
       DEBUG(fd.fd() << " write " << msg);
 
       // close
@@ -260,6 +260,7 @@ TEST(TcpServer, MultiThread) {
     DEBUG("client exit");
 
     // wakeup server
+    usleep(20);
     server.Stop();
     server.WakeUp();
   });

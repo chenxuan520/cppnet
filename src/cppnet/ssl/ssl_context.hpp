@@ -1,18 +1,48 @@
 #pragma once
-#include <memory>
 #ifdef CPPNET_OPENSSL
-#include "ssl_connect.hpp"
+
+#include "ssl_socket.hpp"
+#include <memory>
 #include <openssl/ssl.h>
 
 namespace cppnet {
 
 class SSLContext {
 public:
-  SSLContext();
+  SSLContext() = default;
   ~SSLContext();
-  int Init(const std::string &cert_path, const std::string &key_path,
+  // forbiden copy
+  SSLContext(const SSLContext &) = delete;
+  SSLContext &operator=(const SSLContext &) = delete;
+  /**
+   * @brief: init ssl context
+   * @param: ctx: ssl context
+   */
+  int Init(SSL_CTX *ctx);
+  /**
+   * @brief: init ssl context
+   * @param cert_data: cert data
+   * @param key_data: key data
+   * @param password: password
+   */
+  int Init(const std::string &cert_data, const std::string &key_data,
            const std::string &password = "");
-  std::shared_ptr<SSLConnect> CreateSSLConnect() const;
+  /**
+   * @brief: init ssl context
+   * @param cert_path: cert path file
+   * @param key_path: key path file
+   * @param password: password
+   */
+  int InitFile(const std::string &cert_path, const std::string &key_path,
+               const std::string &password = "");
+  /**
+   * @brief: create ssl connect
+   */
+  std::shared_ptr<SSLSocket> CreateSSLSocket();
+  /**
+   * @brief: close ssl context
+   */
+  int Close();
 
 public:
   const std::string &err_msg() const { return err_msg_; }

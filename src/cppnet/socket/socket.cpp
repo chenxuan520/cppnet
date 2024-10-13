@@ -102,7 +102,7 @@ int Socket::Read(void *buf, size_t len, bool complete) const {
   auto recv_len = 0;
   if (complete) {
     while (recv_len < len) {
-      auto rc = ::read(fd_, (char *)buf + recv_len, len - recv_len);
+      auto rc = IORead((char *)buf + recv_len, len - recv_len);
       if (rc <= 0) {
         break;
       }
@@ -110,7 +110,7 @@ int Socket::Read(void *buf, size_t len, bool complete) const {
     }
     return recv_len;
   } else {
-    return ::read(fd_, buf, len);
+    return IORead(buf, len);
   }
 }
 
@@ -144,7 +144,7 @@ int Socket::Write(const void *buf, size_t len) const {
   if (status_ != kInit) {
     return -1;
   }
-  return ::write(fd_, buf, len);
+  return IOWrite(buf, len);
 }
 
 int Socket::WriteUdp(const std::string &buf, Address &addr) const {

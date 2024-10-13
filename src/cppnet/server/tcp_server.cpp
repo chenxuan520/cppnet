@@ -142,6 +142,9 @@ int TcpServer::EventLoop() {
     while (loop_flag_) {
       Address addr;
       auto accept_fd = listenfd_.Accept(addr);
+      if (!loop_flag_) {
+        break;
+      }
       if (accept_fd.status() != Socket::kInit) {
         err_msg_ = "[syserr]:" + listenfd_.GetSysErr();
         event_callback_(kEventError, *this, accept_fd);
