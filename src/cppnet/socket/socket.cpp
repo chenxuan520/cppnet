@@ -164,6 +164,11 @@ int Socket::SetReuseAddr() const {
                       sizeof(reuse_addr_on));
 }
 
+int Socket::SetSockOpt(int level, int optname, const void *optval,
+                       size_t optlen) const {
+  return ::setsockopt(fd_, level, optname, optval, optlen);
+}
+
 int Socket::GetAddr(Address &addr) const {
   if (status_ != kInit) {
     return -1;

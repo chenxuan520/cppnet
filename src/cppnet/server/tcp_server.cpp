@@ -20,20 +20,20 @@ Socket TcpServer::CreateSocket() {
   Socket listenfd;
   auto rc = listenfd.Init();
   if (rc < 0) {
-    err_msg_ = "[syserr]:" + listenfd_.GetSysErr();
+    err_msg_ = "[syserr]:" + listenfd_.err_msg();
     return kSysErr;
   }
 
   // set reuse addr to avoid time wait delay
   rc = listenfd.SetReuseAddr();
   if (rc < 0) {
-    err_msg_ = "[syserr]:" + listenfd_.GetSysErr();
+    err_msg_ = "[syserr]:" + listenfd_.err_msg();
     return kSysErr;
   }
 
   rc = listenfd.Bind(addr_);
   if (rc < 0) {
-    err_msg_ = "[syserr]:" + listenfd_.GetSysErr();
+    err_msg_ = "[syserr]:" + listenfd_.err_msg();
     return kSysErr;
   }
 
@@ -55,7 +55,7 @@ void TcpServer::HandleAccept() {
 
   auto new_socket = listenfd_.Accept(addr);
   if (new_socket.status() != Socket::kInit) {
-    err_msg_ = "[syserr]:" + new_socket.GetSysErr();
+    err_msg_ = "[syserr]:" + new_socket.err_msg();
     event_callback_(kEventError, *this, new_socket);
     return;
   }
@@ -146,7 +146,7 @@ int TcpServer::EventLoop() {
         break;
       }
       if (accept_fd.status() != Socket::kInit) {
-        err_msg_ = "[syserr]:" + listenfd_.GetSysErr();
+        err_msg_ = "[syserr]:" + listenfd_.err_msg();
         event_callback_(kEventError, *this, accept_fd);
         return kSysErr;
       }
@@ -199,17 +199,17 @@ int TcpServer::WakeUp() {
     Socket soc;
     auto rc = soc.Init();
     if (soc.status() != Socket::kInit) {
-      err_msg_ = "[syserr]:" + soc.GetSysErr();
+      err_msg_ = "[syserr]:" + soc.err_msg();
       return kSysErr;
     }
     rc = soc.Connect(addr_);
     if (rc < 0) {
-      err_msg_ = "[syserr]:" + soc.GetSysErr();
+      err_msg_ = "[syserr]:" + soc.err_msg();
       return kSysErr;
     }
     rc = soc.Close();
     if (rc < 0) {
-      err_msg_ = "[syserr]:" + soc.GetSysErr();
+      err_msg_ = "[syserr]:" + soc.err_msg();
       return kSysErr;
     }
   } break;
@@ -224,13 +224,13 @@ int TcpServer::Init() {
   loop_flag_ = true;
   listenfd_ = CreateSocket();
   if (listenfd_.status() != Socket::kInit) {
-    err_msg_ = "[syserr]:" + listenfd_.GetSysErr();
+    err_msg_ = "[syserr]:" + listenfd_.err_msg();
     return kSysErr;
   }
 
   auto retval = listenfd_.Listen(max_connect_queue_);
   if (retval < 0) {
-    err_msg_ = "[syserr]:" + listenfd_.GetSysErr();
+    err_msg_ = "[syserr]:" + listenfd_.err_msg();
     listenfd_.Close();
     return kSysErr;
   }

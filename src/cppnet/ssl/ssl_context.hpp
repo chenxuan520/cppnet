@@ -41,9 +41,10 @@ public:
   int InitFile(const std::string &cert_path, const std::string &key_path,
                const std::string &password = "");
   /**
-   * @brief: create ssl connect
+   * @brief: create ssl socket
    */
   std::shared_ptr<SSLSocket> CreateSSLSocket(const Socket &soc);
+  std::shared_ptr<SSLSocket> CreateSSLSocket();
   /**
    * @brief: close ssl context
    */

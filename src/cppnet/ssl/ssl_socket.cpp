@@ -44,6 +44,10 @@ std::shared_ptr<SSLSocket> SSLSocket::AcceptSSL(Address &addr) {
   }
 
   auto soc_fd = ::accept(fd_, addr.GetSockAddr(), addr.GetAddrLen());
+  if (soc_fd < 0) {
+    err_msg_ = "[syserr]:" + std::string(strerror(errno));
+    return nullptr;
+  }
   Socket soc(soc_fd);
   auto new_ssl = SSL_new(ssl_ctx_);
   if (new_ssl == nullptr) {

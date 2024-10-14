@@ -7,14 +7,14 @@ using namespace cppnet;
 using namespace std;
 
 TEST(Timer, CreateTimer) {
-  SKIP();
+  // SKIP();
   atomic<int> count{0};
   Address addr{"127.0.0.1", 8080};
   TcpServer server{addr};
   auto rc = server.Init();
   MUST_TRUE(rc == 0, server.err_msg());
 
-  auto timerfd = cppnet::Timer::CreateTimer(0, 1e7);
+  auto timerfd = cppnet::Timer::CreateTimer(0, 1e5);
   MUST_TRUE(timerfd > 0, "create timerfd");
   rc = server.AddSoc(timerfd);
 
@@ -40,7 +40,7 @@ TEST(Timer, CreateTimer) {
   server.Register(event_func);
 
   GO([&]() {
-    sleep(1);
+    usleep(1e4);
     server.Stop();
   });
 

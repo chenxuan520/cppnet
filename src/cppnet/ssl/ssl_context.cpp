@@ -16,6 +16,10 @@ int SSLContext::Init(SSL_CTX *ctx) {
     return kLogicErr;
   }
   ssl_ctx_ = ctx;
+  SSL_CTX_set_mode(ctx, SSL_MODE_AUTO_RETRY);
+  SSL_CTX_set_options(ctx, SSL_OP_ALL | SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 |
+                               SSL_OP_NO_COMPRESSION |
+                               SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION);
   return kSuccess;
 }
 
@@ -134,6 +138,21 @@ std::shared_ptr<SSLSocket> SSLContext::CreateSSLSocket(const Socket &soc) {
   }
 
   return std::make_shared<SSLSocket>(ssl, ssl_ctx_, soc);
+}
+
+std::shared_ptr<SSLSocket> SSLContext::CreateSSLSocket() {
+  if (ssl_ctx_ == nullptr) {
+    err_msg_ = "[loginerr]:ssl context is null";
+    return nullptr;
+  }
+
+  Socket soc;
+  auto rc = soc.Init();
+  if (rc != kSuccess) {
+    err_msg_ = soc.err_msg();
+    return nullptr;
+  }
+  return CreateSSLSocket(soc);
 }
 
 int SSLContext::Close() {

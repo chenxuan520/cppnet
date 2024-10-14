@@ -43,7 +43,6 @@ public:
   /**
    * @brief: Accept socket.
    * @param addr: server address.
-   * @param plen: pointer of address length.
    */
   virtual Socket Accept(Address &addr);
   /**
@@ -129,13 +128,23 @@ public:
    */
   int SetReuseAddr() const;
   /**
+   * @brief: set socket opt
+   * @param level: socket level
+   * @param optname: socket option name
+   * @param optval: socket option value
+   * @param optlen: socket option length
+   * @return: 0 if success,other failed.
+   */
+  int SetSockOpt(int level, int optname, const void *optval,
+                 size_t optlen) const;
+  /**
    * @brief: get addr from socket
    */
   int GetAddr(Address &addr) const;
   /**
    * @brief: get system error string
    */
-  static inline std::string GetSysErr() { return strerror(errno); }
+  static inline std::string err_msg() { return strerror(errno); }
 
 public:
   inline int fd() const { return fd_; }

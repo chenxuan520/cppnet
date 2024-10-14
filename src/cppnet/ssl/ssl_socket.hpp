@@ -11,7 +11,7 @@ namespace cppnet {
 
 class SSLSocket : public Socket {
 public:
-  SSLSocket(SSL *ssl, SSL_CTX *ssl_ctx_, const Socket &soc);
+  SSLSocket(SSL *ssl, SSL_CTX *ssl_ctx, const Socket &soc);
   SSLSocket(const SSLSocket &) = delete;
   /**
    * @brief: connect socket
