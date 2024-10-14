@@ -1,4 +1,5 @@
 #pragma once
+#include "socket/socket.hpp"
 #ifdef CPPNET_OPENSSL
 
 #include "ssl_socket.hpp"
@@ -20,6 +21,10 @@ public:
    */
   int Init(SSL_CTX *ctx);
   /**
+   * @brief: init ssl client context
+   */
+  int InitCli();
+  /**
    * @brief: init ssl context
    * @param cert_data: cert data
    * @param key_data: key data
@@ -38,7 +43,7 @@ public:
   /**
    * @brief: create ssl connect
    */
-  std::shared_ptr<SSLSocket> CreateSSLSocket();
+  std::shared_ptr<SSLSocket> CreateSSLSocket(const Socket &soc);
   /**
    * @brief: close ssl context
    */

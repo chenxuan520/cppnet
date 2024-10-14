@@ -19,6 +19,26 @@ int SSLContext::Init(SSL_CTX *ctx) {
   return kSuccess;
 }
 
+int SSLContext::InitCli() {
+  if (ssl_ctx_ != nullptr) {
+    err_msg_ = "[loginerr]:ssl context is not null";
+    return kLogicErr;
+  }
+
+  const SSL_METHOD *meth = SSLv23_client_method();
+  if (meth == nullptr) {
+    err_msg_ = "[syserr]:create ssl method failed";
+    return kSysErr;
+  }
+  SSL_CTX *ctx = SSL_CTX_new(meth);
+  if (ctx == nullptr) {
+    err_msg_ = "[syserr]:create ssl context failed";
+    return kSysErr;
+  }
+
+  return Init(ctx);
+}
+
 int SSLContext::Init(const std::string &cert_data, const std::string &key_data,
                      const std::string &password) {
   if (ssl_ctx_ != nullptr) {
@@ -56,7 +76,8 @@ int SSLContext::Init(const std::string &cert_data, const std::string &key_data,
   if (!password.empty()) {
     SSL_CTX_set_default_passwd_cb_userdata(ctx, (void *)password.c_str());
   }
-  return kSuccess;
+
+  return Init(ctx);
 }
 
 int SSLContext::InitFile(const std::string &cert_path,
@@ -79,7 +100,9 @@ int SSLContext::InitFile(const std::string &cert_path,
 
   if (SSL_CTX_use_certificate_file(ctx, cert_path.c_str(), SSL_FILETYPE_PEM) <=
       0) {
-    err_msg_ = "[syserr]:use certificate file failed";
+    err_msg_ = std::string("[syserr]:use certificate file failed ") +
+               ERR_error_string(ERR_get_error(), nullptr);
+    ERR_clear_error();
     return kSysErr;
   }
 
@@ -89,14 +112,16 @@ int SSLContext::InitFile(const std::string &cert_path,
 
   if (SSL_CTX_use_PrivateKey_file(ctx, key_path.c_str(), SSL_FILETYPE_PEM) <=
       0) {
-    err_msg_ = "[syserr]:use private key file failed";
+    err_msg_ = std::string("[syserr]:use private key file failed ") +
+               ERR_error_string(ERR_get_error(), nullptr);
+    ERR_clear_error();
     return kSysErr;
   }
 
-  return kSuccess;
+  return Init(ctx);
 }
 
-std::shared_ptr<SSLSocket> SSLContext::CreateSSLSocket() {
+std::shared_ptr<SSLSocket> SSLContext::CreateSSLSocket(const Socket &soc) {
   if (ssl_ctx_ == nullptr) {
     err_msg_ = "[loginerr]:ssl context is null";
     return nullptr;
@@ -108,7 +133,15 @@ std::shared_ptr<SSLSocket> SSLContext::CreateSSLSocket() {
     return nullptr;
   }
 
-  return std::make_shared<SSLSocket>(ssl);
+  return std::make_shared<SSLSocket>(ssl, ssl_ctx_, soc);
+}
+
+int SSLContext::Close() {
+  if (ssl_ctx_ != nullptr) {
+    SSL_CTX_free(ssl_ctx_);
+    ssl_ctx_ = nullptr;
+  }
+  return kSuccess;
 }
 
 } // namespace cppnet

@@ -10,11 +10,16 @@ set(CMAKE_CXX_STANDARD 17)
 include_directories(../cppnet)
 include_directories(../third_party/cpptest)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	add_definitions(-DCPPNET_OPENSSL)
+	aux_source_directory(../cppnet/ssl DIR_SRCS)
+	link_libraries(-lssl -lcrypto)
+endif()
+# for local
 # include_directories(/opt/homebrew/Cellar/openssl@3/3.3.2/include)
-# add_definitions(-DCPPNET_OPENSSL)
+# link_directories(/opt/homebrew/Cellar/openssl@3/3.3.2/lib)
 
 # link dir add
-# link_directories()
 
 # add source
 aux_source_directory(../cppnet/server/io_multiplexing DIR_SRCS)

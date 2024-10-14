@@ -30,7 +30,7 @@ int Socket::InitUdp() {
   return 0;
 }
 
-Socket Socket::Accept(Address &addr) const {
+Socket Socket::Accept(Address &addr) {
   if (status_ != kInit) {
     return Socket(-1);
   }
@@ -38,25 +38,25 @@ Socket Socket::Accept(Address &addr) const {
   return Socket(accept_fd);
 }
 
-int Socket::Listen(int max_connect_queue) const {
+int Socket::Listen(int max_connect_queue) {
   if (status_ != kInit) {
     return -1;
   }
   return ::listen(fd_, max_connect_queue);
 }
 
-int Socket::Bind(Address &addr) const {
+int Socket::Bind(Address &addr) {
   if (status_ != kInit) {
     return -1;
   }
-  return ::bind(fd_, addr.GetSockAddr(), sizeof(sockaddr));
+  return ::bind(fd_, addr.GetSockAddr(), *addr.GetAddrLen());
 }
 
-int Socket::Connect(Address &addr) const {
+int Socket::Connect(Address &addr) {
   if (status_ != kInit) {
     return -1;
   }
-  return ::connect(fd_, addr.GetSockAddr(), sizeof(sockaddr));
+  return ::connect(fd_, addr.GetSockAddr(), *addr.GetAddrLen());
 }
 
 int Socket::Close() {
@@ -83,7 +83,7 @@ int Socket::SetBlock() const {
   return fcntl(fd_, F_SETFL, flags & ~O_NONBLOCK);
 }
 
-int Socket::Read(std::string &buf, size_t len, bool complete) const {
+int Socket::Read(std::string &buf, size_t len, bool complete) {
   if (status_ != kInit) {
     return -1;
   }
@@ -95,7 +95,7 @@ int Socket::Read(std::string &buf, size_t len, bool complete) const {
   return recv_len;
 }
 
-int Socket::Read(void *buf, size_t len, bool complete) const {
+int Socket::Read(void *buf, size_t len, bool complete) {
   if (status_ != kInit) {
     return -1;
   }
@@ -114,7 +114,7 @@ int Socket::Read(void *buf, size_t len, bool complete) const {
   }
 }
 
-int Socket::ReadUdp(std::string &buf, size_t len, Address &addr) const {
+int Socket::ReadUdp(std::string &buf, size_t len, Address &addr) {
   if (status_ != kInit) {
     return -1;
   }
@@ -127,7 +127,7 @@ int Socket::ReadUdp(std::string &buf, size_t len, Address &addr) const {
   return rc;
 }
 
-int Socket::ReadUdp(void *buf, size_t len, Address &addr) const {
+int Socket::ReadUdp(void *buf, size_t len, Address &addr) {
   if (status_ != kInit) {
     return -1;
   }
@@ -136,22 +136,22 @@ int Socket::ReadUdp(void *buf, size_t len, Address &addr) const {
                     (socklen_t *)&addr_len);
 }
 
-int Socket::Write(const std::string &buf) const {
+int Socket::Write(const std::string &buf) {
   return Write(buf.c_str(), buf.size());
 }
 
-int Socket::Write(const void *buf, size_t len) const {
+int Socket::Write(const void *buf, size_t len) {
   if (status_ != kInit) {
     return -1;
   }
   return IOWrite(buf, len);
 }
 
-int Socket::WriteUdp(const std::string &buf, Address &addr) const {
+int Socket::WriteUdp(const std::string &buf, Address &addr) {
   return WriteUdp(buf.c_str(), buf.size(), addr);
 }
 
-int Socket::WriteUdp(const void *buf, size_t len, Address &addr) const {
+int Socket::WriteUdp(const void *buf, size_t len, Address &addr) {
   if (status_ != kInit) {
     return -1;
   }

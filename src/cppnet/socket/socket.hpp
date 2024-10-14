@@ -34,26 +34,26 @@ public:
    * @param addr: server address.
    * @param len: address length.
    */
-  int Connect(Address &addr) const;
+  virtual int Connect(Address &addr);
   /**
    * @brief: Bind socket.
    * @param addr: server address.
    */
-  int Bind(Address &addr) const;
+  virtual int Bind(Address &addr);
   /**
    * @brief: Accept socket.
    * @param addr: server address.
    * @param plen: pointer of address length.
    */
-  Socket Accept(Address &addr) const;
+  virtual Socket Accept(Address &addr);
   /**
    * @brief: Close socket.
    */
-  int Listen(int max_connect_queue) const;
+  virtual int Listen(int max_connect_queue);
   /**
    * @brief: Close socket.
    */
-  int Close();
+  virtual int Close();
   /**
    * @brief: Read data from socket.
    * @param buf: buffer to store data.
@@ -61,7 +61,7 @@ public:
    * @param complete: if must need recv len data
    * @return: read length.
    */
-  int Read(std::string &buf, size_t len, bool complete = false) const;
+  int Read(std::string &buf, size_t len, bool complete = false);
   /**
    * @brief: Read data from socket.
    * @param buf: buffer to store data.
@@ -69,7 +69,7 @@ public:
    * @param complete: if must need recv len data
    * @return: read length.
    */
-  int Read(void *buf, size_t len, bool complete = false) const;
+  int Read(void *buf, size_t len, bool complete = false);
   /**
    * @brief: Read data from socket.
    * @param buf: buffer to store data.
@@ -77,7 +77,7 @@ public:
    * @param address: udp read from
    * @return: read length.
    */
-  int ReadUdp(std::string &buf, size_t len, Address &addr) const;
+  int ReadUdp(std::string &buf, size_t len, Address &addr);
   /**
    * @brief: Read data from udp socket.
    * @param buf: buffer to store data.
@@ -85,21 +85,21 @@ public:
    * @param address: udp read from
    * @return: read length.
    */
-  int ReadUdp(void *buf, size_t len, Address &addr) const;
+  int ReadUdp(void *buf, size_t len, Address &addr);
   /**
    * @brief: Write data to socket.
    * @param buf: buffer to store data.
    * @param len: buffer length.
    * @return: write length.
    */
-  int Write(const std::string &buf) const;
+  int Write(const std::string &buf);
   /**
    * @brief: Write data to socket.
    * @param buf: buffer to store data.
    * @param len: buffer length.
    * @return: write length.
    */
-  int Write(const void *buf, size_t len) const;
+  int Write(const void *buf, size_t len);
   /**
    * @brief: Write data to udp socket.
    * @param buf: buffer to store data.
@@ -107,7 +107,7 @@ public:
    * @param addr: udp write to
    * @return: write length.
    */
-  int WriteUdp(const std::string &buf, Address &addr) const;
+  int WriteUdp(const std::string &buf, Address &addr);
   /**
    * @brief: Write data to udp socket.
    * @param buf: buffer to store data.
@@ -115,7 +115,7 @@ public:
    * @param addr: udp write to
    * @return: write length.
    */
-  int WriteUdp(const void *buf, size_t len, Address &addr) const;
+  int WriteUdp(const void *buf, size_t len, Address &addr);
   /**
    * @brief: Set socket nonblock.
    */
@@ -148,11 +148,11 @@ public:
   bool operator==(const Socket &rhs) const { return fd_ == rhs.fd_; }
 
 protected:
-  virtual inline int IORead(void *buf, size_t len) const {
+  virtual inline int IORead(void *buf, size_t len) {
     return ::read(fd_, buf, len);
   }
 
-  virtual inline int IOWrite(const void *buf, size_t len) const {
+  virtual inline int IOWrite(const void *buf, size_t len) {
     return ::write(fd_, buf, len);
   }
 
