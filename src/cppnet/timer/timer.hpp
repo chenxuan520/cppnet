@@ -15,7 +15,7 @@ public:
    * @brief: Reset timer.
    * @param timerfd: timerfd
    * @param sec: second
-   * @param nsec: nano second
+   * @param nsec: nano second, 1s = 1e9ns
    * @return: 0 if success, -1 if failed.
    */
   static int ResetTimer(int timerfd, int sec, int nsec);

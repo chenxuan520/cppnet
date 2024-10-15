@@ -128,6 +128,18 @@ public:
    */
   int SetReuseAddr() const;
   /**
+   * @brief: set socket read time out
+   * @param timeout_sec: timeout second
+   * @param timeout_usec: timeout nano second
+   */
+  int SetReadTimeout(int timeout_sec, int timeout_usec) const;
+  /**
+   * @brief: set socket write time out
+   * @param timeout_sec: timeout second
+   * @param timeout_usec: timeout nano second
+   */
+  int SetWriteTimeout(int timeout_sec, int timeout_usec) const;
+  /**
    * @brief: set socket opt
    * @param level: socket level
    * @param optname: socket option name

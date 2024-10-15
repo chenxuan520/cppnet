@@ -160,8 +160,22 @@ int Socket::WriteUdp(const void *buf, size_t len, Address &addr) {
 
 int Socket::SetReuseAddr() const {
   int reuse_addr_on = 1;
-  return ::setsockopt(fd_, SOL_SOCKET, SO_REUSEADDR, &reuse_addr_on,
-                      sizeof(reuse_addr_on));
+  return Socket::SetSockOpt(SOL_SOCKET, SO_REUSEADDR, &reuse_addr_on,
+                            sizeof(reuse_addr_on));
+}
+
+int Socket::SetReadTimeout(int timeout_sec, int timeout_usec) const {
+  struct timeval timeout;
+  timeout.tv_sec = timeout_sec;
+  timeout.tv_usec = timeout_usec;
+  return Socket::SetSockOpt(SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+}
+
+int Socket::SetWriteTimeout(int timeout_sec, int timeout_usec) const {
+  struct timeval timeout;
+  timeout.tv_sec = timeout_sec;
+  timeout.tv_usec = timeout_usec;
+  return Socket::SetSockOpt(SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
 }
 
 int Socket::SetSockOpt(int level, int optname, const void *optval,

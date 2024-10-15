@@ -113,3 +113,37 @@ TEST(Socket, CompleteRead) {
   MUST_TRUE(rc == 0, strerror(errno));
   DEBUG("close");
 }
+
+TEST(Socket, ReadTimeout) {
+  SKIP();
+  // TODO
+  // Finish it
+  Address addr{"127.0.0.1", 8080};
+  int rc = 0;
+  const int max_connect_queue = 10;
+  std::string msg = "hello world";
+
+  Socket socket_recv;
+  rc = socket_recv.Init();
+  MUST_TRUE(rc == 0, socket_recv.err_msg());
+  DEFER([&]() { socket_recv.Close(); });
+
+  // set read max time
+  rc = socket_recv.SetReadTimeout(1, 10);
+  MUST_TRUE(rc == 0, socket_recv.err_msg());
+
+  // bind
+  rc = socket_recv.SetReuseAddr();
+  MUST_TRUE(rc == 0, socket_recv.err_msg());
+  rc = socket_recv.Bind(addr);
+  MUST_TRUE(rc == 0, socket_recv.err_msg());
+
+  // listen
+  rc = socket_recv.Listen(max_connect_queue);
+  MUST_TRUE(rc == 0, socket_recv.err_msg());
+
+  // accept
+  Address addr_cli;
+  Socket socket_accept = socket_recv.Accept(addr_cli);
+  MUST_TRUE(socket_accept.status() != Socket::kInit, "should timeout");
+}
