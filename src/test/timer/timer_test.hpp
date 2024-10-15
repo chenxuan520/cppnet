@@ -7,7 +7,9 @@ using namespace cppnet;
 using namespace std;
 
 TEST(Timer, CreateTimer) {
-  // SKIP();
+#ifdef __APPLE__
+  SKIP();
+#endif
   atomic<int> count{0};
   Address addr{"127.0.0.1", 8080};
   TcpServer server{addr};

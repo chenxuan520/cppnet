@@ -3,6 +3,8 @@
 
 #ifdef __linux__
 #include <sys/timerfd.h>
+#elif __APPLE__
+#include <dispatch/dispatch.h>
 #endif
 
 #include <unistd.h>
@@ -19,6 +21,8 @@ int Timer::CreateTimer(int sec, int nsec) {
 
   ResetTimer(timerfd, sec, nsec);
   return timerfd;
+#elif __APPLE__
+  return -1;
 #else
   return -1;
 #endif
