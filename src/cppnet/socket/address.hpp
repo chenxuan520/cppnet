@@ -21,7 +21,7 @@ public:
   static socklen_t *GetAddrLen();
 
 private:
-  sockaddr_in addr_;
+  sockaddr_in addr_{0, 0, {0}};
 };
 
 } // namespace cppnet

@@ -130,7 +130,7 @@ public:
   /**
    * @brief: set socket read time out
    * @param timeout_sec: timeout second
-   * @param timeout_usec: timeout nano second
+   * @param timeout_usec: timeout microsecond, 1s=1e6us
    */
   int SetReadTimeout(int timeout_sec, int timeout_usec) const;
   /**

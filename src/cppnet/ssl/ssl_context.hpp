@@ -30,21 +30,25 @@ public:
    * @param key_data: key data
    * @param password: password
    */
-  int Init(const std::string &cert_data, const std::string &key_data,
-           const std::string &password = "");
+  int InitSvr(const std::string &cert_data, const std::string &key_data,
+              const std::string &password = "");
   /**
    * @brief: init ssl context
    * @param cert_path: cert path file
    * @param key_path: key path file
    * @param password: password
    */
-  int InitFile(const std::string &cert_path, const std::string &key_path,
-               const std::string &password = "");
+  int InitSvrFile(const std::string &cert_path, const std::string &key_path,
+                  const std::string &password = "");
   /**
    * @brief: create ssl socket
    */
   std::shared_ptr<SSLSocket> CreateSSLSocket(const Socket &soc);
   std::shared_ptr<SSLSocket> CreateSSLSocket();
+  /**
+   * @brief: Accept socket ssl.
+   */
+  std::shared_ptr<SSLSocket> AcceptSSL(const Socket &soc);
   /**
    * @brief: close ssl context
    */

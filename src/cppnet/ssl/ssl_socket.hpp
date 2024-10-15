@@ -18,25 +18,12 @@ public:
    */
   int Connect(Address &addr) override;
   /**
-   * @brief: Accept socket ssl.
-   */
-  std::shared_ptr<SSLSocket> AcceptSSL(Address &addr);
-  /**
    * @brief: close ssl
    */
   int Close() override;
 
 public:
   inline std::string err_msg() const { return err_msg_; }
-
-protected:
-  /**
-   * @brief: Accept socket, return err, use AcceptSSL
-   */
-  Socket Accept(Address &addr) override {
-    err_msg_ = "[loginerr]:ssl socket can not accept,use AcceptSSL";
-    return kLogicErr;
-  }
 
 protected:
   inline int IORead(void *buf, size_t len) override {

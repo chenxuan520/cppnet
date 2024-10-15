@@ -7,7 +7,7 @@ public:
   /**
    * @brief: Create timer.
    * @param sec: second
-   * @param nsec: nano second
+   * @param nsec: nano second, 1s = 1e9ns
    * @return: timerfd, -1 if failed.
    */
   static int CreateTimer(int sec, int nsec);

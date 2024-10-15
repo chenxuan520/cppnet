@@ -31,6 +31,15 @@ Socket TcpServer::CreateSocket() {
     return kSysErr;
   }
 
+  // recheck ip and port addr
+  std::string ip;
+  uint16_t port;
+  addr_.GetIPAndPort(ip, port);
+  if (ip.empty() || port == 0) {
+    err_msg_ = "[logicerr]:ip or port is invalid";
+    return kLogicErr;
+  }
+
   rc = listenfd.Bind(addr_);
   if (rc < 0) {
     err_msg_ = "[syserr]:" + listenfd_.err_msg();
@@ -224,7 +233,7 @@ int TcpServer::Init() {
   loop_flag_ = true;
   listenfd_ = CreateSocket();
   if (listenfd_.status() != Socket::kInit) {
-    err_msg_ = "[syserr]:" + listenfd_.err_msg();
+    err_msg_ = "[logicerr]:listenfd not init";
     return kSysErr;
   }
 

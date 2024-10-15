@@ -3,6 +3,7 @@
 #include "socket/socket_test.hpp"
 #include "ssl/ssl_context_test.hpp"
 #include "timer/timer_test.hpp"
+#include "utils/file_test.hpp"
 #include "utils/host_test.hpp"
 #include "utils/threadpoll_test.hpp"
 

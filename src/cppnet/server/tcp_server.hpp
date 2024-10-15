@@ -58,7 +58,7 @@ public:
    */
   int EventLoop();
   /**
-   * @brief: Close file descriptor.With remove from epoll.
+   * @brief: Remove from event listen, not close.
    */
   int RemoveSoc(const Socket &fd);
   /**
@@ -78,6 +78,7 @@ public:
   inline void set_max_connect_queue(int max_connect_queue) {
     max_connect_queue_ = max_connect_queue;
   }
+  inline void set_addr(const Address &addr) { addr_ = addr; }
   inline std::string err_msg() const { return err_msg_; }
   inline std::shared_ptr<IOMultiplexingBase> io_multiplexing() {
     return io_multiplexing_;
