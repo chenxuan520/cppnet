@@ -250,6 +250,11 @@ int TcpServer::Init() {
 int TcpServer::InitMode() {
 
   switch (mode_) {
+
+  case kMixed: {
+    thread_pool_ = std::make_shared<ThreadPool<Socket>>();
+    thread_pool_->Init();
+  } // need init pool and io_multiplexing both
   case kIOMultiplexing: {
     io_multiplexing_ = IOMultiplexingFactory::CreateDefault();
     if (io_multiplexing_ == nullptr) {

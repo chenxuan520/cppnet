@@ -13,3 +13,13 @@ TEST(Address, AddressTurn) {
   MUST_TRUE(ip == "127.0.0.1", ip + " is not 127.0.0.1");
   MUST_TRUE(port == 80, std::to_string(port) + " is not 80");
 }
+
+TEST(Address, AddressUninit) {
+  Address addr;
+  std::string ip;
+  uint16_t port;
+  addr.GetIPAndPort(ip, port);
+  DEBUG("ip: " + ip + " port: " + std::to_string(port));
+  MUST_TRUE(ip == "0.0.0.0", ip + " is not 0.0.0.0");
+  MUST_TRUE(port == 0, std::to_string(port) + " is not 0");
+}

@@ -187,8 +187,7 @@ int Socket::GetAddr(Address &addr) const {
   if (status_ != kInit) {
     return -1;
   }
-  socklen_t addr_len = sizeof(sockaddr);
-  return getpeername(fd_, addr.GetSockAddr(), addr.GetAddrLen());
+  return addr.GetPeerAddr(fd_, addr);
 }
 
 } // namespace cppnet

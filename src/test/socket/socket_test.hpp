@@ -115,7 +115,7 @@ TEST(Socket, CompleteRead) {
 }
 
 TEST(Socket, ReadTimeout) {
-#ifndef __APPLE__
+#ifdef __APPLE__
   SKIP();
 #endif
   // TODO

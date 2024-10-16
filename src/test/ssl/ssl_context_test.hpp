@@ -1,7 +1,6 @@
 #pragma once
 #include "server/tcp_server.hpp"
 #include "utils/file.hpp"
-#include <fstream>
 #include <memory>
 #include <unistd.h>
 #include <unordered_map>
@@ -106,13 +105,11 @@ TEST(SSLContext, SSLServer) {
   auto event_func = [&](TcpServer::Event event, TcpServer &, Socket fd) {
     switch (event) {
     case TcpServer::Event::kEventAccept: {
-      auto ssl_sock = ssl_ctx.CreateSSLSocket(fd);
-      MUST_TRUE(ssl_sock != nullptr, ssl_ctx.err_msg());
-
       auto ssl_ptr = ssl_ctx.AcceptSSL(fd);
       DEBUG(fd.fd() << " accept ssl sock");
       hashmap[fd.fd()] = ssl_ptr;
     } break;
+
     case TcpServer::Event::kEventRead: {
       auto it = hashmap.find(fd.fd());
       MUST_TRUE(it != hashmap.end(), "not found fd" << fd.fd());
@@ -122,6 +119,7 @@ TEST(SSLContext, SSLServer) {
       DEBUG(fd.fd() << " read " << buf);
       MUST_TRUE(buf == msg, ssl_sock->err_msg());
     } break;
+
     case TcpServer::Event::kEventLeave: {
       auto it = hashmap.find(fd.fd());
       MUST_TRUE(it != hashmap.end(), "not found fd");
@@ -131,6 +129,7 @@ TEST(SSLContext, SSLServer) {
       hashmap.erase(it);
       server.Stop();
     } break;
+
     case TcpServer::Event::kEventError: {
       FATAL(fd.err_msg());
       server.Stop();
