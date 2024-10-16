@@ -97,18 +97,8 @@ void TcpServer::HandleRead(int fd) {
 void TcpServer::HandleLeave(int fd) {
   Socket soc(fd);
   event_callback_(kEventLeave, *this, soc);
-  auto rc = RemoveSoc(soc);
-  if (rc < 0) {
-    err_msg_ = "[syserr]:" + io_multiplexing_->err_msg();
-    HandleError(fd);
-    return;
-  }
-  rc = soc.Close();
-  if (rc < 0) {
-    err_msg_ = "[syserr]:" + soc.err_msg();
-    HandleError(fd);
-    return;
-  }
+  RemoveSoc(soc);
+  soc.Close();
 }
 
 void TcpServer::HandleError(int fd) {

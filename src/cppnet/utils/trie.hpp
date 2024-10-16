@@ -6,6 +6,7 @@
 
 namespace cppnet {
 
+// Because of template,so cannot use cpp file
 template <class T> class Trie {
 public:
   using SearchCallback = std::function<void(const std::shared_ptr<T>, bool)>;
