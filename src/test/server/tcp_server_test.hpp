@@ -269,3 +269,110 @@ TEST(TcpServer, MultiThread) {
   rc = server.EventLoop();
   MUST_EQUAL(rc, 0);
 }
+
+TEST(TcpServer, MixMode) {
+  // SKIP();
+  int loop_time = 1;
+
+  for (int i = 0; i < loop_time; i += 1) {
+    // init server
+    server.set_mode(cppnet::TcpServer::kMixed);
+    auto rc = server.Init();
+    MUST_TRUE(rc == 0, server.err_msg());
+    DEFER([]() { server.Clean(); });
+
+    // init count
+    atomic<int> count{0};
+    atomic<int> client_count{2};
+
+    // init event function
+    auto event_func = [&](TcpServer::Event event, TcpServer &server,
+                          Socket fd) {
+      if (event == TcpServer::kEventAccept) {
+        Address addr_cli;
+        fd.GetAddr(addr_cli);
+        string ip;
+        uint16_t port = 0;
+        addr_cli.GetIPAndPort(ip, port);
+        MUST_TRUE(port != 8080, "port need not equal 8080");
+        DEBUG(fd.fd() << " accept " << ip << ":" << port);
+        // accept
+      } else if (event == TcpServer::kEventRead) {
+        // read
+        string buf;
+        auto ser_rc = fd.Read(buf, 1);
+        DEBUG(fd.fd() << " read " << buf);
+        if (buf.size() == 0) {
+          return;
+        }
+        // str2int
+        int num = stoi(buf);
+        // add count
+        count += num;
+        // send back
+        ser_rc = fd.Write(to_string(num));
+      } else if (event == TcpServer::kEventLeave) {
+        // leave, break loop
+        client_count--;
+        if (client_count == 0) {
+          DEBUG("server stop");
+          server.Stop();
+        }
+        DEBUG(fd.fd() << " leave " << client_count);
+      } else {
+        // dismiss
+        DEBUG(fd.fd() << " dismiss " << event);
+      }
+    };
+    server.Register(event_func);
+
+    // thread to run client
+    const int test_num = 2;
+    srand(time(nullptr));
+    atomic<int> sum{0};
+    cpptest::WaitGroup wait_group;
+    for (int i = 0; i < 2; i++) {
+      wait_group.Add(GO_WAIT([&]() {
+        int num = rand() % 10;
+        sum += num;
+
+        // init client
+        Socket client;
+        auto cli_rc = client.Init();
+        MUST_EQUAL(cli_rc, 0);
+
+        // connect
+        cli_rc = client.Connect(addr);
+        MUST_EQUAL(cli_rc, 0);
+        DEBUG("client connect ");
+
+        // write
+        cli_rc = client.Write(to_string(num));
+        MUST_TRUE(cli_rc > 0, "write error");
+        DEBUG("client write " << to_string(num) << " ");
+
+        // read back
+        string buf;
+        cli_rc = client.Read(buf, 1);
+        MUST_EQUAL(cli_rc, buf.size());
+        DEBUG("client read " << buf << " " << i);
+
+        // close
+        usleep(1000);
+        cli_rc = client.Close();
+        EXPECT_EQ(cli_rc, 0);
+        DEBUG("client exit");
+      }));
+    }
+
+    // run server
+    rc = server.EventLoop();
+    MUST_EQUAL(rc, 0);
+
+    wait_group.Wait();
+
+    // check
+    DEBUG("count " << count << " sum " << sum);
+    MUST_EQUAL(count, sum);
+  }
+}

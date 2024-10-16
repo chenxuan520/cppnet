@@ -1,5 +1,6 @@
 
 #include "timer.hpp"
+#include "../utils/const.hpp"
 
 #ifdef __linux__
 #include <sys/timerfd.h>
@@ -16,15 +17,15 @@ int Timer::CreateTimer(int sec, int nsec) {
 #ifdef __linux__
   int timerfd = timerfd_create(CLOCK_REALTIME, 0);
   if (timerfd <= 0) {
-    return -1;
+    return kSysErr;
   }
 
   ResetTimer(timerfd, sec, nsec);
   return timerfd;
 #elif __APPLE__
-  return -1;
+  return kUnSupport;
 #else
-  return -1;
+  return kUnSupport;
 #endif
 }
 
@@ -39,7 +40,7 @@ int Timer::ResetTimer(int timerfd, int sec, int nsec) {
   timerfd_settime(timerfd, 0, &ts, NULL);
 #endif
 
-  return 0;
+  return kSuccess;
 }
 
 int Timer::RemoveTimer(int timerfd) { return ::close(timerfd); }

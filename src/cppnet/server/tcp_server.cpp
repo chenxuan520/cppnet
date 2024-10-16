@@ -71,6 +71,7 @@ void TcpServer::HandleAccept() {
 
   switch (mode_) {
 
+  case kMixed:
   case kIOMultiplexing: {
     auto rc = io_multiplexing_->MonitorSoc(new_socket);
     if (rc < 0) {
@@ -96,8 +97,18 @@ void TcpServer::HandleRead(int fd) {
 void TcpServer::HandleLeave(int fd) {
   Socket soc(fd);
   event_callback_(kEventLeave, *this, soc);
-  RemoveSoc(soc);
-  soc.Close();
+  auto rc = RemoveSoc(soc);
+  if (rc < 0) {
+    err_msg_ = "[syserr]:" + io_multiplexing_->err_msg();
+    HandleError(fd);
+    return;
+  }
+  rc = soc.Close();
+  if (rc < 0) {
+    err_msg_ = "[syserr]:" + soc.err_msg();
+    HandleError(fd);
+    return;
+  }
 }
 
 void TcpServer::HandleError(int fd) {
@@ -120,17 +131,27 @@ int TcpServer::EventLoop() {
 
   switch (mode_) {
 
+  case kMixed:
   case kIOMultiplexing: {
     auto callback = [this](IOMultiplexingBase &, Socket fd,
                            IOMultiplexingBase::IOEvent event) {
       if (fd == listenfd_) {
         HandleAccept();
+
       } else if (event == IOMultiplexingBase::kIOEventLeave) {
         HandleLeave(fd.fd());
+
       } else if (event == IOMultiplexingBase::kIOEventRead) {
-        HandleRead(fd.fd());
+        if (mode_ == kMixed) {
+          thread_pool_->AddTask(
+              {[this](Socket soc) { HandleRead(soc.fd()); }, fd});
+        } else {
+          HandleRead(fd.fd());
+        }
+
       } else if (event == IOMultiplexingBase::kIOEventError) {
         HandleError(fd.fd());
+
       } else {
         err_msg_ = "[logicerr]:unknown event";
       }
@@ -139,6 +160,9 @@ int TcpServer::EventLoop() {
     if (rc < 0) {
       err_msg_ = "[syserr]:" + std::string(strerror(errno));
       return kSysErr;
+    }
+    if (mode_ == kMixed) {
+      thread_pool_->Stop();
     }
   } break;
 
@@ -163,10 +187,11 @@ int TcpServer::EventLoop() {
       thread_pool_->AddTask({callback, accept_fd});
     }
     thread_pool_->Stop();
-  }
+  } break;
 
   default:
-    return kSuccess;
+    err_msg_ = "[logicerr]:unknown mode";
+    return kLogicErr;
   }
   return kSuccess;
 }
@@ -178,6 +203,7 @@ void TcpServer::Stop() {
   }
   loop_flag_ = false;
   switch (mode_) {
+  case kMixed:
   case kIOMultiplexing: {
     io_multiplexing_->Stop();
   } break;
@@ -277,8 +303,6 @@ int TcpServer::InitMode() {
       return kSysErr;
     }
 
-    // init default callback
-    event_callback_ = [](Event, TcpServer &, Socket) {};
   } break;
 
   case kMultiThread: {
@@ -289,6 +313,9 @@ int TcpServer::InitMode() {
   default:
     return kSuccess;
   }
+
+  // init default callback
+  event_callback_ = [](Event, TcpServer &, Socket) {};
 
   return kSuccess;
 }

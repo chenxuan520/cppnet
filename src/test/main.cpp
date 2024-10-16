@@ -6,6 +6,7 @@
 #include "utils/file_test.hpp"
 #include "utils/host_test.hpp"
 #include "utils/threadpoll_test.hpp"
+#include "utils/trie_test.hpp"
 
 #include <signal.h>
 
