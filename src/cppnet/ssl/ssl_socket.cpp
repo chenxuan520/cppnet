@@ -7,13 +7,9 @@
 
 namespace cppnet {
 
-SSLSocket::SSLSocket(SSL *ssl, SSL_CTX *ssl_ctx, const Socket &soc) {
+SSLSocket::SSLSocket(SSL *ssl, const Socket &soc) {
   if (ssl == nullptr) {
     err_msg_ = "[loginerr]:ssl is nullptr";
-    return;
-  }
-  if (ssl_ctx == nullptr) {
-    err_msg_ = "[loginerr]:ssl context is null";
     return;
   }
   if (soc.status() != kInit) {
@@ -22,7 +18,6 @@ SSLSocket::SSLSocket(SSL *ssl, SSL_CTX *ssl_ctx, const Socket &soc) {
   }
   fd_ = soc.fd();
   ssl_ = ssl;
-  ssl_ctx_ = ssl_ctx;
   SSL_set_fd(ssl_, fd_);
   status_ = kInit;
 }

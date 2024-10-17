@@ -1,7 +1,5 @@
 #pragma once
 
-#include "utils/const.hpp"
-#include <memory>
 #ifdef CPPNET_OPENSSL
 
 #include "../socket/socket.hpp"
@@ -11,7 +9,7 @@ namespace cppnet {
 
 class SSLSocket : public Socket {
 public:
-  SSLSocket(SSL *ssl, SSL_CTX *ssl_ctx, const Socket &soc);
+  SSLSocket(SSL *ssl, const Socket &soc);
   SSLSocket(const SSLSocket &) = delete;
   /**
    * @brief: connect socket
@@ -36,7 +34,6 @@ protected:
 
 private:
   SSL *ssl_ = nullptr;
-  SSL_CTX *ssl_ctx_ = nullptr;
   std::string err_msg_;
 };
 

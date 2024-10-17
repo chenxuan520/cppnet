@@ -146,7 +146,7 @@ std::shared_ptr<SSLSocket> SSLContext::CreateSSLSocket(const Socket &soc) {
     return nullptr;
   }
 
-  return std::make_shared<SSLSocket>(ssl, ssl_ctx_, soc);
+  return std::make_shared<SSLSocket>(ssl, soc);
 }
 
 std::shared_ptr<SSLSocket> SSLContext::CreateSSLSocket() {
@@ -178,7 +178,7 @@ std::shared_ptr<SSLSocket> SSLContext::AcceptSSL(const Socket &soc) {
     ERR_clear_error();
     return nullptr;
   }
-  return std::make_shared<SSLSocket>(new_ssl, ssl_ctx_, soc);
+  return std::make_shared<SSLSocket>(new_ssl, soc);
 }
 
 int SSLContext::Close() {
