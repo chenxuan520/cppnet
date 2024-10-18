@@ -92,8 +92,9 @@ TEST(TcpServer, MultiClient) {
     DEFER([]() { server.Clean(); });
 
     // init count
+    const int test_num = 10;
     atomic<int> count{0};
-    atomic<int> client_count{2};
+    atomic<int> client_count{test_num};
 
     // init event function
     auto event_func = [&](TcpServer::Event event, TcpServer &server,
@@ -133,11 +134,10 @@ TEST(TcpServer, MultiClient) {
     server.Register(event_func);
 
     // thread to run client
-    const int test_num = 2;
     srand(time(nullptr));
     atomic<int> sum{0};
     cpptest::WaitGroup wait_group;
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < test_num; i++) {
       wait_group.Add(GO_WAIT([&]() {
         int num = rand() % 10;
         sum += num;
@@ -282,8 +282,9 @@ TEST(TcpServer, MixMode) {
     DEFER([]() { server.Clean(); });
 
     // init count
+    const int test_num = 2;
     atomic<int> count{0};
-    atomic<int> client_count{2};
+    atomic<int> client_count{test_num};
 
     // init event function
     auto event_func = [&](TcpServer::Event event, TcpServer &server,
@@ -327,11 +328,10 @@ TEST(TcpServer, MixMode) {
     server.Register(event_func);
 
     // thread to run client
-    const int test_num = 2;
     srand(time(nullptr));
     atomic<int> sum{0};
     cpptest::WaitGroup wait_group;
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < test_num; i++) {
       wait_group.Add(GO_WAIT([&]() {
         int num = rand() % 10;
         sum += num;
