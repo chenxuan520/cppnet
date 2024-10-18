@@ -7,9 +7,9 @@
 namespace cppnet {
 
 std::string Host::GetLocalName() {
-  char ip[512] = {0};
-  gethostname(ip, sizeof(ip));
-  return ip;
+  char name[512] = {0};
+  gethostname(name, sizeof(name));
+  return name;
 }
 
 std::string Host::GetLocalIP() {

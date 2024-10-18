@@ -16,9 +16,13 @@ public:
    */
   int Connect(Address &addr) override;
   /**
-   * @brief: close ssl
+   * @brief: close ssl and socket
    */
   int Close() override;
+  /**
+   * @brief: close ssl
+   */
+  int CloseSSL();
 
 public:
   inline std::string err_msg() const { return err_msg_; }

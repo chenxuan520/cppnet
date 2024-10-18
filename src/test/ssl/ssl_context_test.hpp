@@ -124,7 +124,7 @@ TEST(SSLContext, SSLServer) {
       auto it = hashmap.find(fd.fd());
       MUST_TRUE(it != hashmap.end(), "not found fd");
       auto ssl_sock = it->second;
-      ssl_sock->Close();
+      ssl_sock->CloseSSL();
       DEBUG(fd.fd() << " close");
       hashmap.erase(it);
       server.Stop();

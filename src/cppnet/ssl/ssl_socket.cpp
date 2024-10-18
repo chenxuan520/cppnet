@@ -23,8 +23,17 @@ SSLSocket::SSLSocket(SSL *ssl, const Socket &soc) {
 }
 
 int SSLSocket::Close() {
+  if (status_ != kInit) {
+    err_msg_ = "[logicerr]:socket status is invalid";
+    return kLogicErr;
+  }
+  Socket::Close();
+  CloseSSL();
+  return kSuccess;
+}
+
+int SSLSocket::CloseSSL() {
   if (ssl_ != nullptr) {
-    ::close(fd_);
     SSL_shutdown(ssl_);
     SSL_free(ssl_);
     ssl_ = nullptr;

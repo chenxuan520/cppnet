@@ -17,3 +17,4 @@ install(DIRECTORY ./cppnet DESTINATION include)
 
 # add source
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)
+add_subdirectory(${PROJECT_SOURCE_DIR}/lib)
