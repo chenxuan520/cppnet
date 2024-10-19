@@ -5,6 +5,7 @@
 #include "timer/timer_test.hpp"
 #include "utils/file_test.hpp"
 #include "utils/host_test.hpp"
+#include "utils/string_test.hpp"
 #include "utils/threadpoll_test.hpp"
 #include "utils/trie_test.hpp"
 
