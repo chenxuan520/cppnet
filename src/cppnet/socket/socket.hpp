@@ -70,6 +70,13 @@ public:
    */
   int Read(void *buf, size_t len, bool complete = false);
   /**
+   * @brief: Read data from socket until delim(include delim).
+   * @param buf: buffer to store data.
+   * @param delim: delimiter
+   * @return: read length.
+   */
+  int ReadUntil(std::string &buf, const std::string &delim);
+  /**
    * @brief: Read data from socket.
    * @param buf: buffer to store data.
    * @param len: buffer length.

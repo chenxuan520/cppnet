@@ -118,8 +118,6 @@ TEST(Socket, ReadTimeout) {
 #ifdef __APPLE__
   SKIP();
 #endif
-  // TODO
-  // Finish it
   Address addr{"127.0.0.1", 8080};
   int rc = 0;
   const int max_connect_queue = 10;
@@ -148,4 +146,65 @@ TEST(Socket, ReadTimeout) {
   Address addr_cli;
   Socket socket_accept = socket_recv.Accept(addr_cli);
   MUST_TRUE(socket_accept.status() != Socket::kInit, "should timeout");
+}
+
+TEST(Socket, ReadUntil) {
+  Address addr{"127.0.0.1", 8080};
+  int rc = 0;
+  const int max_connect_queue = 10;
+  std::string msg = "hello world,cpp";
+  std::string msg_right = "hello world";
+
+  Socket socket_recv, socket_send;
+  rc = socket_recv.Init();
+  MUST_TRUE(rc == 0, socket_recv.err_msg());
+  rc = socket_send.Init();
+  MUST_TRUE(rc == 0, socket_send.err_msg());
+  DEFER([&]() {
+    socket_recv.Close();
+    socket_send.Close();
+  });
+
+  // bind
+  rc = socket_recv.SetReuseAddr();
+  MUST_TRUE(rc == 0, socket_recv.err_msg());
+  rc = socket_recv.Bind(addr);
+  MUST_TRUE(rc == 0, socket_recv.err_msg());
+
+  // listen
+  rc = socket_recv.Listen(max_connect_queue);
+  MUST_TRUE(rc == 0, socket_recv.err_msg());
+
+  // thread to run send func
+  GO_JOIN([&]() {
+    // connect
+    auto cli_rc = socket_send.Connect(addr);
+    MUST_TRUE(cli_rc == 0, socket_send.err_msg());
+    DEBUG("client connect");
+
+    // write
+    cli_rc = socket_send.Write(msg);
+    MUST_TRUE(cli_rc == msg.size(), socket_send.err_msg());
+    DEBUG("client write " << msg);
+
+    // close
+    cli_rc = socket_send.Close();
+    MUST_TRUE(cli_rc == 0, socket_send.err_msg());
+    DEBUG("client close");
+  });
+
+  // accept
+  Address addr_cli;
+  Socket socket_accept = socket_recv.Accept(addr_cli);
+
+  // read
+  std::string msg_rec;
+  rc = socket_accept.ReadUntil(msg_rec, "world");
+  DEBUG("read " << msg_rec);
+  MUST_EQUAL(msg_right, msg_rec);
+
+  // close
+  rc = socket_accept.Close();
+  MUST_TRUE(rc == 0, socket_accept.err_msg());
+  DEBUG("close");
 }

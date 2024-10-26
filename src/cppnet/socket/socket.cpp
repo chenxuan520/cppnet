@@ -114,6 +114,23 @@ int Socket::Read(void *buf, size_t len, bool complete) {
   }
 }
 
+int Socket::ReadUntil(std::string &buf, const std::string &delim) {
+  if (status_ != kInit || delim.empty()) {
+    return -1;
+  }
+  auto delim_len = delim.size();
+  char ch = 0;
+  while (ch != delim[delim_len - 1] ||
+         buf.substr(buf.size() - delim.size()) != delim) {
+    auto rc = IORead(&ch, 1);
+    if (rc <= 0) {
+      break;
+    }
+    buf += ch;
+  }
+  return buf.size();
+}
+
 int Socket::ReadUdp(std::string &buf, size_t len, Address &addr) {
   if (status_ != kInit) {
     return -1;
