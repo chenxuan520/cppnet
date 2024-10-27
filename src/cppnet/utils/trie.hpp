@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace cppnet {
@@ -9,7 +10,7 @@ namespace cppnet {
 // Because of template,so cannot use cpp file
 template <class T> class Trie {
 public:
-  using SearchCallback = std::function<void(const std::shared_ptr<T>, bool)>;
+  using SearchCallback = std::function<bool(std::shared_ptr<T>, bool)>;
 
   Trie() { root_ = new Node; }
 
@@ -74,8 +75,12 @@ public:
         return;
       } else {
         temp = temp->next_[key[i]];
-        if (temp->stop_)
-          callback(temp->data_, i == key.size() - 1);
+        if (temp->stop_) {
+          auto is_continue = callback(temp->data_, i == key.size() - 1);
+          if (!is_continue) {
+            break;
+          }
+        }
       }
     }
     return;

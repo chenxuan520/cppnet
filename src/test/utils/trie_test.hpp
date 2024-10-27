@@ -37,26 +37,41 @@ TEST(Trie, Test) {
 
   // test search
   atomic<int> count = 0;
-  trie.Search("hello.world", [&](shared_ptr<int> data, bool last) { count++; });
+  trie.Search("hello.world", [&](shared_ptr<int> data, bool last) -> bool {
+    count++;
+    return true;
+  });
   MUST_TRUE(count == 2, "Search failed");
 
   count = 0;
   trie.Search("hello.world.cppnet",
-              [&](shared_ptr<int> data, bool last) { count++; });
+              [&](shared_ptr<int> data, bool last) -> bool {
+                count++;
+                return true;
+              });
   MUST_TRUE(count == 3, "Search failed");
 
   count = 0;
   trie.Search("hello.world.cppnet.cppnet",
-              [&](shared_ptr<int> data, bool last) { count++; });
+              [&](shared_ptr<int> data, bool last) -> bool {
+                count++;
+                return true;
+              });
   MUST_TRUE(count == 4, "Search failed");
 
   count = 0;
   trie.Search("hello.world.cppnet.cppnet.cppnet",
-              [&](shared_ptr<int> data, bool last) { count++; });
+              [&](shared_ptr<int> data, bool last) -> bool {
+                count++;
+                return true;
+              });
   MUST_TRUE(count == 4, "Search failed");
 
   count = 0;
-  trie.Search("helo;", [&](shared_ptr<int> data, bool last) { count++; });
+  trie.Search("helo;", [&](shared_ptr<int> data, bool last) -> bool {
+    count++;
+    return true;
+  });
   MUST_TRUE(count == 0, "count is " << count);
 
   // test

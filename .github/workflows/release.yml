@@ -1,15 +1,8 @@
 name: build_and_release #名称随意
 on:
   push: #设置触发规则
-    branches:
-      - main
-      - master
     tags:
       - 'v*'
-  pull_request:
-    branches:
-      - main
-      - master
 
 jobs:
   build:

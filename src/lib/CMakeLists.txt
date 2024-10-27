@@ -32,5 +32,9 @@ aux_source_directory(../cppnet/timer DIR_SRCS)
 aux_source_directory(../cppnet/utils DIR_SRCS)
 aux_source_directory(../cppnet/socket DIR_SRCS)
 
+# add http source
+file(GLOB HTTP_SRCS "../cppnet/http/*/*.cpp" "../cppnet/http/*/*/*.cpp")
+list(APPEND DIR_SRCS ${HTTP_SRCS})
+
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 add_library(cppnet STATIC ${DIR_SRCS})

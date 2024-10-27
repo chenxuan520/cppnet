@@ -33,6 +33,10 @@ aux_source_directory(../cppnet/timer DIR_SRCS)
 aux_source_directory(../cppnet/utils DIR_SRCS)
 aux_source_directory(../cppnet/socket DIR_SRCS)
 
+# add http source
+file(GLOB HTTP_SRCS "../cppnet/http/*/*.cpp" "../cppnet/http/*/*/*.cpp")
+list(APPEND DIR_SRCS ${HTTP_SRCS})
+
 set(EXECUTABLE_OUTPUT_PATH ../../bin)
 
 add_executable(test_bin ./main.cpp ${DIR_SRCS})
