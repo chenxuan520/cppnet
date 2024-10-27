@@ -1,0 +1,52 @@
+name: build_and_release #名称随意
+on:
+  push: #设置触发规则
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  build:
+    strategy:
+      matrix: # 会分开成两个任务分别执行
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code #这部分是为了从github自动clone代码
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Install ubuntu build tools #这部分是安装依赖
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake
+
+      - name: Install macos build tools #这部分是安装依赖
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install cmake
+
+      - name: Create Release File
+        run: |
+          cd src
+          ./release.sh
+          cp ./cppnet.tar.gz ../cppnet-${{ matrix.os }}-release.tar.gz
+          cd ..
+
+      - name: Release
+        uses: softprops/action-gh-release@v2 #具体参考https://github.com/softprops/action-gh-release
+        if: startsWith(github.ref, 'refs/tags/') # 设置为有tag才进行上传
+        with:
+          body: Auto Create Release 
+          files: |
+            cppnet-${{ matrix.os }}-release.tar.gz
+            LICENSE
+

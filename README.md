@@ -9,6 +9,7 @@
 - [x] 支持UDP协议(添加测试)
 - [ ] 支持Http协议(彻底迁移 cppweb -> cppnet)
 - [x] 支持 cicd 生成 lib包
+- [ ] 添加 release pkg的demo 和cmakelist
 - [x] 抽象出epoll层
 - [x] 支持SSL
 - [x] accept 改造

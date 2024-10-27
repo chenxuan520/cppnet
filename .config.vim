@@ -57,7 +57,7 @@ let g:Term_project_task=[
 			\'path'       : s:root.'/src',
 			\'close'      : 1,
 			\'type'       : 'split',
-			\'key'        : '\5',
+			\'key'        : '\4',
 			\'end_script' : 'cclose|packadd termdebug|Termdebug ./bin/test_bin',
 			\},
 			\{
@@ -68,7 +68,18 @@ let g:Term_project_task=[
 			\'close'      : 2,
 			\'end_script' : 'CocRestart',
 			\'type'       : 'split',
+			\'key'        : '\5',
+			\},
+			\{
+			\'name'       : 'release',
+			\'command'    : './release.sh',
+			\'mode'       : 'quickfix',
+			\'path'       : s:root.'/src',
+			\'close'      : 2,
+			\'type'       : 'split',
 			\'key'        : '\6',
+			\'pre_script' : '',
+			\'end_script' : '',
 			\},
 			\]
 
