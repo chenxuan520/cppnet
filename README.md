@@ -8,7 +8,7 @@
 - [ ] 补全select
 - [x] 支持UDP协议(添加测试)
 - [ ] 支持Http协议(彻底迁移 cppweb -> cppnet)
-- [ ] 支持 cicd 生成 lib包
+- [x] 支持 cicd 生成 lib包
 - [x] 抽象出epoll层
 - [x] 支持SSL
 - [x] accept 改造

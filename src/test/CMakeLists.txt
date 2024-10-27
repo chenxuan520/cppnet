@@ -34,4 +34,8 @@ aux_source_directory(../cppnet/utils DIR_SRCS)
 aux_source_directory(../cppnet/socket DIR_SRCS)
 
 set(EXECUTABLE_OUTPUT_PATH ../../bin)
+
 add_executable(test_bin ./main.cpp ${DIR_SRCS})
+
+add_executable(link_bin ./main.cpp)
+target_link_libraries(link_bin cppnet)
