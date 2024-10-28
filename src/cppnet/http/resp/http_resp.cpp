@@ -1,6 +1,5 @@
 #include "http_resp.hpp"
 #include "../../utils/const.hpp"
-#include "../../utils/string.hpp"
 #include "../version/http_version.hpp"
 #include <string>
 #include <vector>
@@ -29,12 +28,29 @@ int HttpResp::Parse(const std::string &origin_resp) {
 
   // parse status_code and version
   std::vector<std::string> first_line_vec;
-  StringUtil::Split(first_line, " ", first_line_vec);
-  if (first_line_vec.size() != 3) {
+  auto first_space_pos = first_line.find(" ");
+  if (first_space_pos == std::string::npos) {
+    err_msg_ = "first line format error";
+    return kLogicErr;
+  }
+  auto second_space_pos = first_line.find(" ", first_space_pos + 1);
+  if (second_space_pos == std::string::npos) {
+    err_msg_ = "first line format error";
+    return kLogicErr;
+  }
+  first_line_vec.push_back(first_line.substr(0, first_space_pos));
+  first_line_vec.push_back(first_line.substr(
+      first_space_pos + 1, second_space_pos - first_space_pos - 1));
+  first_line_vec.push_back(first_line.substr(second_space_pos + 1));
+
+  int code = 0;
+  try {
+    code = std::stoi(first_line_vec[1]);
+  } catch (std::exception &e) {
     err_msg_ = "status code format error";
     return kLogicErr;
   }
-  status_code_ = HttpStatusCodeUtil::ConvertToCode(first_line_vec[2]);
+  status_code_ = HttpStatusCodeUtil::ConvertToCode(code);
   version_ = HttpVersionUtil::ConvertToVersion(first_line_vec[0]);
 
   // parse header
@@ -47,30 +63,36 @@ int HttpResp::Parse(const std::string &origin_resp) {
   return kSuccess;
 }
 
-int HttpResp::Build(std::string &resp) {
+int HttpResp::Build(std::string &resp_str) {
   if (status_code_ == HttpStatusCode::UNKNOWN) {
     err_msg_ = "status code is unknown";
     return kLogicErr;
   }
-  resp.clear();
+  resp_str.clear();
 
   // add version
-  resp += HttpVersionUtil::ConvertToStr(version_) + " ";
+  resp_str += HttpVersionUtil::ConvertToStr(version_) + " ";
 
   // add status
   auto status_str = HttpStatusCodeUtil::ConvertToStr(status_code_);
-  resp += std::to_string((int)status_code_) + " " + status_str + "\r\n";
+  resp_str += std::to_string((int)status_code_) + " " + status_str + "\r\n";
 
   // set header size key
   header_.Add("Content-Length", std::to_string(body_.size()));
 
   // add header
-  resp += header_.ToString();
+  resp_str += header_.ToString();
 
   // add body
-  resp += body_;
+  resp_str += body_;
 
   return kSuccess;
+}
+
+void HttpResp::Clear() {
+  status_code_ = HttpStatusCode::UNKNOWN;
+  header_.Clear();
+  body_.clear();
 }
 
 void HttpResp::NotFound() {

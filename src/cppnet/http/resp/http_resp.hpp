@@ -36,7 +36,11 @@ public:
   /**
    * @brief: convert http response to string
    */
-  int Build(std::string &resp);
+  int Build(std::string &resp_str);
+  /**
+   * @brief: clear http response
+   */
+  void Clear();
 
 public:
   /**

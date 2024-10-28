@@ -16,6 +16,26 @@ public:
    */
   int Parse(const std::string &origin_req);
 
+  /**
+   * @brief: build http request
+   * @param req_str: http request string
+   * @return: 0: success, -1: invalid http request
+   */
+  int Build(std::string &req_str);
+  /**
+   * @brief: clear http request
+   */
+  void Clear();
+
+public:
+  using KVMappings = std::unordered_map<std::string, std::string>;
+  // build common http request
+  void GET(const std::string &url, const KVMappings &params = KVMappings(),
+           const KVMappings &extra_header = KVMappings());
+
+  void POST(const std::string &url, const std::string &body,
+            const KVMappings &extra_header = KVMappings());
+
 public:
   HttpHeader &header() { return header_; }
   HttpRoute &route() { return route_; }

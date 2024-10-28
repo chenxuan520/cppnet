@@ -54,6 +54,8 @@ std::string &HttpHeader::operator[](const std::string &key) {
   return headers_[key];
 }
 
+void HttpHeader::Clear() { headers_.clear(); }
+
 HttpHeader::ContentType
 HttpHeader::ConvertToContentType(const std::string &content_type) const {
   if (content_type == "text/html")

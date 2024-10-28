@@ -207,4 +207,10 @@ int Socket::GetAddr(Address &addr) const {
   return addr.GetPeerAddr(fd_, addr);
 }
 
+Address Socket::GetAddr() const {
+  Address addr;
+  GetAddr(addr);
+  return addr;
+}
+
 } // namespace cppnet

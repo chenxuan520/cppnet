@@ -59,6 +59,11 @@ public:
    */
   inline std::string err_msg() { return err_msg_; }
 
+  /**
+   * @brief: clear route
+   */
+  void Clear();
+
 private:
   std::string path_;
   std::string err_msg_;

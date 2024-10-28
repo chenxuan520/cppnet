@@ -34,6 +34,12 @@ public:
    * @return: http status code
    */
   static HttpStatusCode ConvertToCode(const std::string &code);
+  /**
+   * @brief: convert int to http status code
+   * @param code: http status code int
+   * @return: http status code
+   */
+  static HttpStatusCode ConvertToCode(int code);
 };
 
 } // namespace cppnet

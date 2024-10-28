@@ -59,4 +59,54 @@ int HttpReq::Parse(const std::string &origin_req) {
   return kSuccess;
 }
 
+int HttpReq::Build(std::string &req_str) {
+  if (method_ == HttpMethod::UNKNOWN || version_ == HttpVersion::UNKNOWN) {
+    err_msg_ = "[logicerr]:invalid http request";
+    return kLogicErr;
+  }
+  if (header_.Get("Host").empty()) {
+    header_.Add("Host", "localhost");
+  }
+  header_.SetContentLength(body_.size());
+
+  req_str = HttpMethodUtil::ConvertToStr(method_) + " " + route_.ToString() +
+            " " + HttpVersionUtil::ConvertToStr(version_) + "\r\n";
+  req_str += header_.ToString();
+  req_str += body_;
+  return kSuccess;
+}
+
+void HttpReq::Clear() {
+  method_ = HttpMethod::UNKNOWN;
+  version_ = HttpVersion::UNKNOWN;
+  header_.Clear();
+  route_.Clear();
+  body_.clear();
+  err_msg_.clear();
+}
+
+void HttpReq::GET(const std::string &url, const KVMappings &params,
+                  const KVMappings &extra_header) {
+  method_ = HttpMethod::GET;
+  version_ = HttpVersion::HTTP_1_1;
+  route_.SetPath(url);
+  for (auto &it : params) {
+    route_.AddParam(it.first, it.second);
+  }
+  for (auto &it : extra_header) {
+    header_.Add(it.first, it.second);
+  }
+}
+
+void HttpReq::POST(const std::string &url, const std::string &body,
+                   const KVMappings &extra_header) {
+  method_ = HttpMethod::POST;
+  version_ = HttpVersion::HTTP_1_1;
+  route_.SetPath(url);
+  body_ = body;
+  for (auto &it : extra_header) {
+    header_.Add(it.first, it.second);
+  }
+}
+
 } // namespace cppnet

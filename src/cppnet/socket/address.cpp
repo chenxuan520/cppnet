@@ -1,5 +1,6 @@
 #include "address.hpp"
 #include <arpa/inet.h>
+#include <cstring>
 #include <netdb.h>
 
 namespace cppnet {

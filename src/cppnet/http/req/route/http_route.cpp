@@ -46,6 +46,10 @@ std::string HttpRoute::GetParam(const std::string &key) const {
     return "";
 }
 
+void HttpRoute::AddParam(const std::string &key, const std::string &value) {
+  params_[key] = value;
+}
+
 std::string HttpRoute::ToString() const {
   std::string ret = path_;
   if (!params_.empty()) {
@@ -56,6 +60,11 @@ std::string HttpRoute::ToString() const {
     ret.pop_back();
   }
   return ret;
+}
+
+void HttpRoute::Clear() {
+  path_.clear();
+  params_.clear();
 }
 
 } // namespace cppnet

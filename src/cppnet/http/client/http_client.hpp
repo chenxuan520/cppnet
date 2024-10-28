@@ -9,7 +9,7 @@ namespace cppnet {
 class HttpClient {
 public:
   HttpClient() = default;
-  ~HttpClient();
+  ~HttpClient() { Close(); }
   /**
    * @brief: init client
    * @param addr: server address
@@ -18,19 +18,24 @@ public:
   int Init(Address &addr);
   /**
    * @brief: send request
+   * @param req: http request
+   * @param resp: http response
    * @return: 0: success, -1: failed
    */
-  int Send();
+  int Send(HttpReq &req, HttpResp &resp);
+
+  /**
+   * @brief: close client
+   */
+  void Close() { soc_.Close(); }
 
 public:
-  HttpResp &resp() { return resp_; }
-  HttpReq &req() { return req_; }
   Socket &socket() { return soc_; }
+  std::string err_msg() { return err_msg_; }
 
 private:
-  HttpResp resp_;
-  HttpReq req_;
   Socket soc_;
+  std::string err_msg_;
 };
 
 } // namespace cppnet

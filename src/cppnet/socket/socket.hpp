@@ -161,6 +161,10 @@ public:
    */
   int GetAddr(Address &addr) const;
   /**
+   * @brief: get addr from socket
+   */
+  Address GetAddr() const;
+  /**
    * @brief: get system error string
    */
   static inline std::string err_msg() { return strerror(errno); }

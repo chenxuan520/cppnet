@@ -64,6 +64,11 @@ public:
    */
   inline std::string err_msg() { return err_msg_; }
 
+  /**
+   * @brief: clear header
+   */
+  void Clear();
+
 public:
   /**
    * @brief: common header control

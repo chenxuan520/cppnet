@@ -126,23 +126,28 @@ int HttpServer::StaticDir(
 }
 
 void HttpServer::EventFunc(TcpServer::Event event, TcpServer &, Socket soc) {
-  const std::string kCRLF = "\r\n\r\n";
+  const std::string kCRLF = "\r\n";
   switch (event) {
   case TcpServer::kEventRead: {
     // step1:recv and parse http request
     std::string buf;
     bool find_at_least_one = false;
-    soc.ReadUntil(buf, kCRLF + kCRLF);
+    auto len = soc.ReadUntil(buf, kCRLF + kCRLF);
+    if (len <= 0) {
+      logger_->Error(soc.err_msg());
+      err_callback_(soc.err_msg(), soc);
+      soc.Close();
+      return;
+    }
+
     HttpReq req;
     HttpResp resp;
 
     auto rc = req.Parse(buf);
     if (rc != kSuccess) {
-      if (err_callback_) {
-        err_callback_(req.err_msg(), soc);
-        soc.Close();
-      }
       logger_->Error(req.err_msg());
+      err_callback_(req.err_msg(), soc);
+      soc.Close();
       return;
     }
     auto content_size = req.header().GetContentLength();
