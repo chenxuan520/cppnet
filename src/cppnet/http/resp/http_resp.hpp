@@ -39,6 +39,20 @@ public:
   int Build(std::string &resp);
 
 public:
+  /**
+   * @brief: set http status code
+   */
+  void NotFound();
+  void Redirect(const std::string &location, bool forever = false);
+  void SuccessWithBinary(const std::string &body);
+  void SuccessWithJson(const std::string &body);
+  /**
+   * @brief: set resp file type
+   */
+  void Json(HttpStatusCode status_code, const std::string &body);
+  void Text(HttpStatusCode status_code, const std::string &body);
+
+public:
   std::string err_msg() { return err_msg_; }
 
 private:

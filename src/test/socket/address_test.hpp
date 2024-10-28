@@ -23,3 +23,14 @@ TEST(Address, AddressUninit) {
   MUST_TRUE(ip == "0.0.0.0", ip + " is not 0.0.0.0");
   MUST_TRUE(port == 0, std::to_string(port) + " is not 0");
 }
+
+TEST(Address, AddressDomain) {
+  Address addr;
+  auto rc = addr.InitWithDomain("localhost", 80);
+  MUST_TRUE(rc == 0, "init with domain error");
+  std::string ip;
+  uint16_t port;
+  addr.GetIPAndPort(ip, port);
+  DEBUG("ip: " + ip + " port: " + std::to_string(port));
+  MUST_EQUAL(ip, "127.0.0.1");
+}

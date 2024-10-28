@@ -26,6 +26,10 @@ std::string HttpStatusCodeUtil::ConvertToStr(const HttpStatusCode &code) {
     return "METHOD_NOT_ALLOWED";
   case HttpStatusCode::INTERNAL_SERVER_ERROR:
     return "INTERNAL_SERVER_ERROR";
+  case HttpStatusCode::MOVED_PERMANENTLY:
+    return "MOVED_PERMANENTLY";
+  case HttpStatusCode::FOUND:
+    return "FOUND";
   default:
     return "UNKNOWN";
   }
@@ -54,6 +58,10 @@ HttpStatusCode HttpStatusCodeUtil::ConvertToCode(const std::string &code) {
     return HttpStatusCode::METHOD_NOT_ALLOWED;
   else if (code == "INTERNAL_SERVER_ERROR")
     return HttpStatusCode::INTERNAL_SERVER_ERROR;
+  else if (code == "MOVED_PERMANENTLY")
+    return HttpStatusCode::MOVED_PERMANENTLY;
+  else if (code == "FOUND")
+    return HttpStatusCode::FOUND;
   else
     return HttpStatusCode::UNKNOWN;
 }

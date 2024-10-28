@@ -1,3 +1,5 @@
+#include "http/req/http_req_test.hpp"
+#include "http/resp/http_resp_test.hpp"
 #include "server/tcp_server_test.hpp"
 #include "socket/address_test.hpp"
 #include "socket/socket_test.hpp"
@@ -21,7 +23,6 @@ INIT(Main) {
     WARNING("Test Task Cost Too Much Time, Killed");
     exit(-1);
   });
-  DEBUG(__cplusplus);
 }
 
 ARGC_FUNC {

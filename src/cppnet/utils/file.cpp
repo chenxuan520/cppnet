@@ -14,6 +14,7 @@ int File::Read(const std::string &path, std::string &data) {
 
   data.assign((std::istreambuf_iterator<char>(ifs)),
               (std::istreambuf_iterator<char>()));
+  ifs.close();
   return kSuccess;
 }
 
@@ -29,7 +30,9 @@ int File::Write(const std::string &path, const std::string &data) {
 
 bool File::Exist(const std::string &path) {
   std::ifstream file(path);
-  return file.good();
+  auto exist = file.good();
+  file.close();
+  return exist;
 }
 
 } // namespace cppnet

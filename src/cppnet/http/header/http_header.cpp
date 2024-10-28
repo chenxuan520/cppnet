@@ -134,4 +134,12 @@ void HttpHeader::SetContentType(HttpHeader::ContentType content_type) {
 
 void HttpHeader::SetHost(const std::string &host) { headers_["Host"] = host; }
 
+void HttpHeader::SetLongConnection(bool is_long_connect) {
+  if (is_long_connect) {
+    headers_["Connection"] = "keep-alive";
+  } else {
+    headers_["Connection"] = "close";
+  }
+}
+
 } // namespace cppnet

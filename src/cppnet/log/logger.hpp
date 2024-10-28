@@ -8,7 +8,6 @@ namespace cppnet {
 class Logger {
 public:
   Logger() = default;
-  virtual ~Logger() = default;
   virtual void Debug(const std::string &msg) {
     std::cout << "[DEBUG]:" << msg << std::endl;
   }

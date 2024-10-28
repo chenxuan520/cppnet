@@ -74,6 +74,7 @@ public:
   void SetContentType(ContentType content_type);
   std::string GetHost() const;
   void SetHost(const std::string &host);
+  void SetLongConnection(bool is_long_connect = true);
 
   /**
    * @brief: get cookie control, TODO

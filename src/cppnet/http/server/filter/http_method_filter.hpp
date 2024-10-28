@@ -6,6 +6,7 @@ namespace cppnet {
 
 class HttpMethodFilter : public HttpFilter {
 public:
+  HttpMethodFilter() = default;
   void Init(const HttpMethod method) { method_ = method; }
 
   inline virtual bool IsMatchFilter(HttpReq &req) override {

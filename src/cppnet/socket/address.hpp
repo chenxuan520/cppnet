@@ -11,9 +11,21 @@ public:
   Address(const std::string &ip, uint16_t port);
   Address(sockaddr_in addr) : addr_(addr) {};
   /**
+   * @brief: init with ip and port
+   */
+  int Init(const std::string &ip, uint16_t port);
+  /**
+   * @brief: init with domain and port
+   */
+  int InitWithDomain(const std::string &domain, uint16_t port);
+  /**
    * @brief: Get ip and port from addr_.
    */
-  void GetIPAndPort(std::string &ip, uint16_t &port);
+  void GetIPAndPort(std::string &ip, uint16_t &port) const;
+  /**
+   * @brief: Make to string
+   */
+  std::string ToString() const;
 
 public:
   sockaddr_in *GetAddr() { return &addr_; }
