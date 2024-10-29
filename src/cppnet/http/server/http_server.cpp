@@ -114,8 +114,7 @@ int HttpServer::StaticDir(
           ctx.resp().NotFound();
           return;
         }
-        ctx.resp().header().SetContentType(
-            HttpHeader::ContentType::kApplicationOctetStream);
+        ctx.resp().Success(HttpHeader::ContentType::kApplicationOctetStream);
       },
       new_filters);
   if (rc != kSuccess) {

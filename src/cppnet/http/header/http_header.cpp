@@ -70,6 +70,14 @@ HttpHeader::ConvertToContentType(const std::string &content_type) const {
     return HttpHeader::ContentType::kApplicationOctetStream;
   else if (content_type == "application/json")
     return HttpHeader::ContentType::kApplicationJson;
+  else if (content_type == "image/png")
+    return HttpHeader::ContentType::kImagePng;
+  else if (content_type == "image/jpeg")
+    return HttpHeader::ContentType::kImageJpeg;
+  else if (content_type == "image/gif")
+    return HttpHeader::ContentType::kImageGif;
+  else if (content_type == "image/webp")
+    return HttpHeader::ContentType::kImageWebp;
   else
     return HttpHeader::ContentType::kUnknown;
 }
@@ -89,6 +97,14 @@ HttpHeader::ConvertToStr(const HttpHeader::ContentType &content_type) const {
     return "application/json";
   case HttpHeader::ContentType::kApplicationOctetStream:
     return "application/octet-stream";
+  case HttpHeader::ContentType::kImagePng:
+    return "image/png";
+  case HttpHeader::ContentType::kImageJpeg:
+    return "image/jpeg";
+  case HttpHeader::ContentType::kImageGif:
+    return "image/gif";
+  case HttpHeader::ContentType::kImageWebp:
+    return "image/webp";
   default:
     return "unknown";
   }

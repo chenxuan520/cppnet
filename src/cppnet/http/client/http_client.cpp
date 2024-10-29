@@ -7,7 +7,7 @@ int HttpClient::Init(Address &addr) {
   auto rc = soc_.Init();
   rc = soc_.Connect(addr);
   if (rc != kSuccess) {
-    err_msg_ = soc_.err_msg();
+    err_msg_ = "[soc.Connect]:" + soc_.err_msg();
     return rc;
   }
   return 0;

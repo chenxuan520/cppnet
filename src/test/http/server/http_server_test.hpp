@@ -1,6 +1,7 @@
 #include "http/client/http_client.hpp"
 #include "http/server/http_server.hpp"
 #include "test.h"
+#include "utils/file.hpp"
 
 using namespace cppnet;
 using namespace std;
@@ -24,7 +25,49 @@ TEST(HttpServer, HelloWorld) {
   MUST_TRUE(rc == 0, client.err_msg());
 
   HttpReq req;
+  HttpResp resp;
+
+  req.GET("/world");
+  rc = client.Send(req, resp);
+  MUST_TRUE(rc == 0, client.err_msg());
+  MUST_TRUE(resp.status_code() == HttpStatusCode::NOT_FOUND,
+            "get wrong status code " +
+                HttpStatusCodeUtil::ConvertToStr(resp.status_code()));
+
+  req.Clear();
+  resp.Clear();
   req.GET("/hello");
+  rc = client.Send(req, resp);
+  MUST_TRUE(rc == 0, client.err_msg());
+  MUST_TRUE(resp.status_code() == HttpStatusCode::OK,
+            "get wrong status code " +
+                HttpStatusCodeUtil::ConvertToStr(resp.status_code()));
+  MUST_TRUE(resp.body() == "hello world", "get wrong body " + resp.body());
+  DEBUG("resp: " << resp.body());
+}
+
+TEST(HttpServer, StaticDir) {
+  HttpServer server;
+  Address addr{"127.0.0.1", 8080};
+  auto rc = server.Init(addr);
+  MUST_TRUE(rc == 0, server.err_msg());
+
+  server.StaticDir("/", "./");
+
+  // create file
+  rc = File::Write("./index.html", "hello world");
+  MUST_TRUE(rc == 0, "write file failed");
+  DEFER([]() { remove("./index.html"); });
+
+  // sync run server
+  GO_JOIN([&] { server.Run(); });
+
+  HttpClient client;
+  rc = client.Init(addr);
+  MUST_TRUE(rc == 0, client.err_msg());
+
+  HttpReq req;
+  req.GET("/index.html");
   HttpResp resp;
   rc = client.Send(req, resp);
   MUST_TRUE(rc == 0, client.err_msg());
@@ -33,4 +76,5 @@ TEST(HttpServer, HelloWorld) {
                 HttpStatusCodeUtil::ConvertToStr(resp.status_code()));
   MUST_TRUE(resp.body() == "hello world", "get wrong body " + resp.body());
   DEBUG("resp: " << resp.body());
+  server.Stop();
 }

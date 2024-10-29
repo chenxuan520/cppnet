@@ -129,6 +129,16 @@ void HttpResp::SuccessWithJson(const std::string &body) {
   header_.SetHost("cppnet");
 }
 
+void HttpResp::Success(HttpHeader::ContentType content_type,
+                       const std::string &body) {
+  if (!body.empty()) {
+    body_ = body;
+  }
+  status_code_ = HttpStatusCode::OK;
+  header_.SetContentType(content_type);
+  header_.SetHost("cppnet");
+}
+
 void HttpResp::Json(HttpStatusCode status_code, const std::string &body) {
   status_code_ = status_code;
   body_ = body;

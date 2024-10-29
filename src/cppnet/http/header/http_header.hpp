@@ -17,6 +17,10 @@ public:
     kTextJavascript,
     kApplicationJson,
     kApplicationOctetStream,
+    kImagePng,
+    kImageJpeg,
+    kImageGif,
+    kImageWebp,
     kUnknown
   };
   ContentType ConvertToContentType(const std::string &content_type) const;

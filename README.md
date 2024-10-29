@@ -12,6 +12,7 @@
 - [ ] 添加 release pkg的demo 和cmakelist
 - [ ] httpclient 完成
 - [ ] 支持sslhttp
+- [ ] 添加更多log
 - [x] 抽象出epoll层
 - [x] 支持SSL
 - [x] accept 改造
