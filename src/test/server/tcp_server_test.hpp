@@ -112,7 +112,7 @@ TEST(TcpServer, MultiClient) {
         // read
         string buf;
         auto ser_rc = fd.Read(buf, 1);
-        DEBUG(fd.fd() << " read " << buf);
+        // DEBUG(fd.fd() << " read " << buf);
         // str2int
         int num = stoi(buf);
         // add count
@@ -121,7 +121,7 @@ TEST(TcpServer, MultiClient) {
         ser_rc = fd.Write(to_string(num));
       } else if (event == TcpServer::kEventLeave) {
         // leave, break loop
-        DEBUG(fd.fd() << " leave ");
+        // DEBUG(fd.fd() << " leave ");
         client_count--;
         if (client_count == 0) {
           server.Stop();
@@ -150,24 +150,24 @@ TEST(TcpServer, MultiClient) {
         // connect
         cli_rc = client.Connect(addr);
         MUST_EQUAL(cli_rc, 0);
-        DEBUG("client connect ");
+        // DEBUG("client connect ");
 
         // write
         cli_rc = client.Write(to_string(num));
         MUST_TRUE(cli_rc > 0, "write error");
-        DEBUG("client write " << to_string(num) << " ");
+        // DEBUG("client write " << to_string(num) << " ");
 
         // read back
         string buf;
         cli_rc = client.Read(buf, 1);
         MUST_EQUAL(cli_rc, buf.size());
-        DEBUG("client read " << buf << " " << i);
+        // DEBUG("client read " << buf << " " << i);
 
         // close
         usleep(10000);
         cli_rc = client.Close();
         EXPECT_EQ(cli_rc, 0);
-        DEBUG("client exit");
+        // DEBUG("client exit");
       }));
     }
 
@@ -296,13 +296,13 @@ TEST(TcpServer, MixMode) {
         uint16_t port = 0;
         addr_cli.GetIPAndPort(ip, port);
         MUST_TRUE(port != 8080, "port need not equal 8080");
-        DEBUG(fd.fd() << " accept " << ip << ":" << port);
+        // DEBUG(fd.fd() << " accept " << ip << ":" << port);
         // accept
       } else if (event == TcpServer::kEventRead) {
         // read
         string buf;
         auto ser_rc = fd.Read(buf, 1);
-        DEBUG(fd.fd() << " read " << buf);
+        // DEBUG(fd.fd() << " read " << buf);
         if (buf.size() == 0) {
           return;
         }

@@ -10,7 +10,9 @@ namespace cppnet {
 class SSLSocket : public Socket {
 public:
   SSLSocket(SSL *ssl, const Socket &soc);
+  ~SSLSocket() = default;
   SSLSocket(const SSLSocket &) = delete;
+  SSLSocket &operator=(const SSLSocket &) = delete;
   /**
    * @brief: connect socket
    */

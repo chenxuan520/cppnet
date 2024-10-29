@@ -13,6 +13,8 @@
 - [ ] httpclient 完成
 - [ ] 支持sslhttp
 - [ ] 添加更多log
+- [x] route 宽泛匹配
+- [ ] post 参数设置
 - [x] 抽象出epoll层
 - [x] 支持SSL
 - [x] accept 改造

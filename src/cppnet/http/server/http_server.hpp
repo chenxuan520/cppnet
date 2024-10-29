@@ -7,7 +7,12 @@
 #include "../server/filter/http_filter.hpp"
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
+
+#ifdef CPPNET_OPENSSL
+#include "../../ssl/ssl_context.hpp"
+#endif
 
 namespace cppnet {
 
@@ -38,11 +43,16 @@ private:
 };
 
 using HttpCallback = std::function<void(HttpContext &)>;
+
 using HttpErrCallback =
     std::function<void(const std::string &err_msg, Socket soc)>;
-using TrieDataSingleType =
-    std::pair<HttpCallback, std::vector<std::shared_ptr<HttpFilter>>>;
-using TrieDataType = std::vector<TrieDataSingleType>;
+
+struct HttpTrieData {
+  HttpCallback callback = nullptr;
+  bool is_exact_match = true;
+  std::vector<std::shared_ptr<HttpFilter>> filters;
+};
+using TrieDataType = std::vector<HttpTrieData>;
 
 class HttpGroup {
 protected:
@@ -77,7 +87,8 @@ public:
    */
   int RegisterHandler(
       const std::string &path, HttpCallback callback,
-      const std::vector<std::shared_ptr<HttpFilter>> &filters = {});
+      const std::vector<std::shared_ptr<HttpFilter>> &filters = {},
+      bool is_exact_match = true);
   /**
    * @brief: middware
    * @param callback: request callback
@@ -85,7 +96,7 @@ public:
    * @return 0 if success, -1 if failed
    */
   int Use(HttpCallback callback,
-          const std::vector<std::shared_ptr<HttpFilter>> &filters);
+          const std::vector<std::shared_ptr<HttpFilter>> &filters = {});
   /**
    * @brief: group
    * @param route: group route
@@ -127,6 +138,15 @@ public:
   int StaticDir(const std::string &path, const std::string &dir_path,
                 const std::vector<std::shared_ptr<HttpFilter>> &filters = {});
   /**
+   * @brief: add static file
+   * @param path: request path
+   * @param dir_path: file path
+   * @param filters: request filters
+   * @return 0 if success, -1 if failed
+   */
+  int StaticFile(const std::string &path, const std::string &file_path,
+                 const std::vector<std::shared_ptr<HttpFilter>> &filters = {});
+  /**
    * @brief: register error callback
    * @param callback: error callback
    */
@@ -143,6 +163,22 @@ public:
    * @param logger: logger
    */
   void set_logger(std::shared_ptr<Logger> logger) { logger_ = logger; }
+
+#ifdef CPPNET_OPENSSL
+public:
+  // https
+  /**
+   * @brief: init https server
+   * @param addr: server address
+   * @param ssl_context: ssl context
+   * @return 0 if success, -1 if failed
+   */
+  int InitSSL(const Address &addr, std::shared_ptr<SSLContext> ssl_context);
+
+private:
+  std::shared_ptr<SSLContext> ssl_context_ = nullptr;
+  std::unordered_map<int, std::shared_ptr<SSLSocket>> ssl_sockets_map_;
+#endif
 
 private:
   // event callback
