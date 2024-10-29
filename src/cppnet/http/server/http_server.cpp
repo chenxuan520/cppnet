@@ -92,7 +92,7 @@ int HttpServer::StaticDir(
   new_filters.push_back(method_filter);
   auto rc = RegisterHandler(
       path,
-      [&](HttpContext &ctx) {
+      [=](HttpContext &ctx) {
         auto route = ctx.req().route().GetPath();
         auto pos = route.find(path);
         if (pos == std::string::npos) {

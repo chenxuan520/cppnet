@@ -54,5 +54,5 @@ TEST(Timer, CreateTimer) {
   // 1e7 = 10ms, 100ms = 1e8
   // 1s = 1e9
   DEBUG("timer event count: " << count);
-  MUST_TRUE(count > 90 && count < 110, "timer event count wrong");
+  MUST_TRUE(count > 90 && count < 110, "timer event count wrong "+to_string(count));
 }
