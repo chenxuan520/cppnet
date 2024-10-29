@@ -78,7 +78,7 @@ int HttpResp::Build(std::string &resp_str) {
   resp_str += std::to_string((int)status_code_) + " " + status_str + "\r\n";
 
   // set header size key
-  header_.Add("Content-Length", std::to_string(body_.size()));
+  header_.SetContentLength(body_.size());
 
   // add header
   resp_str += header_.ToString();
@@ -99,7 +99,6 @@ void HttpResp::NotFound() {
   status_code_ = HttpStatusCode::NOT_FOUND;
   body_ = "<html><body><h1>404 Not Found</h1></body></html>";
   header_.SetContentType(HttpHeader::ContentType::kTextHtml);
-  header_.SetHost("cppnet");
 }
 
 void HttpResp::Redirect(const std::string &location, bool forever) {
@@ -111,7 +110,6 @@ void HttpResp::Redirect(const std::string &location, bool forever) {
     body_ = "<html><body><h1>302 Found</h1></body></html>";
   }
   header_.SetContentType(HttpHeader::ContentType::kTextHtml);
-  header_.SetHost("cppnet");
   header_.Add("Location", location);
 }
 
@@ -119,14 +117,12 @@ void HttpResp::SuccessWithBinary(const std::string &body) {
   status_code_ = HttpStatusCode::OK;
   body_ = body;
   header_.SetContentType(HttpHeader::ContentType::kApplicationOctetStream);
-  header_.SetHost("cppnet");
 }
 
 void HttpResp::SuccessWithJson(const std::string &body) {
   status_code_ = HttpStatusCode::OK;
   body_ = body;
   header_.SetContentType(HttpHeader::ContentType::kApplicationJson);
-  header_.SetHost("cppnet");
 }
 
 void HttpResp::Success(HttpHeader::ContentType content_type,
@@ -136,21 +132,18 @@ void HttpResp::Success(HttpHeader::ContentType content_type,
   }
   status_code_ = HttpStatusCode::OK;
   header_.SetContentType(content_type);
-  header_.SetHost("cppnet");
 }
 
 void HttpResp::Json(HttpStatusCode status_code, const std::string &body) {
   status_code_ = status_code;
   body_ = body;
   header_.SetContentType(HttpHeader::ContentType::kApplicationJson);
-  header_.SetHost("cppnet");
 }
 
 void HttpResp::Text(HttpStatusCode status_code, const std::string &body) {
   status_code_ = status_code;
   body_ = body;
   header_.SetContentType(HttpHeader::ContentType::kTextPlain);
-  header_.SetHost("cppnet");
 }
 
 } // namespace cppnet

@@ -10,8 +10,8 @@
 - [x] 支持Http协议(彻底迁移 cppweb -> cppnet)
 - [x] 支持 cicd 生成 lib包
 - [ ] 添加 release pkg的demo 和cmakelist
-- [ ] httpclient 完成
-- [ ] 支持sslhttp
+- [x] httpclient 完成
+- [ ] httpserver test
 - [ ] 添加更多log
 - [x] route 宽泛匹配
 - [ ] post 参数设置

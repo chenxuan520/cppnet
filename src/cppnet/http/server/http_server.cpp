@@ -161,22 +161,37 @@ int HttpServer::StaticFile(
   return kSuccess;
 }
 
-void HttpServer::EventFunc(TcpServer::Event event, TcpServer &, Socket soc) {
+void HttpServer::EventFunc(TcpServer::Event event, TcpServer &,
+                           Socket event_soc) {
   const std::string kCRLF = "\r\n";
   switch (event) {
   case TcpServer::kEventRead: {
-
+    std::shared_ptr<Socket> soc = nullptr;
 #ifdef CPPNET_OPENSSL
-
+    if (ssl_context_) {
+      if (ssl_sockets_map_.find(event_soc.fd()) != ssl_sockets_map_.end()) {
+        soc = ssl_sockets_map_[event_soc.fd()];
+      } else {
+        logger_->Error("ssl socket not found");
+        err_callback_("ssl socket not found", event_soc);
+        event_soc.Close();
+        return;
+      }
+    } else {
+      soc = std::make_shared<Socket>(event_soc);
+    }
+#else
+    soc = std::make_shared<Socket>(event_soc);
 #endif
+
     // step1:recv and parse http request
     std::string buf;
     bool find_at_least_one = false;
-    auto len = soc.ReadUntil(buf, kCRLF + kCRLF);
+    auto len = soc->ReadUntil(buf, kCRLF + kCRLF);
     if (len <= 0) {
-      logger_->Error(soc.err_msg());
-      err_callback_(soc.err_msg(), soc);
-      soc.Close();
+      logger_->Error(soc->err_msg());
+      err_callback_(soc->err_msg(), *soc);
+      soc->Close();
       return;
     }
 
@@ -186,14 +201,14 @@ void HttpServer::EventFunc(TcpServer::Event event, TcpServer &, Socket soc) {
     auto rc = req.Parse(buf);
     if (rc != kSuccess) {
       logger_->Error(req.err_msg());
-      err_callback_(req.err_msg(), soc);
-      soc.Close();
+      err_callback_(req.err_msg(), *soc);
+      soc->Close();
       return;
     }
     auto content_size = req.header().GetContentLength();
     std::string body;
     if (content_size > 0) {
-      soc.Read(body, content_size, true);
+      soc->Read(body, content_size, true);
       req.body() = body;
     }
     auto path = req.route().GetPath();
@@ -218,7 +233,7 @@ void HttpServer::EventFunc(TcpServer::Event event, TcpServer &, Socket soc) {
                      }
                      if (route_func) {
                        find_at_least_one = true;
-                       HttpContext ctx(req, resp, soc);
+                       HttpContext ctx(req, resp, *soc);
                        route_func(ctx);
                        return ctx.is_continue();
                      }
@@ -229,42 +244,53 @@ void HttpServer::EventFunc(TcpServer::Event event, TcpServer &, Socket soc) {
     // step3:build resp and send
     if (!find_at_least_one) {
       resp.NotFound();
-    } else {
-      resp.header().SetContentLength(resp.body().size());
-      resp.header().SetHost("cppnet");
     }
     std::string resp_buf;
     rc = resp.Build(resp_buf);
     if (rc != kSuccess) {
       logger_->Error(resp.err_msg());
-      err_callback_(resp.err_msg(), soc);
-      soc.Close();
+      err_callback_(resp.err_msg(), *soc);
+      soc->Close();
       return;
     }
-    rc = soc.Write(resp_buf);
+    rc = soc->Write(resp_buf);
     if (rc < 0) {
-      logger_->Error(soc.err_msg());
-      err_callback_(soc.err_msg(), soc);
-      soc.Close();
+      logger_->Error(soc->err_msg());
+      err_callback_(soc->err_msg(), *soc);
+      soc->Close();
     }
   } break;
 
   case TcpServer::kEventAccept: {
     Address recv_addr;
-    auto rc = soc.GetAddr(recv_addr);
+    auto rc = event_soc.GetAddr(recv_addr);
     if (rc != RC::kSuccess) {
-      logger_->Error(soc.err_msg());
-      err_callback_(soc.err_msg(), soc);
-      soc.Close();
+      logger_->Error(event_soc.err_msg());
+      err_callback_(event_soc.err_msg(), event_soc);
+      event_soc.Close();
       return;
     }
     logger_->Info("accept from " + recv_addr.ToString());
+#ifdef CPPNET_OPENSSL
+    if (ssl_context_) {
+      auto ssl_socket = ssl_context_->AcceptSSL(event_soc);
+      ssl_sockets_map_[event_soc.fd()] = ssl_socket;
+    }
+#endif
   } break;
 
   case TcpServer::kEventLeave: {
     Address recv_addr;
-    soc.GetAddr(recv_addr);
+    event_soc.GetAddr(recv_addr);
     logger_->Info("leave from " + recv_addr.ToString());
+#ifdef CPPNET_OPENSSL
+    if (ssl_context_) {
+      if (ssl_sockets_map_.find(event_soc.fd()) != ssl_sockets_map_.end()) {
+        ssl_sockets_map_[event_soc.fd()]->Close();
+        ssl_sockets_map_.erase(event_soc.fd());
+      }
+    }
+#endif
   } break;
 
   case TcpServer::kEventError:

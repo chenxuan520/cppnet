@@ -22,3 +22,25 @@ TEST(HttpClient, Send) {
   rc = resp.Build(resp_str);
   MUST_TRUE(rc == 0, resp.err_msg());
 }
+
+TEST(HttpClient, Https) {
+  HttpClient client;
+  Address addr;
+  addr.InitWithDomain("www.baidu.com", 443);
+  auto rc = client.InitSSL(addr);
+  MUST_TRUE(rc == 0, client.err_msg());
+  HttpReq req;
+  req.GET("/");
+  req.header().SetHost("www.baidu.com");
+  HttpResp resp;
+  rc = client.Send(req, resp);
+  string resp_str;
+  rc = resp.Build(resp_str);
+  MUST_TRUE(rc == 0, client.err_msg());
+  MUST_TRUE(resp.status_code() == HttpStatusCode::OK,
+            "get wrong status code " +
+                HttpStatusCodeUtil::ConvertToStr(resp.status_code()) + "\r\n" +
+                resp_str);
+  MUST_TRUE(rc == 0, resp.err_msg());
+  DEBUG(resp_str);
+}

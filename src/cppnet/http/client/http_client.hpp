@@ -4,6 +4,11 @@
 #include "../req/http_req.hpp"
 #include "../resp/http_resp.hpp"
 
+#ifdef CPPNET_OPENSSL
+#include "../../ssl/ssl_context.hpp"
+#include <memory>
+#endif
+
 namespace cppnet {
 
 class HttpClient {
@@ -27,14 +32,28 @@ public:
   /**
    * @brief: close client
    */
-  void Close() { soc_.Close(); }
+  void Close();
+
+#ifdef CPPNET_OPENSSL
+public:
+  /**
+   * @brief: init ssl client
+   * @param addr: server address
+   * @param ssl_context: ssl context
+   * @return: 0: success, -1: failed
+   */
+  int InitSSL(Address &addr);
+
+private:
+  std::shared_ptr<SSLContext> ssl_context_;
+#endif
 
 public:
-  Socket &socket() { return soc_; }
+  Socket &socket() { return *soc_; }
   std::string err_msg() { return err_msg_; }
 
 private:
-  Socket soc_;
+  std::shared_ptr<Socket> soc_ = nullptr;
   std::string err_msg_;
 };
 
