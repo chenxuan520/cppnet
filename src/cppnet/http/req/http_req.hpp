@@ -36,6 +36,9 @@ public:
   void POST(const std::string &url, const std::string &body,
             const KVMappings &extra_header = KVMappings());
 
+  void POST(const std::string &url, const KVMappings &params,
+            const KVMappings &extra_header = KVMappings());
+
 public:
   HttpHeader &header() { return header_; }
   HttpRoute &route() { return route_; }

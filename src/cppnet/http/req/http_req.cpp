@@ -109,4 +109,18 @@ void HttpReq::POST(const std::string &url, const std::string &body,
   }
 }
 
+void HttpReq::POST(const std::string &url, const KVMappings &params,
+                   const KVMappings &extra_header) {
+  method_ = HttpMethod::POST;
+  version_ = HttpVersion::HTTP_1_1;
+  route_.SetPath(url);
+  for (auto &it : params) {
+    body_ += it.first + "=" + it.second + "&";
+  }
+  body_ = body_.substr(0, body_.size() - 1);
+  for (auto &it : extra_header) {
+    header_.Add(it.first, it.second);
+  }
+}
+
 } // namespace cppnet

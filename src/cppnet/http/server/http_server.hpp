@@ -44,9 +44,6 @@ private:
 
 using HttpCallback = std::function<void(HttpContext &)>;
 
-using HttpErrCallback =
-    std::function<void(const std::string &err_msg, Socket soc)>;
-
 struct HttpTrieData {
   HttpCallback callback = nullptr;
   bool is_exact_match = true;
@@ -166,13 +163,6 @@ public:
    * @brief: stop http server
    */
   void Stop();
-  /**
-   * @brief: register error callback
-   * @param callback: error callback
-   */
-  void RegisterErrorCallback(HttpErrCallback callback) {
-    err_callback_ = callback;
-  }
 
 #ifdef CPPNET_OPENSSL
 public:
@@ -193,11 +183,14 @@ private:
 private:
   // event callback
   void EventFunc(TcpServer::Event, TcpServer &, Socket);
+  void HandleRead(TcpServer &, Socket &soc);
+  void HandleAccept(TcpServer &, Socket &soc);
+  void HandleLeave(TcpServer &, Socket &soc);
+  void HandleError(TcpServer &, Socket &soc);
 
 private:
   TcpServer server_;
   Trie<TrieDataType> trie_;
-  HttpErrCallback err_callback_ = [](const std::string &, Socket) {};
   bool is_continue_ = false;
 };
 

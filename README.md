@@ -14,7 +14,7 @@
 - [x] httpserver test
 - [ ] 添加更多log
 - [x] route 宽泛匹配
-- [ ] post 参数设置
+- [x] post 参数设置
 - [ ] 添加demo仓库和组织
 - [x] 抽象出epoll层
 - [x] 支持SSL
