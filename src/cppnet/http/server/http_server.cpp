@@ -42,7 +42,7 @@ int HttpGroup::RegisterHandler(
 }
 
 HttpGroup HttpGroup::Group(const std::string &route) {
-  return HttpGroup(route_ + route, trie_);
+  return HttpGroup(route_ + route, trie_, logger_);
 }
 
 int HttpGroup::Use(HttpCallback callback,
@@ -50,44 +50,7 @@ int HttpGroup::Use(HttpCallback callback,
   return RegisterHandler("", callback, filters, false);
 }
 
-int HttpServer::Init(const Address &addr) {
-  server_.set_addr(addr);
-  is_continue_ = true;
-  auto rc = server_.Init();
-  if (rc != RC::kSuccess) {
-    err_msg_ = server_.err_msg();
-    return rc;
-  }
-  server_.Register(std::bind(&HttpServer::EventFunc, this,
-                             std::placeholders::_1, std::placeholders::_2,
-                             std::placeholders::_3));
-  return kSuccess;
-}
-
-int HttpServer::Run() {
-  if (!is_continue_) {
-    err_msg_ = "[logicerr]:server status stop,not init";
-    return kLogicErr;
-  }
-  auto rc = server_.EventLoop();
-  if (rc != RC::kSuccess) {
-    err_msg_ = server_.err_msg();
-    return rc;
-  }
-  return kSuccess;
-}
-
-void HttpServer::Stop() {
-  if (!is_continue_) {
-    return;
-  }
-  is_continue_ = false;
-  server_.Stop();
-  server_.WakeUp();
-  server_.Clean();
-}
-
-int HttpServer::StaticDir(
+int HttpGroup::StaticDir(
     const std::string &path, const std::string &dir_path,
     const std::vector<std::shared_ptr<HttpFilter>> &filters) {
   auto method_filter = std::make_shared<HttpMethodFilter>();
@@ -110,7 +73,7 @@ int HttpServer::StaticDir(
         auto exist = File::Exist(file_path);
         if (!exist) {
           logger_->Warn("static dir not exist " + file_path);
-          ctx.resp().NotFound();
+          ctx.Next();
           return;
         }
         auto rc = File::Read(file_path, ctx.resp().body());
@@ -119,7 +82,10 @@ int HttpServer::StaticDir(
           ctx.resp().NotFound();
           return;
         }
-        ctx.resp().Success(HttpHeader::ContentType::kApplicationOctetStream);
+        logger_->Info(" return static file " + file_path);
+        ctx.resp().header().SetLongConnection(true);
+        ctx.resp().Success(
+            HttpHeader::ConvertFileType(File::Suffix(file_path)));
       },
       new_filters, false);
   if (rc != kSuccess) {
@@ -129,7 +95,7 @@ int HttpServer::StaticDir(
   return kSuccess;
 }
 
-int HttpServer::StaticFile(
+int HttpGroup::StaticFile(
     const std::string &path, const std::string &file_path,
     const std::vector<std::shared_ptr<HttpFilter>> &filters) {
   auto method_filter = std::make_shared<HttpMethodFilter>();
@@ -151,7 +117,10 @@ int HttpServer::StaticFile(
           ctx.resp().NotFound();
           return;
         }
-        ctx.resp().Success(HttpHeader::ContentType::kApplicationOctetStream);
+        logger_->Info(" return static file " + file_path);
+        ctx.resp().header().SetLongConnection(true);
+        ctx.resp().Success(
+            HttpHeader::ConvertFileType(File::Suffix(file_path)));
       },
       new_filters);
   if (rc != kSuccess) {
@@ -159,6 +128,44 @@ int HttpServer::StaticFile(
     return rc;
   }
   return kSuccess;
+}
+
+int HttpServer::Init(const Address &addr) {
+  server_.set_addr(addr);
+  is_continue_ = true;
+  auto rc = server_.Init();
+  if (rc != RC::kSuccess) {
+    err_msg_ = server_.err_msg();
+    return rc;
+  }
+  server_.Register(std::bind(&HttpServer::EventFunc, this,
+                             std::placeholders::_1, std::placeholders::_2,
+                             std::placeholders::_3));
+  return kSuccess;
+}
+
+int HttpServer::Run() {
+  if (!is_continue_) {
+    err_msg_ = "[logicerr]:server status stop,not init";
+    return kLogicErr;
+  }
+  logger_->Info("http server run");
+  auto rc = server_.EventLoop();
+  if (rc != RC::kSuccess) {
+    err_msg_ = server_.err_msg();
+    return rc;
+  }
+  return kSuccess;
+}
+
+void HttpServer::Stop() {
+  if (!is_continue_) {
+    return;
+  }
+  is_continue_ = false;
+  server_.Stop();
+  server_.WakeUp();
+  server_.Clean();
 }
 
 void HttpServer::EventFunc(TcpServer::Event event, TcpServer &,
@@ -186,7 +193,6 @@ void HttpServer::EventFunc(TcpServer::Event event, TcpServer &,
 
     // step1:recv and parse http request
     std::string buf;
-    bool find_at_least_one = false;
     auto len = soc->ReadUntil(buf, kCRLF + kCRLF);
     if (len <= 0) {
       logger_->Error(soc->err_msg());
@@ -232,17 +238,18 @@ void HttpServer::EventFunc(TcpServer::Event event, TcpServer &,
                        }
                      }
                      if (route_func) {
-                       find_at_least_one = true;
                        HttpContext ctx(req, resp, *soc);
                        route_func(ctx);
-                       return ctx.is_continue();
+                       if (!is_continue_) {
+                         return false;
+                       }
                      }
                    }
                    return true;
                  });
 
     // step3:build resp and send
-    if (!find_at_least_one) {
+    if (resp.status_code() == HttpStatusCode::UNKNOWN) {
       resp.NotFound();
     }
     std::string resp_buf;
@@ -284,11 +291,10 @@ void HttpServer::EventFunc(TcpServer::Event event, TcpServer &,
     event_soc.GetAddr(recv_addr);
     logger_->Info("leave from " + recv_addr.ToString());
 #ifdef CPPNET_OPENSSL
-    if (ssl_context_) {
-      if (ssl_sockets_map_.find(event_soc.fd()) != ssl_sockets_map_.end()) {
-        ssl_sockets_map_[event_soc.fd()]->Close();
-        ssl_sockets_map_.erase(event_soc.fd());
-      }
+    if (ssl_context_ &&
+        ssl_sockets_map_.find(event_soc.fd()) != ssl_sockets_map_.end()) {
+      ssl_sockets_map_[event_soc.fd()]->Close();
+      ssl_sockets_map_.erase(event_soc.fd());
     }
 #endif
   } break;

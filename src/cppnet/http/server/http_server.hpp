@@ -56,8 +56,9 @@ using TrieDataType = std::vector<HttpTrieData>;
 
 class HttpGroup {
 protected:
-  HttpGroup(const std::string &route, Trie<TrieDataType> &trie)
-      : route_(route), trie_(trie) {};
+  HttpGroup(const std::string &route, Trie<TrieDataType> &trie,
+            std::shared_ptr<Logger> logger)
+      : route_(route), trie_(trie), logger_(logger) {};
 
 public:
   /**
@@ -98,37 +99,6 @@ public:
   int Use(HttpCallback callback,
           const std::vector<std::shared_ptr<HttpFilter>> &filters = {});
   /**
-   * @brief: group
-   * @param route: group route
-   * @return HttpGroup
-   */
-  HttpGroup Group(const std::string &route);
-
-protected:
-  std::string route_;
-  Trie<TrieDataType> &trie_;
-};
-
-class HttpServer : public HttpGroup {
-public:
-  HttpServer() : HttpGroup("", trie_) {};
-  ~HttpServer() { Stop(); }
-  /**
-   * @brief: init http server
-   * @param addr: server address
-   * @return 0 if success, -1 if failed
-   */
-  int Init(const Address &addr);
-  /**
-   * @brief: run http server
-   * @return 0 if success, -1 if failed
-   */
-  int Run();
-  /**
-   * @brief: stop http server
-   */
-  void Stop();
-  /**
    * @brief: add static dir
    * @param path: request path
    * @param dir_path: dir path
@@ -147,12 +117,11 @@ public:
   int StaticFile(const std::string &path, const std::string &file_path,
                  const std::vector<std::shared_ptr<HttpFilter>> &filters = {});
   /**
-   * @brief: register error callback
-   * @param callback: error callback
+   * @brief: group
+   * @param route: group route
+   * @return HttpGroup
    */
-  void RegisterErrorCallback(HttpErrCallback callback) {
-    err_callback_ = callback;
-  }
+  HttpGroup Group(const std::string &route);
   /**
    * @brief: get error message
    * @return error message
@@ -162,7 +131,48 @@ public:
    * @brief: set logger
    * @param logger: logger
    */
-  void set_logger(std::shared_ptr<Logger> logger) { logger_ = logger; }
+  void set_logger(std::shared_ptr<Logger> logger) {
+    if (logger != nullptr) {
+      logger_ = logger;
+    }
+  }
+
+protected:
+  std::string route_;
+  Trie<TrieDataType> &trie_;
+  std::string err_msg_;
+  std::shared_ptr<Logger> logger_ = std::make_shared<Logger>();
+};
+
+class HttpServer : public HttpGroup {
+public:
+  HttpServer() : HttpGroup("", trie_, std::make_shared<Logger>()) {};
+  ~HttpServer() { Stop(); }
+  // forbiden copy
+  HttpServer(const HttpServer &) = delete;
+  HttpServer &operator=(const HttpServer &) = delete;
+  /**
+   * @brief: init http server
+   * @param addr: server address
+   * @return 0 if success, -1 if failed
+   */
+  int Init(const Address &addr);
+  /**
+   * @brief: run http server
+   * @return 0 if success, -1 if failed
+   */
+  int Run();
+  /**
+   * @brief: stop http server
+   */
+  void Stop();
+  /**
+   * @brief: register error callback
+   * @param callback: error callback
+   */
+  void RegisterErrorCallback(HttpErrCallback callback) {
+    err_callback_ = callback;
+  }
 
 #ifdef CPPNET_OPENSSL
 public:
@@ -187,10 +197,8 @@ private:
 private:
   TcpServer server_;
   Trie<TrieDataType> trie_;
-  std::string err_msg_;
   HttpErrCallback err_callback_ = [](const std::string &, Socket) {};
   bool is_continue_ = false;
-  std::shared_ptr<Logger> logger_ = std::make_shared<Logger>();
 };
 
 } // namespace cppnet

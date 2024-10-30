@@ -57,7 +57,7 @@ std::string &HttpHeader::operator[](const std::string &key) {
 void HttpHeader::Clear() { headers_.clear(); }
 
 HttpHeader::ContentType
-HttpHeader::ConvertToContentType(const std::string &content_type) const {
+HttpHeader::ConvertToContentType(const std::string &content_type) {
   if (content_type == "text/html")
     return HttpHeader::ContentType::kTextHtml;
   else if (content_type == "text/plain")
@@ -82,8 +82,32 @@ HttpHeader::ConvertToContentType(const std::string &content_type) const {
     return HttpHeader::ContentType::kUnknown;
 }
 
+HttpHeader::ContentType
+HttpHeader::ConvertFileType(const std::string &file_type) {
+  if (file_type == "html" || file_type == "htm")
+    return HttpHeader::ContentType::kTextHtml;
+  else if (file_type == "txt")
+    return HttpHeader::ContentType::kTextPlain;
+  else if (file_type == "css" || file_type == "less")
+    return HttpHeader::ContentType::kTextCss;
+  else if (file_type == "js" || file_type == "mjs")
+    return HttpHeader::ContentType::kTextJavascript;
+  else if (file_type == "json")
+    return HttpHeader::ContentType::kApplicationJson;
+  else if (file_type == "png")
+    return HttpHeader::ContentType::kImagePng;
+  else if (file_type == "jpg" || file_type == "jpeg")
+    return HttpHeader::ContentType::kImageJpeg;
+  else if (file_type == "gif")
+    return HttpHeader::ContentType::kImageGif;
+  else if (file_type == "webp")
+    return HttpHeader::ContentType::kImageWebp;
+  else
+    return HttpHeader::ContentType::kApplicationOctetStream;
+}
+
 std::string
-HttpHeader::ConvertToStr(const HttpHeader::ContentType &content_type) const {
+HttpHeader::ConvertToStr(const HttpHeader::ContentType &content_type) {
   switch (content_type) {
   case HttpHeader::ContentType::kTextPlain:
     return "text/plain";

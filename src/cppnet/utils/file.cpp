@@ -1,6 +1,7 @@
 #include "file.hpp"
 #include "utils/const.hpp"
 
+#include <filesystem>
 #include <fstream>
 #include <unistd.h>
 
@@ -29,10 +30,21 @@ int File::Write(const std::string &path, const std::string &data) {
 }
 
 bool File::Exist(const std::string &path) {
-  std::ifstream file(path);
-  auto exist = file.good();
-  file.close();
-  return exist;
+  return std::filesystem::exists(std::filesystem::path(path)) &&
+         std::filesystem::is_regular_file(std::filesystem::path(path));
+}
+
+std::string File::Suffix(const std::string &path) {
+  auto last_slash = path.find_last_of("/");
+  if (last_slash == std::string::npos) {
+    last_slash = 0;
+  }
+  auto tmp = path.substr(last_slash);
+  auto pos = tmp.find_last_of(".");
+  if (pos == std::string::npos) {
+    return "";
+  }
+  return tmp.substr(pos + 1);
 }
 
 } // namespace cppnet

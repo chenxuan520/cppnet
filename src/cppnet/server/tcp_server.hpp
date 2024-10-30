@@ -35,6 +35,9 @@ public:
   TcpServer(const std::string &ip, uint16_t port);
   TcpServer(Address &addr);
   virtual ~TcpServer();
+  // forbiden copy
+  TcpServer(const TcpServer &) = delete;
+  TcpServer &operator=(const TcpServer &) = delete;
   /**
    * @brief: Init tcp server. Create epfd, bind serverfd, set serverfd non block
    * and register serverfd to epoll.
@@ -83,9 +86,7 @@ public:
   inline std::shared_ptr<IOMultiplexingBase> io_multiplexing() {
     return io_multiplexing_;
   }
-  inline std::shared_ptr<ThreadPool<Socket>> thread_pool() {
-    return thread_pool_;
-  }
+  inline std::shared_ptr<ThreadPool> thread_pool() { return thread_pool_; }
 
 protected:
   Socket CreateSocket();
@@ -112,7 +113,7 @@ private:
   // io multiplexing
   std::shared_ptr<IOMultiplexingBase> io_multiplexing_{nullptr};
   // threadpool
-  std::shared_ptr<ThreadPool<Socket>> thread_pool_{nullptr};
+  std::shared_ptr<ThreadPool> thread_pool_{nullptr};
 
 private:
   // default max connect queue is 10

@@ -267,7 +267,7 @@ TEST(TcpServer, MultiThread) {
 
   // run server
   rc = server.EventLoop();
-  MUST_EQUAL(rc, 0);
+  MUST_TRUE(rc == 0, server.err_msg());
 }
 
 TEST(TcpServer, MixMode) {

@@ -23,9 +23,16 @@ public:
   /**
    * @brief: check file exist
    * @param path: file path
-   * @return: true exist, false not exist
+   * @return: true exist, false not exist,
+   * @note: dir return false
    */
   static bool Exist(const std::string &path);
+  /**
+   * @brief: get file suffix, not include .
+   * @param path: file path
+   * @return: file suffix
+   */
+  static std::string Suffix(const std::string &path);
 };
 
 } // namespace cppnet

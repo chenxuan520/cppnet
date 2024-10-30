@@ -133,8 +133,8 @@ int TcpServer::EventLoop() {
 
       } else if (event == IOMultiplexingBase::kIOEventRead) {
         if (mode_ == kMixed) {
-          thread_pool_->AddTask(
-              {[this](Socket soc) { HandleRead(soc.fd()); }, fd});
+          auto task_func = std::bind(&TcpServer::HandleRead, this, fd.fd());
+          thread_pool_->AddTask({task_func});
         } else {
           HandleRead(fd.fd());
         }
@@ -174,13 +174,13 @@ int TcpServer::EventLoop() {
         return kSysErr;
       }
 
-      thread_pool_->AddTask({callback, accept_fd});
+      thread_pool_->AddTask({std::bind(callback, accept_fd)});
     }
     thread_pool_->Stop();
   } break;
 
   default:
-    err_msg_ = "[logicerr]:unknown mode";
+    err_msg_ = "[logicerr]:unknown mode " + std::to_string(mode_);
     return kLogicErr;
   }
   return kSuccess;
@@ -268,7 +268,7 @@ int TcpServer::InitMode() {
   switch (mode_) {
 
   case kMixed: {
-    thread_pool_ = std::make_shared<ThreadPool<Socket>>();
+    thread_pool_ = std::make_shared<ThreadPool>();
     thread_pool_->Init();
   } // need init pool and io_multiplexing both
   case kIOMultiplexing: {
@@ -296,7 +296,7 @@ int TcpServer::InitMode() {
   } break;
 
   case kMultiThread: {
-    thread_pool_ = std::make_shared<ThreadPool<Socket>>();
+    thread_pool_ = std::make_shared<ThreadPool>();
     thread_pool_->Init();
   } break;
 

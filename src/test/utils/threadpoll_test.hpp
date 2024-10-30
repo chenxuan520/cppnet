@@ -8,7 +8,7 @@ using namespace cppnet;
 TEST(ThreadPool, Run) {
   const int loop = 100;
 
-  ThreadPool<int> pool;
+  ThreadPool pool;
   pool.Init();
 
   std::atomic<int> sum;
@@ -19,7 +19,7 @@ TEST(ThreadPool, Run) {
 
   for (int i = 0; i < loop; i++) {
     target += i;
-    auto rc = pool.AddTask({task_func, i});
+    auto rc = pool.AddTask({std::bind(task_func, i)});
     MUST_EQUAL(rc, 0);
   }
 

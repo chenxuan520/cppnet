@@ -67,7 +67,10 @@ public:
     Node *temp = root_;
 
     if (temp->stop_) {
-      callback(temp->data_, key.empty());
+      auto is_continue = callback(temp->data_, key.empty());
+      if (!is_continue) {
+        return;
+      }
     }
 
     for (unsigned i = 0; i < key.size(); i++) {

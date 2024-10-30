@@ -23,6 +23,7 @@ TEST(HttpClient, Send) {
   MUST_TRUE(rc == 0, resp.err_msg());
 }
 
+#ifdef CPPNET_OPENSSL
 TEST(HttpClient, Https) {
   HttpClient client;
   Address addr;
@@ -44,3 +45,4 @@ TEST(HttpClient, Https) {
   MUST_TRUE(rc == 0, resp.err_msg());
   DEBUG(resp_str);
 }
+#endif

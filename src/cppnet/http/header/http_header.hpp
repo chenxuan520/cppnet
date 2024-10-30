@@ -23,8 +23,9 @@ public:
     kImageWebp,
     kUnknown
   };
-  ContentType ConvertToContentType(const std::string &content_type) const;
-  std::string ConvertToStr(const ContentType &content_type) const;
+  static ContentType ConvertToContentType(const std::string &content_type);
+  static ContentType ConvertFileType(const std::string &file_type);
+  static std::string ConvertToStr(const ContentType &content_type);
 
 public:
   HttpHeader() = default;

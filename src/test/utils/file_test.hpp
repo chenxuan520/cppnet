@@ -22,4 +22,32 @@ TEST(File, ReadWrite) {
 
   // exist
   MUST_TRUE(File::Exist(path), "file not exist");
+  MUST_TRUE(!File::Exist("."), "dir exist");
+  MUST_TRUE(!File::Exist("./"), "dir exist");
+}
+
+TEST(File, Suffix) {
+  string path = "./test.txt";
+  string suffix = File::Suffix(path);
+  MUST_TRUE(suffix == "txt", "suffix not equal " + suffix);
+
+  path = "./test";
+  suffix = File::Suffix(path);
+  MUST_TRUE(suffix == "", "suffix not equal " + suffix);
+
+  path = "./test/test.txt";
+  suffix = File::Suffix(path);
+  MUST_TRUE(suffix == "txt", "suffix not equal" + suffix);
+
+  path = "./test/test";
+  suffix = File::Suffix(path);
+  MUST_TRUE(suffix == "", "suffix not equal " + suffix);
+
+  path = "test.txt";
+  suffix = File::Suffix(path);
+  MUST_TRUE(suffix == "txt", "suffix not equal " + suffix);
+
+  path = "test";
+  suffix = File::Suffix(path);
+  MUST_TRUE(suffix == "", "suffix not equal " + suffix);
 }

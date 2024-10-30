@@ -45,10 +45,10 @@ public:
   std::string err_msg() { return err_msg_; }
 
 private:
+  HttpMethod method_ = HttpMethod::UNKNOWN;
+  HttpVersion version_ = HttpVersion::HTTP_1_1;
   HttpHeader header_;
   HttpRoute route_;
-  HttpMethod method_;
-  HttpVersion version_;
   std::string body_;
   std::string err_msg_;
 };

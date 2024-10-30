@@ -15,6 +15,9 @@ class HttpClient {
 public:
   HttpClient() = default;
   ~HttpClient() { Close(); }
+  // forbiden copy
+  HttpClient(const HttpClient &) = delete;
+  HttpClient &operator=(const HttpClient &) = delete;
   /**
    * @brief: init client
    * @param addr: server address

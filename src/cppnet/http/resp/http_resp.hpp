@@ -63,8 +63,8 @@ public:
 
 private:
   HttpStatusCode status_code_ = HttpStatusCode::UNKNOWN;
+  HttpVersion version_ = HttpVersion::HTTP_1_1;
   HttpHeader header_;
-  HttpVersion version_;
   std::string body_;
   std::string err_msg_;
 };

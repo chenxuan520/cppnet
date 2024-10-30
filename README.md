@@ -11,10 +11,11 @@
 - [x] 支持 cicd 生成 lib包
 - [ ] 添加 release pkg的demo 和cmakelist
 - [x] httpclient 完成
-- [ ] httpserver test
+- [x] httpserver test
 - [ ] 添加更多log
 - [x] route 宽泛匹配
 - [ ] post 参数设置
+- [ ] 添加demo仓库和组织
 - [x] 抽象出epoll层
 - [x] 支持SSL
 - [x] accept 改造

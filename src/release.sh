@@ -1,5 +1,8 @@
 #!/bin/bash
 
+rm ./cppnet.tar.gz
+rm ./lib/libcppnet.a
+
 # run build.sh first
 ./build.sh
 
