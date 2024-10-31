@@ -205,6 +205,11 @@ void HttpServer::Stop() {
   server_.Clean();
 }
 
+int HttpServer::SetTcpServerMode(TcpServer::Mode mode) {
+  server_.set_mode(mode);
+  return kSuccess;
+}
+
 void HttpServer::HandleError(TcpServer &server, Socket &event_soc) {
   logger_->Error(server.err_msg());
 }

@@ -173,6 +173,11 @@ public:
    * @brief: stop http server
    */
   void Stop();
+  /**
+   * @brief: set tcp_server mode
+   * @return logger
+   */
+  int SetTcpServerMode(TcpServer::Mode mode);
 
 #ifdef CPPNET_OPENSSL
 public:

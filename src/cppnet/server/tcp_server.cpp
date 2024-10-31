@@ -56,6 +56,10 @@ int TcpServer::RemoveSoc(const Socket &soc) {
 }
 
 int TcpServer::AddSoc(const Socket &soc) {
+  if (soc.status() != Socket::kInit) {
+    err_msg_ = "[logicerr]:soc is not init";
+    return kLogicErr;
+  }
   return io_multiplexing_->MonitorSoc(soc);
 }
 
@@ -159,6 +163,11 @@ int TcpServer::EventLoop() {
   case kMultiThread: {
     auto callback = [&](Socket fd) {
       event_callback_(kEventAccept, *this, fd);
+      std::string tmp;
+      while (fd.ReadPeek(tmp, 1) > 0) {
+        event_callback_(kEventRead, *this, fd);
+      }
+      event_callback_(kEventLeave, *this, fd);
       return;
     };
 

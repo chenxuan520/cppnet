@@ -77,6 +77,13 @@ public:
    */
   int ReadUntil(std::string &buf, const std::string &delim);
   /**
+   * @brief: Read data from socket but not remove data from socket.
+   * @param buf: buffer to store data.
+   * @param len: buffer length.
+   * @return: read length.
+   */
+  int ReadPeek(std::string &buf, size_t len);
+  /**
    * @brief: Read data from socket.
    * @param buf: buffer to store data.
    * @param len: buffer length.
@@ -180,12 +187,12 @@ public:
   bool operator==(const Socket &rhs) const { return fd_ == rhs.fd_; }
 
 protected:
-  virtual inline int IORead(void *buf, size_t len) {
-    return ::read(fd_, buf, len);
+  virtual inline int IORead(void *buf, size_t len, int flags = 0) {
+    return ::recv(fd_, buf, len, flags);
   }
 
-  virtual inline int IOWrite(const void *buf, size_t len) {
-    return ::write(fd_, buf, len);
+  virtual inline int IOWrite(const void *buf, size_t len, int flags = 0) {
+    return ::send(fd_, buf, len, flags);
   }
 
 protected:

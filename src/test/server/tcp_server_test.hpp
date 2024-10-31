@@ -208,6 +208,7 @@ TEST(TcpServer, MultiThread) {
       MUST_TRUE(port != 8080, "port need not equal 8080");
       DEBUG(fd.fd() << " accept " << ip << ":" << port);
 
+    } else if (event == TcpServer::kEventRead) {
       // read
       string buf;
       rc = fd.Read(buf, msg.size());
@@ -224,6 +225,8 @@ TEST(TcpServer, MultiThread) {
       MUST_EQUAL(rc, 0);
       DEBUG(fd.fd() << " close");
       server.Stop();
+    } else if (event == TcpServer::kEventLeave) {
+      DEBUG(fd.fd() << " leave ");
     } else {
       DEBUG(fd.fd() << " error " << event);
       FATAL(server.err_msg());

@@ -101,17 +101,22 @@ int Socket::Read(void *buf, size_t len, bool complete) {
   }
   auto recv_len = 0;
   if (complete) {
-    while (recv_len < len) {
-      auto rc = IORead((char *)buf + recv_len, len - recv_len);
-      if (rc <= 0) {
-        break;
-      }
-      recv_len += rc;
-    }
-    return recv_len;
+    return IORead(buf, len, MSG_WAITALL);
   } else {
     return IORead(buf, len);
   }
+}
+
+int Socket::ReadPeek(std::string &buf, size_t len) {
+  if (status_ != kInit) {
+    return -1;
+  }
+  char *data = new char[len + 1];
+  memset(data, 0, len + 1);
+  auto recv_len = IORead(data, len, MSG_PEEK);
+  buf = data;
+  delete[] data;
+  return recv_len;
 }
 
 int Socket::ReadUntil(std::string &buf, const std::string &delim) {
