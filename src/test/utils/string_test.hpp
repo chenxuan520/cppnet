@@ -31,3 +31,15 @@ TEST(StringUtil, Split) {
   ASSERT_EQ(arr.size(), 1);
   ASSERT_EQ(arr[0], "a,b,c");
 }
+
+TEST(StringUtil, UrlCode) {
+  std::string str = "/a/b/c?a=1&b=%E5%95%8A%E5%95%8A&c=3";
+  DEBUG(str);
+  std::string res = StringUtil::UrlDecode(str);
+  DEBUG(res);
+
+  std::string res2 = StringUtil::UrlEncode(res);
+  DEBUG(res2);
+
+  ASSERT_EQ(res2, str);
+}

@@ -17,6 +17,18 @@ int HttpGroup::GET(const std::string &path, HttpCallback callback,
   return RegisterHandler(path, callback, filters);
 }
 
+int HttpGroup::GET(const std::string &path,
+                   std::initializer_list<HttpCallback> callbacks,
+                   const std::vector<std::shared_ptr<HttpFilter>> &filters) {
+  for (auto callback : callbacks) {
+    auto rc = GET(path, callback, filters);
+    if (rc != kSuccess) {
+      return rc;
+    }
+  }
+  return kSuccess;
+}
+
 int HttpGroup::POST(const std::string &path, HttpCallback callback,
                     const std::vector<std::shared_ptr<HttpFilter>> &filters) {
   auto new_filters = filters;
@@ -24,6 +36,18 @@ int HttpGroup::POST(const std::string &path, HttpCallback callback,
   method_filter->Init(HttpMethod::POST);
   new_filters.push_back(method_filter);
   return RegisterHandler(path, callback, filters);
+}
+
+int HttpGroup::POST(const std::string &path,
+                    std::initializer_list<HttpCallback> callbacks,
+                    const std::vector<std::shared_ptr<HttpFilter>> &filters) {
+  for (auto callback : callbacks) {
+    auto rc = POST(path, callback, filters);
+    if (rc != kSuccess) {
+      return rc;
+    }
+  }
+  return kSuccess;
 }
 
 int HttpGroup::RegisterHandler(
@@ -37,6 +61,19 @@ int HttpGroup::RegisterHandler(
     trie_.Set(route_ + path, set_data);
   } else {
     pdata->push_back(HttpTrieData{callback, is_exact_match, filters});
+  }
+  return kSuccess;
+}
+
+int HttpGroup::RegisterHandler(
+    const std::string &path, std::initializer_list<HttpCallback> callbacks,
+    const std::vector<std::shared_ptr<HttpFilter>> &filters,
+    bool is_exact_match) {
+  for (auto callback : callbacks) {
+    auto rc = RegisterHandler(path, callback, filters, is_exact_match);
+    if (rc != kSuccess) {
+      return rc;
+    }
   }
   return kSuccess;
 }
@@ -177,6 +214,7 @@ void HttpServer::HandleAccept(TcpServer &server, Socket &event_soc) {
   auto rc = event_soc.GetAddr(recv_addr);
   if (rc != RC::kSuccess) {
     logger_->Error(event_soc.err_msg());
+    server.RemoveSoc(event_soc);
     event_soc.Close();
     return;
   }
@@ -184,6 +222,12 @@ void HttpServer::HandleAccept(TcpServer &server, Socket &event_soc) {
 #ifdef CPPNET_OPENSSL
   if (ssl_context_) {
     auto ssl_socket = ssl_context_->AcceptSSL(event_soc);
+    if (ssl_socket == nullptr) {
+      logger_->Error(ssl_context_->err_msg());
+      server.RemoveSoc(event_soc);
+      event_soc.Close();
+      return;
+    }
     ssl_sockets_map_[event_soc.fd()] = ssl_socket;
   }
 #endif
@@ -211,6 +255,7 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
       soc = ssl_sockets_map_[event_soc.fd()];
     } else {
       logger_->Error("ssl socket not found");
+      server.RemoveSoc(event_soc);
       event_soc.Close();
       return;
     }
@@ -226,16 +271,22 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
   auto len = soc->ReadUntil(buf, kCRLF + kCRLF);
   if (len <= 0) {
     logger_->Error(soc->err_msg());
+    server.RemoveSoc(event_soc);
     soc->Close();
     return;
   }
 
   HttpReq req;
   HttpResp resp;
+  std::string resp_buf;
 
   auto rc = req.Parse(buf);
   if (rc != kSuccess) {
     logger_->Error(req.err_msg());
+    resp.BadRequest(req.err_msg());
+    resp.Build(resp_buf);
+    soc->Write(resp_buf);
+    server.RemoveSoc(event_soc);
     soc->Close();
     return;
   }
@@ -280,12 +331,11 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
   if (resp.status_code() == HttpStatusCode::UNKNOWN) {
     resp.NotFound();
   }
-  std::string resp_buf;
   rc = resp.Build(resp_buf);
   if (rc != kSuccess) {
     logger_->Error(resp.err_msg());
-    soc->Close();
-    return;
+    resp.InternalServerError(resp.err_msg());
+    resp.Build(resp_buf);
   }
   rc = soc->Write(resp_buf);
   if (rc < 0) {

@@ -180,16 +180,20 @@ TEST(HttpServer, Middleware) {
   MUST_TRUE(rc == 0, server.err_msg());
 
   atomic<int> count = 0;
-  server.Use([&count](HttpContext &ctx) {
-    DEBUG("use middleware");
+  auto count_func = [&count](HttpContext &ctx) {
+    DEBUG("use count");
     count++;
     ctx.Next();
-  });
+  };
 
-  server.GET("/hello", [&](HttpContext &ctx) {
-    ctx.resp().Text(HttpStatusCode::OK, "hello world");
-    server.Stop();
-  });
+  server.Use(count_func);
+
+  server.GET("/hello", {count_func,
+                        [&](HttpContext &ctx) {
+                          ctx.resp().Text(HttpStatusCode::OK, "hello world");
+                          server.Stop();
+                        },
+                        count_func});
 
   // sync run server
   GO_JOIN([&] { server.Run(); });
@@ -210,7 +214,7 @@ TEST(HttpServer, Middleware) {
   MUST_TRUE(resp.body() == "hello world", "get wrong body " + resp.body());
   DEBUG("resp: " << resp.body());
 
-  MUST_TRUE(count == 1, "get wrong count " + to_string(count));
+  MUST_TRUE(count == 2, "get wrong count " + to_string(count));
 }
 
 #ifdef CPPNET_OPENSSL

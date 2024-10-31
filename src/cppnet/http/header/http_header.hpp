@@ -7,7 +7,7 @@ namespace cppnet {
 
 class HttpHeader {
 public:
-  /*! \enum class Cont
+  /*
    * @brief: content type
    */
   enum class ContentType {

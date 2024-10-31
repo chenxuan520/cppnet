@@ -7,11 +7,11 @@
 #include "../server/filter/http_filter.hpp"
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #ifdef CPPNET_OPENSSL
 #include "../../ssl/ssl_context.hpp"
+#include <unordered_map>
 #endif
 
 namespace cppnet {
@@ -67,6 +67,9 @@ public:
    */
   int GET(const std::string &path, HttpCallback callback,
           const std::vector<std::shared_ptr<HttpFilter>> &filters = {});
+  int GET(const std::string &path,
+          std::initializer_list<HttpCallback> callbacks,
+          const std::vector<std::shared_ptr<HttpFilter>> &filters = {});
   /**
    * @brief POST request
    * @param path: request path
@@ -75,6 +78,9 @@ public:
    * @return 0 if success, -1 if failed
    */
   int POST(const std::string &path, HttpCallback callback,
+           const std::vector<std::shared_ptr<HttpFilter>> &filters = {});
+  int POST(const std::string &path,
+           std::initializer_list<HttpCallback> callbacks,
            const std::vector<std::shared_ptr<HttpFilter>> &filters = {});
   /**
    * @brief all type request
@@ -85,6 +91,10 @@ public:
    */
   int RegisterHandler(
       const std::string &path, HttpCallback callback,
+      const std::vector<std::shared_ptr<HttpFilter>> &filters = {},
+      bool is_exact_match = true);
+  int RegisterHandler(
+      const std::string &path, std::initializer_list<HttpCallback> callbacks,
       const std::vector<std::shared_ptr<HttpFilter>> &filters = {},
       bool is_exact_match = true);
   /**

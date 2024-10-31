@@ -134,6 +134,18 @@ void HttpResp::Success(HttpHeader::ContentType content_type,
   header_.SetContentType(content_type);
 }
 
+void HttpResp::BadRequest(const std::string &body) {
+  status_code_ = HttpStatusCode::BAD_REQUEST;
+  header_.SetContentType(HttpHeader::ContentType::kTextHtml);
+  body_ = body;
+}
+
+void HttpResp::InternalServerError(const std::string &body) {
+  status_code_ = HttpStatusCode::INTERNAL_SERVER_ERROR;
+  header_.SetContentType(HttpHeader::ContentType::kTextHtml);
+  body_ = body;
+}
+
 void HttpResp::Json(HttpStatusCode status_code, const std::string &body) {
   status_code_ = status_code;
   body_ = body;

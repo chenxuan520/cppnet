@@ -30,7 +30,7 @@ int HttpRoute::Parse(const std::string &origin_path) {
       return kLogicErr;
     }
     std::string key = it.substr(0, pos);
-    std::string value = it.substr(pos + 1);
+    std::string value = StringUtil::UrlDecode(it.substr(pos + 1));
     params_[key] = value;
   }
   path_ = origin_path.substr(0, param_start);
@@ -59,6 +59,7 @@ std::string HttpRoute::ToString() const {
     }
     ret.pop_back();
   }
+  ret = StringUtil::UrlEncode(ret);
   return ret;
 }
 

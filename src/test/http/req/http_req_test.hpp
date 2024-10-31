@@ -5,7 +5,8 @@ using namespace cppnet;
 using namespace std;
 
 TEST(HttpReq, Parse) {
-  string req = "POST /api/users/123?uid=123&token=456 HTTP/1.1\r\n"
+  string req = "POST /api/users/123?uid=123&txt=%E5%95%8A%E5%95%8A&token=456 "
+               "HTTP/1.1\r\n"
                "Host: example.com\r\n"
                "Content-Type: application/json\r\n"
                "Content-Length: 25\r\n"
@@ -23,6 +24,8 @@ TEST(HttpReq, Parse) {
             http_req.route().GetParam("uid"))
   MUST_TRUE(http_req.route().GetParam("token") == "456",
             http_req.route().GetParam("token"))
+  MUST_TRUE(http_req.route().GetParam("txt") == "啊啊",
+            http_req.route().GetParam("txt"))
   MUST_TRUE(http_req.route().GetParam("unexist") == "",
             http_req.route().GetParam("unexist"))
   MUST_TRUE(http_req.header().GetContentLength() == 25,

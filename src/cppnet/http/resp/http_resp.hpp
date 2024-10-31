@@ -52,6 +52,8 @@ public:
   void SuccessWithJson(const std::string &body);
   void Success(HttpHeader::ContentType content_type,
                const std::string &body = "");
+  void BadRequest(const std::string &body = "");
+  void InternalServerError(const std::string &body = "");
   /**
    * @brief: set resp file type
    */
