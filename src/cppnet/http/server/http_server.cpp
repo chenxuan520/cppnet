@@ -206,6 +206,12 @@ void HttpServer::Stop() {
 }
 
 int HttpServer::SetTcpServerMode(TcpServer::Mode mode) {
+#ifdef CPPNET_OPENSSL
+  if (mode == TcpServer::kMixed) {
+    err_msg_ = "[logicerr]:mixed mode not support https";
+    return kNotSupport;
+  }
+#endif
   server_.set_mode(mode);
   return kSuccess;
 }
@@ -275,7 +281,7 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
   std::string buf;
   auto len = soc->ReadUntil(buf, kCRLF + kCRLF);
   if (len <= 0) {
-    logger_->Error(soc->err_msg());
+    logger_->Error("[soc.ReadUntil]:" + soc->err_msg());
     server.RemoveSoc(event_soc);
     soc->Close();
     return;
@@ -287,7 +293,7 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
 
   auto rc = req.Parse(buf);
   if (rc != kSuccess) {
-    logger_->Error(req.err_msg());
+    logger_->Error("[req.Parse]:" + req.err_msg());
     resp.BadRequest(req.err_msg());
     resp.Build(resp_buf);
     soc->Write(resp_buf);
@@ -338,13 +344,13 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
   }
   rc = resp.Build(resp_buf);
   if (rc != kSuccess) {
-    logger_->Error(resp.err_msg());
+    logger_->Error("[resp.Build]:" + resp.err_msg());
     resp.InternalServerError(resp.err_msg());
     resp.Build(resp_buf);
   }
   rc = soc->Write(resp_buf);
   if (rc < 0) {
-    logger_->Error(soc->err_msg());
+    logger_->Error("[soc.Write]" + soc->err_msg());
     soc->Close();
   }
 }

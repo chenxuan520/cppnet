@@ -52,7 +52,10 @@ Socket TcpServer::CreateSocket() {
 void TcpServer::Register(EventCallBack cb) { event_callback_ = cb; }
 
 int TcpServer::RemoveSoc(const Socket &soc) {
-  return io_multiplexing_->RemoveSoc(soc);
+  if (io_multiplexing_ != nullptr) {
+    return io_multiplexing_->RemoveSoc(soc);
+  }
+  return kSuccess;
 }
 
 int TcpServer::AddSoc(const Socket &soc) {
@@ -118,7 +121,7 @@ int TcpServer::EventLoop() {
     return kLogicErr;
   }
 
-  if (io_multiplexing_ == nullptr) {
+  if (io_multiplexing_ == nullptr && mode_ != kMultiThread) {
     err_msg_ = "[logicerr]:io multiplexing not init";
     return kLogicErr;
   }

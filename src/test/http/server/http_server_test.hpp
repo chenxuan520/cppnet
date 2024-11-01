@@ -2,6 +2,7 @@
 #include "http/server/http_server.hpp"
 #include "log/std_logger.hpp"
 #include "test.h"
+#include "utils/const.hpp"
 #include "utils/file.hpp"
 #include <atomic>
 
@@ -219,40 +220,58 @@ TEST(HttpServer, Middleware) {
 
 #ifdef CPPNET_OPENSSL
 TEST(HttpServer, HttpsServer) {
-  HttpServer server;
-  server.set_logger(std::make_shared<StdLogger>());
-  Address addr{"127.0.0.1", 8080};
-  std::shared_ptr<SSLContext> ssl_context = std::make_shared<SSLContext>();
-  auto rc = ssl_context->InitSvrFile("./test/ssl/cert_demo.pem",
-                                     "./test/ssl/cert_key.pem");
-  MUST_TRUE(rc == 0, ssl_context->err_msg());
-  rc = server.InitSSL(addr, ssl_context);
-  MUST_TRUE(rc == 0, server.err_msg());
+  for (int i = 0; i < 3; i++) {
+    int rc = 0;
+    HttpServer server;
+    switch (i) {
+    case 0:
+      rc = server.SetTcpServerMode(TcpServer::kIOMultiplexing);
+      MUST_TRUE(rc == 0, server.err_msg());
+      break;
+    case 1:
+      rc = server.SetTcpServerMode(TcpServer::kMultiThread);
+      MUST_TRUE(rc == 0, server.err_msg());
+      break;
+    case 2:
+      rc = server.SetTcpServerMode(TcpServer::kMixed);
+      MUST_TRUE(rc == kNotSupport, server.err_msg());
+      return;
+    }
+    server.set_logger(std::make_shared<StdLogger>());
+    Address addr{"127.0.0.1", 8080};
+    std::shared_ptr<SSLContext> ssl_context = std::make_shared<SSLContext>();
+    rc = ssl_context->InitSvrFile("./test/ssl/cert_demo.pem",
+                                  "./test/ssl/cert_key.pem");
+    MUST_TRUE(rc == 0, ssl_context->err_msg());
+    rc = server.InitSSL(addr, ssl_context);
+    MUST_TRUE(rc == 0, server.err_msg());
 
-  server.GET("/hello", [&](HttpContext &ctx) {
-    ctx.resp().Text(HttpStatusCode::OK, "hello world");
+    server.GET("/hello", [&](HttpContext &ctx) {
+      ctx.resp().Text(HttpStatusCode::OK, "hello world");
+      server.Stop();
+    });
+
+    // sync run server
+    GO_JOIN([&] { server.Run(); });
+
+    HttpClient client;
+    rc = client.InitSSL(addr);
+    MUST_TRUE(rc == 0, client.err_msg());
+
+    HttpReq req;
+    HttpResp resp;
+
+    req.GET("/hello");
+    rc = client.Send(req, resp);
+    MUST_TRUE(rc == 0, client.err_msg());
+    DEBUG("client ssl send");
+    MUST_TRUE(resp.status_code() == HttpStatusCode::OK,
+              "get wrong status code " +
+                  HttpStatusCodeUtil::ConvertToStr(resp.status_code()));
+    MUST_TRUE(resp.body() == "hello world", "get wrong body " + resp.body());
+    DEBUG("resp: " << resp.body());
+    client.Close();
     server.Stop();
-  });
-
-  // sync run server
-  GO_JOIN([&] { server.Run(); });
-
-  HttpClient client;
-  rc = client.InitSSL(addr);
-  MUST_TRUE(rc == 0, client.err_msg());
-
-  HttpReq req;
-  HttpResp resp;
-
-  req.GET("/hello");
-  rc = client.Send(req, resp);
-  MUST_TRUE(rc == 0, client.err_msg());
-  MUST_TRUE(resp.status_code() == HttpStatusCode::OK,
-            "get wrong status code " +
-                HttpStatusCodeUtil::ConvertToStr(resp.status_code()));
-  MUST_TRUE(resp.body() == "hello world", "get wrong body " + resp.body());
-  DEBUG("resp: " << resp.body());
-  client.Close();
-  server.Stop();
+  }
 }
 #endif

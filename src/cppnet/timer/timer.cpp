@@ -24,7 +24,7 @@ int TimerSocket::Init(int sec, int nsec) {
   status_ = kInit;
   return kSuccess;
 #elif __APPLE__
-  return kUnSupport;
+  return kNotSupport;
 #else
   return kUnSupport;
 #endif
@@ -37,9 +37,11 @@ int TimerSocket::Reset(int sec, int nsec) {
   ts.it_value.tv_nsec = nsec;
   ts.it_interval.tv_sec = sec;
   ts.it_interval.tv_nsec = nsec;
-#endif
 
   timerfd_settime(fd_, 0, &ts, NULL);
   return kSuccess;
+#else
+  return kNotSupport;
+#endif
 }
 } // namespace cppnet
