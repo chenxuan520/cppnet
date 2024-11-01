@@ -33,6 +33,32 @@ public:
    * @return: file suffix
    */
   static std::string Suffix(const std::string &path);
+  /**
+   * @brief: create file
+   * @param path: file path
+   * @return: 0 success, -1 fail
+   * @note: auto create dir if not exist
+   */
+  static int Create(const std::string &path);
+  /**
+   * @brief: remove file
+   * @param path: file path
+   * @return: 0 success, -1 fail
+   */
+  static int Remove(const std::string &path);
+  /**
+   * @brief: append file
+   * @param path: file path
+   * @param data: file data
+   * @return: 0 success, -1 fail
+   */
+  static int Append(const std::string &path, const std::string &data);
+  /**
+   * @brief: check file write permission
+   * @param path: file path
+   * @return: true can write, false can not write
+   */
+  static bool CanWrite(const std::string &path);
 };
 
 } // namespace cppnet

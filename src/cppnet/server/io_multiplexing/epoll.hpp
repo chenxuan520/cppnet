@@ -5,12 +5,6 @@ namespace cppnet {
 
 class Epoll : public IOMultiplexingBase {
 public:
-  enum TriggerType {
-    kEdgeTrigger,
-    kLevelTrigger,
-  };
-
-public:
   Epoll() : IOMultiplexingBase() {}
   ~Epoll() {}
   int Init() override;
@@ -18,9 +12,6 @@ public:
   int RemoveSoc(const Socket &fd) override;
   int Loop(NotifyCallBack callback) override;
   void Close() override;
-
-public:
-  static void SetTriggerType(TriggerType type) { trigger_type_ = type; }
 
 private:
   Socket CreateEpoll();

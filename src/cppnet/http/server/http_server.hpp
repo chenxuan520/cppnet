@@ -135,6 +135,11 @@ public:
    */
   std::string err_msg() { return err_msg_; }
   /**
+   * @brief: get logger
+   * @return logger
+   */
+  std::shared_ptr<Logger> logger() { return logger_; }
+  /**
    * @brief: set logger
    * @param logger: logger
    */
@@ -174,10 +179,10 @@ public:
    */
   void Stop();
   /**
-   * @brief: set tcp_server mode
-   * @return logger
+   * @brief: get tcp server
+   * @return tcp server
    */
-  int SetTcpServerMode(TcpServer::Mode mode);
+  TcpServer &server() { return server_; }
 
 #ifdef CPPNET_OPENSSL
 public:

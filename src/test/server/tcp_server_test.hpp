@@ -1,7 +1,3 @@
-#ifdef __linux__
-#include "server/io_multiplexing/epoll.hpp"
-#endif
-
 #include "server/tcp_server.hpp"
 #include "test.h"
 #include <atomic>
@@ -81,9 +77,11 @@ TEST(TcpServer, MultiClient) {
   for (int i = 0; i < loop_time; i += 1) {
 #ifdef __linux__
     if (i % 2) {
-      cppnet::Epoll::SetTriggerType(Epoll::kEdgeTrigger);
+      server.io_multiplexing()->set_trigger_type(
+          IOMultiplexingBase::kEdgeTrigger);
     } else {
-      cppnet::Epoll::SetTriggerType(Epoll::kLevelTrigger);
+      server.io_multiplexing()->set_trigger_type(
+          IOMultiplexingBase::kLevelTrigger);
     }
 #endif
     // init server

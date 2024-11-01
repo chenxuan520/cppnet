@@ -224,12 +224,10 @@ TEST(HttpServer, HttpsServer) {
     HttpServer server;
     switch (i) {
     case 0:
-      rc = server.SetTcpServerMode(TcpServer::kIOMultiplexing);
-      MUST_TRUE(rc == 0, server.err_msg());
+      server.server().set_mode(TcpServer::kIOMultiplexing);
       break;
     case 1:
-      rc = server.SetTcpServerMode(TcpServer::kMultiThread);
-      MUST_TRUE(rc == 0, server.err_msg());
+      server.server().set_mode(TcpServer::kMultiThread);
       break;
       return;
     }

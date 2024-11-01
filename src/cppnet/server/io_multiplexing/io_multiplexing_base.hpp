@@ -24,6 +24,11 @@ public:
   using NotifyCallBack =
       std::function<void(IOMultiplexingBase &, Socket, IOEvent)>;
 
+  enum TriggerType {
+    kEdgeTrigger,
+    kLevelTrigger,
+  };
+
 public:
   /**
    * @brief: Init multiplexing.
@@ -71,12 +76,17 @@ public:
    * @brief: Set wait timeout.
    */
   inline void set_wait_timeout(int timeout) { wait_timeout_ = timeout; }
+  /**
+   * @brief: Set trigger type.
+   */
+  inline void set_trigger_type(TriggerType type) { trigger_type_ = type; }
 
 protected:
   std::string err_msg_;
   bool loop_flag_ = true;
   int max_event_num_ = 1024;
   int wait_timeout_ = -1;
+  TriggerType trigger_type_ = kLevelTrigger;
 };
 
 } // namespace cppnet
