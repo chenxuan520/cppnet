@@ -2,7 +2,6 @@
 #include "http/server/http_server.hpp"
 #include "log/std_logger.hpp"
 #include "test.h"
-#include "utils/const.hpp"
 #include "utils/file.hpp"
 #include <atomic>
 
@@ -220,7 +219,7 @@ TEST(HttpServer, Middleware) {
 
 #ifdef CPPNET_OPENSSL
 TEST(HttpServer, HttpsServer) {
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < 2; i++) {
     int rc = 0;
     HttpServer server;
     switch (i) {
@@ -232,9 +231,6 @@ TEST(HttpServer, HttpsServer) {
       rc = server.SetTcpServerMode(TcpServer::kMultiThread);
       MUST_TRUE(rc == 0, server.err_msg());
       break;
-    case 2:
-      rc = server.SetTcpServerMode(TcpServer::kMixed);
-      MUST_TRUE(rc == kNotSupport, server.err_msg());
       return;
     }
     server.set_logger(std::make_shared<StdLogger>());

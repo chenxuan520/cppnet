@@ -4,6 +4,7 @@
 #include "filter/http_method_filter.hpp"
 #include <functional>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace cppnet {
@@ -100,8 +101,8 @@ int HttpGroup::StaticDir(
         auto route = ctx.req().route().GetPath();
         auto pos = route.find(path);
         if (pos == std::string::npos) {
-          logger_->Warn("static dir path error " + ctx.req().route().GetPath() +
-                        " " + path);
+          logger_->Warn("[logicerr]:static dir path error " +
+                        ctx.req().route().GetPath() + " " + path);
           ctx.resp().NotFound();
           return;
         }
@@ -109,7 +110,7 @@ int HttpGroup::StaticDir(
         auto file_path = dir_path + "/" + aim_path;
         auto exist = File::Exist(file_path);
         if (!exist) {
-          logger_->Warn("static dir not exist " + file_path);
+          logger_->Warn("[logicerr]:static dir not exist " + file_path);
           ctx.Next();
           return;
         }
@@ -119,14 +120,14 @@ int HttpGroup::StaticDir(
           ctx.resp().NotFound();
           return;
         }
-        logger_->Info(" return static file " + file_path);
+        logger_->Info("static_dir: return static dir success " + file_path);
         ctx.resp().header().SetLongConnection(true);
         ctx.resp().Success(
             HttpHeader::ConvertFileType(File::Suffix(file_path)));
       },
       new_filters, false);
   if (rc != kSuccess) {
-    logger_->Error("register static dir error");
+    logger_->Error("[logicerr]:register static dir error");
     return rc;
   }
   return kSuccess;
@@ -144,24 +145,24 @@ int HttpGroup::StaticFile(
       [=](HttpContext &ctx) {
         auto exist = File::Exist(file_path);
         if (!exist) {
-          logger_->Warn("static file not exist " + file_path);
+          logger_->Warn("[logicerr]:static file not exist " + file_path);
           ctx.resp().NotFound();
           return;
         }
         auto rc = File::Read(file_path, ctx.resp().body());
         if (rc != kSuccess) {
-          logger_->Error(file_path + " read error");
+          logger_->Error("[logicerr]:" + file_path + " read error");
           ctx.resp().NotFound();
           return;
         }
-        logger_->Info(" return static file " + file_path);
+        logger_->Info("static_file: return static file success " + file_path);
         ctx.resp().header().SetLongConnection(true);
         ctx.resp().Success(
             HttpHeader::ConvertFileType(File::Suffix(file_path)));
       },
       new_filters);
   if (rc != kSuccess) {
-    logger_->Error("register static file error");
+    logger_->Error("[logicerr]:register static file error");
     return rc;
   }
   return kSuccess;
@@ -186,7 +187,18 @@ int HttpServer::Run() {
     err_msg_ = "[logicerr]:server status stop,not init";
     return kLogicErr;
   }
-  logger_->Info("http server run");
+#ifdef CPPNET_OPENSSL
+  if (ssl_context_) {
+    logger_->Info("https server run in https://" + server_.addr().ToString() +
+                  "\r\n");
+  } else {
+    logger_->Info("http server run in http://" + server_.addr().ToString() +
+                  "\r\n");
+  }
+#else
+  logger_->Info("http server run in http://" + server_.addr().ToString() +
+                "\r\n");
+#endif
   auto rc = server_.EventLoop();
   if (rc != RC::kSuccess) {
     err_msg_ = server_.err_msg();
@@ -206,12 +218,6 @@ void HttpServer::Stop() {
 }
 
 int HttpServer::SetTcpServerMode(TcpServer::Mode mode) {
-#ifdef CPPNET_OPENSSL
-  if (mode == TcpServer::kMixed) {
-    err_msg_ = "[logicerr]:mixed mode not support https";
-    return kNotSupport;
-  }
-#endif
   server_.set_mode(mode);
   return kSuccess;
 }
@@ -224,17 +230,18 @@ void HttpServer::HandleAccept(TcpServer &server, Socket &event_soc) {
   Address recv_addr;
   auto rc = event_soc.GetAddr(recv_addr);
   if (rc != RC::kSuccess) {
-    logger_->Error(event_soc.err_msg());
+    logger_->Error("[event_soc.GetAddr]:" + event_soc.err_msg());
     server.RemoveSoc(event_soc);
     event_soc.Close();
     return;
   }
-  logger_->Info("accept from " + recv_addr.ToString());
+  logger_->Info("accept from " + recv_addr.ToString() +
+                " soc: " + std::to_string(event_soc.fd()));
 #ifdef CPPNET_OPENSSL
   if (ssl_context_) {
     auto ssl_socket = ssl_context_->AcceptSSL(event_soc);
     if (ssl_socket == nullptr) {
-      logger_->Error(ssl_context_->err_msg());
+      logger_->Error("[ssl_context.AcceptSSL]:" + ssl_context_->err_msg());
       server.RemoveSoc(event_soc);
       event_soc.Close();
       return;
@@ -247,7 +254,8 @@ void HttpServer::HandleAccept(TcpServer &server, Socket &event_soc) {
 void HttpServer::HandleLeave(TcpServer &server, Socket &event_soc) {
   Address recv_addr;
   event_soc.GetAddr(recv_addr);
-  logger_->Info("leave from " + recv_addr.ToString());
+  logger_->Info("leave from " + recv_addr.ToString() +
+                " soc: " + std::to_string(event_soc.fd()));
 #ifdef CPPNET_OPENSSL
   if (ssl_context_ &&
       ssl_sockets_map_.find(event_soc.fd()) != ssl_sockets_map_.end()) {
@@ -265,7 +273,7 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
     if (ssl_sockets_map_.find(event_soc.fd()) != ssl_sockets_map_.end()) {
       soc = ssl_sockets_map_[event_soc.fd()];
     } else {
-      logger_->Error("ssl socket not found");
+      logger_->Error("[logicerr]:ssl socket not found");
       server.RemoveSoc(event_soc);
       event_soc.Close();
       return;
@@ -297,6 +305,9 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
     resp.BadRequest(req.err_msg());
     resp.Build(resp_buf);
     soc->Write(resp_buf);
+    logger_->Info(
+        "resp: " + HttpStatusCodeUtil::ConvertToStr(resp.status_code()) +
+        " soc:" + std::to_string(event_soc.fd()) + kCRLF);
     server.RemoveSoc(event_soc);
     soc->Close();
     return;
@@ -309,7 +320,8 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
   }
   auto path = req.route().GetPath();
   auto method = req.method();
-  logger_->Info(HttpMethodUtil::ConvertToStr(method) + " " + path);
+  logger_->Info("req: " + HttpMethodUtil::ConvertToStr(method) + " " + path +
+                " soc:" + std::to_string(event_soc.fd()));
 
   // step2:find route and run func
   trie_.Search(path,
@@ -351,8 +363,13 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
   rc = soc->Write(resp_buf);
   if (rc < 0) {
     logger_->Error("[soc.Write]" + soc->err_msg());
+    server.RemoveSoc(event_soc);
     soc->Close();
+    return;
   }
+  logger_->Info(
+      "resp: " + HttpStatusCodeUtil::ConvertToStr(resp.status_code()) +
+      " soc:" + std::to_string(event_soc.fd()) + kCRLF);
 }
 
 void HttpServer::EventFunc(TcpServer::Event event, TcpServer &,
@@ -376,6 +393,10 @@ void HttpServer::EventFunc(TcpServer::Event event, TcpServer &,
 #ifdef CPPNET_OPENSSL
 int HttpServer::InitSSL(const Address &addr,
                         std::shared_ptr<SSLContext> ssl_context) {
+  if (server_.mode() == TcpServer::kMixed) {
+    err_msg_ = "mixed mode not support ssl";
+    return kNotSupport;
+  }
   if (ssl_context == nullptr) {
     err_msg_ = "ssl context is nullptr";
     return kLogicErr;

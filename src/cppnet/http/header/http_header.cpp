@@ -174,6 +174,10 @@ void HttpHeader::SetContentType(HttpHeader::ContentType content_type) {
   headers_["Content-Type"] = ConvertToStr(content_type);
 }
 
+void HttpHeader::SetContentType(const std::string &content_type) {
+  headers_["Content-Type"] = content_type;
+}
+
 void HttpHeader::SetHost(const std::string &host) { headers_["Host"] = host; }
 
 void HttpHeader::SetLongConnection(bool is_long_connect) {

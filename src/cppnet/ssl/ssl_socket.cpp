@@ -9,11 +9,11 @@ namespace cppnet {
 
 SSLSocket::SSLSocket(SSL *ssl, const Socket &soc) {
   if (ssl == nullptr) {
-    err_msg_ = "[loginerr]:ssl is nullptr";
+    err_msg_ = "[logicerr]:ssl is nullptr";
     return;
   }
   if (soc.status() != kInit) {
-    err_msg_ = "[loginerr]:socket fd is invalid";
+    err_msg_ = "[logicerr]:socket fd is invalid";
     return;
   }
   fd_ = soc.fd();
@@ -43,7 +43,7 @@ int SSLSocket::CloseSSL() {
 
 int SSLSocket::Connect(Address &addr) {
   if (ssl_ == nullptr || status_ != kInit) {
-    err_msg_ = "[loginerr]:ssl is nullptr or socket fd is invalid";
+    err_msg_ = "[logicerr]:ssl is nullptr or socket fd is invalid";
     return kLogicErr;
   }
   auto rc = ::connect(fd_, addr.GetSockAddr(), *addr.GetAddrLen());

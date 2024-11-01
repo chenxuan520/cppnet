@@ -82,6 +82,8 @@ public:
     max_connect_queue_ = max_connect_queue;
   }
   inline void set_addr(const Address &addr) { addr_ = addr; }
+  inline Mode mode() const { return mode_; }
+  inline Address addr() const { return addr_; }
   inline std::string err_msg() const { return err_msg_; }
   inline std::shared_ptr<IOMultiplexingBase> io_multiplexing() {
     return io_multiplexing_;

@@ -79,6 +79,10 @@ HttpStatusCode HttpStatusCodeUtil::ConvertToCode(int code) {
     return HttpStatusCode::NO_CONTENT;
   case 206:
     return HttpStatusCode::PARTIAL_CONTENT;
+  case 301:
+    return HttpStatusCode::MOVED_PERMANENTLY;
+  case 302:
+    return HttpStatusCode::FOUND;
   case 400:
     return HttpStatusCode::BAD_REQUEST;
   case 401:
@@ -91,10 +95,6 @@ HttpStatusCode HttpStatusCodeUtil::ConvertToCode(int code) {
     return HttpStatusCode::METHOD_NOT_ALLOWED;
   case 500:
     return HttpStatusCode::INTERNAL_SERVER_ERROR;
-  case 301:
-    return HttpStatusCode::MOVED_PERMANENTLY;
-  case 302:
-    return HttpStatusCode::FOUND;
   default:
     return HttpStatusCode::UNKNOWN;
   }

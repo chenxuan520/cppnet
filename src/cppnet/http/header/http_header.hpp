@@ -82,6 +82,7 @@ public:
   void SetContentLength(int content_length);
   ContentType GetContentType() const;
   void SetContentType(ContentType content_type);
+  void SetContentType(const std::string &content_type);
   std::string GetHost() const;
   void SetHost(const std::string &host);
   void SetLongConnection(bool is_long_connect = true);
