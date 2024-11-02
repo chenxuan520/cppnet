@@ -188,4 +188,50 @@ void HttpHeader::SetLongConnection(bool is_long_connect) {
   }
 }
 
+void HttpHeader::SetCookie(const Cookie &cookie) {
+  std::string cookie_str = cookie.key + "=" + cookie.value;
+  if (!cookie.expires.empty()) {
+    cookie_str += "; expires=" + cookie.expires;
+  }
+  if (!cookie.path.empty()) {
+    cookie_str += "; path=" + cookie.path;
+  }
+  if (!cookie.domain.empty()) {
+    cookie_str += "; domain=" + cookie.domain;
+  }
+  if (cookie.secure) {
+    cookie_str += "; secure";
+  }
+  if (cookie.http_only) {
+    cookie_str += "; HttpOnly";
+  }
+  if (headers_.find("Set-Cookie") == headers_.end()) {
+    headers_["Set-Cookie"] = cookie_str;
+  } else {
+    headers_["Set-Cookie"] += "; " + cookie_str;
+  }
+}
+
+std::string HttpHeader::GetCookieVal(const std::string &key) const {
+  auto it = headers_.find("Cookie");
+  if (it == headers_.end()) {
+    return "";
+  }
+  std::vector<std::string> cookies;
+  StringUtil::Split(it->second, ";", cookies);
+  for (auto &cookie : cookies) {
+    size_t pos = cookie.find("=");
+    if (pos == std::string::npos) {
+      continue;
+    }
+    auto space_offset = cookie.find_first_not_of(" ");
+    std::string cookie_key = cookie.substr(space_offset, pos - space_offset);
+    std::string cookie_val = cookie.substr(pos + 1);
+    if (cookie_key == key) {
+      return cookie_val;
+    }
+  }
+  return "";
+}
+
 } // namespace cppnet

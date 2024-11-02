@@ -2,6 +2,7 @@
 #include "http/req/http_req_test.hpp"
 #include "http/resp/http_resp_test.hpp"
 #include "http/server/http_server_test.hpp"
+#include "log/file_logger_test.hpp"
 #include "server/tcp_server_test.hpp"
 #include "socket/address_test.hpp"
 #include "socket/socket_test.hpp"

@@ -31,6 +31,7 @@ aux_source_directory(../cppnet/server DIR_SRCS)
 aux_source_directory(../cppnet/timer DIR_SRCS)
 aux_source_directory(../cppnet/utils DIR_SRCS)
 aux_source_directory(../cppnet/socket DIR_SRCS)
+aux_source_directory(../cppnet/log DIR_SRCS)
 
 # add http source
 file(GLOB HTTP_SRCS "../cppnet/http/*/*.cpp" "../cppnet/http/*/*/*.cpp")

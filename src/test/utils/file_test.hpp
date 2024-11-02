@@ -1,5 +1,6 @@
 #include "test.h"
 #include "utils/file.hpp"
+#include <string>
 
 using namespace std;
 using namespace cppnet;
@@ -92,4 +93,34 @@ TEST(File, Append) {
   MUST_TRUE(rc == 0, "read file fail");
   DEBUG("read_data: " << read_data);
   MUST_TRUE(data + append_data == read_data, "data not equal");
+}
+
+TEST(File, LineCount) {
+  string path = "test.txt";
+  int line_count = File::LineCount(path);
+  MUST_TRUE(line_count == 0, "line count not equal");
+
+  string data = "hello world";
+  File::Write(path, data);
+
+  DEFER_DEFAULT {
+    File::Remove(path);
+    MUST_TRUE(!File::Exist(path), "file not remove");
+  };
+
+  line_count = File::LineCount(path);
+  MUST_TRUE(line_count == 1, "line count not equal, " + to_string(line_count));
+
+  File::Append(path, "\n" + data);
+  line_count = File::LineCount(path);
+  MUST_TRUE(line_count == 2, "line count not equal, " + to_string(line_count));
+
+  File::Append(path, "\n");
+  line_count = File::LineCount(path);
+  string content;
+  auto rc = File::Read(path, content);
+  MUST_TRUE(rc == 0, "read file fail");
+  DEBUG(content);
+
+  MUST_TRUE(line_count == 2, "line count not equal, " + to_string(line_count));
 }

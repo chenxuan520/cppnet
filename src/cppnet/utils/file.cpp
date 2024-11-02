@@ -89,4 +89,17 @@ bool File::CanWrite(const std::string &path) {
          std::filesystem::perms::none;
 }
 
+int File::LineCount(const std::string &path) {
+  std::ifstream ifs(path);
+  if (!ifs.is_open()) {
+    return 0;
+  }
+  int count = 0;
+  std::string line;
+  while (std::getline(ifs, line)) {
+    count++;
+  }
+  return count;
+}
+
 } // namespace cppnet

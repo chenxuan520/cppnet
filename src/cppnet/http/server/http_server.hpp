@@ -5,6 +5,7 @@
 #include "../../utils/trie.hpp"
 #include "../resp/http_resp.hpp"
 #include "../server/filter/http_filter.hpp"
+#include <any>
 #include <memory>
 #include <string>
 #include <vector>
@@ -20,6 +21,9 @@ class HttpContext {
 public:
   HttpContext(HttpReq &req, HttpResp &resp, Socket &soc)
       : req_(req), resp_(resp), soc_(soc) {}
+  // forbiden copy
+  HttpContext(const HttpContext &) = delete;
+  HttpContext &operator=(const HttpContext &) = delete;
 
 public:
   /*
@@ -28,6 +32,19 @@ public:
   inline void Next() { is_continue_ = true; }
   inline void Abort() { is_continue_ = false; }
   inline bool is_continue() { return is_continue_; }
+  /*
+   * @brief: get inline data
+   */
+  template <typename T> T Get(const std::string &key) {
+    try {
+      return std::any_cast<T>(inline_data_[key]);
+    } catch (const std::bad_any_cast &e) {
+      return T();
+    }
+  }
+  template <typename T> void Set(const std::string &key, const T &value) {
+    inline_data_[key] = value;
+  }
   /*
    * @brief: get inline data
    */
@@ -40,6 +57,7 @@ private:
   HttpResp &resp_;
   Socket &soc_;
   bool is_continue_ = false;
+  std::unordered_map<std::string, std::any> inline_data_;
 };
 
 using HttpCallback = std::function<void(HttpContext &)>;

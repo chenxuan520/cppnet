@@ -3,6 +3,7 @@
 ## Author
 - [chenxuan](https://github.com/chenxuan520)
 ## TODO
+- [ ] 补充完整 readme
 - [x] 支持设置LT和ET模式下的事件触发方式
 - [x] 支持设置连接的超时时间
 - [ ] 补全select
@@ -15,7 +16,6 @@
 - [ ] 添加更多log
 - [x] route 宽泛匹配
 - [x] post 参数设置
-- [ ] 添加demo仓库和组织
 - [ ] 触发模式控制修改
 - [ ] 添加压力测试
 - [x] 抽象出epoll层

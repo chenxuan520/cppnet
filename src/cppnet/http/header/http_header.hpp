@@ -88,10 +88,19 @@ public:
   void SetLongConnection(bool is_long_connect = true);
 
   /**
-   * @brief: get cookie control, TODO
+   * @brief: get cookie control
    */
-  std::string GetCookie() const;
-  void SetCookie(const std::string &cookie);
+  struct Cookie {
+    std::string key;
+    std::string value;
+    std::string expires;
+    std::string path;
+    std::string domain;
+    bool secure;
+    bool http_only;
+  };
+  std::string GetCookieVal(const std::string &key) const;
+  void SetCookie(const Cookie &cookie);
 
 private:
   std::unordered_map<std::string, std::string> headers_;

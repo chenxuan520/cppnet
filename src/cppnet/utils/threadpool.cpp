@@ -71,8 +71,8 @@ void ThreadPool::Worker(void *arg) {
     }
 
     pool.busy_now_++;
-    if (task.task_func_ != NULL) {
-      task.task_func_();
+    if (task.task_func != NULL) {
+      task.task_func();
     }
     pool.busy_now_--;
   }

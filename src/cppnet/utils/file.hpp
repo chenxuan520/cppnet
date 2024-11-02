@@ -59,6 +59,13 @@ public:
    * @return: true can write, false can not write
    */
   static bool CanWrite(const std::string &path);
+  /**
+   * @brief: get file line count
+   * @param path: file path
+   * @return: line count
+   * @note: file not exist return 0
+   */
+  static int LineCount(const std::string &path);
 };
 
 } // namespace cppnet

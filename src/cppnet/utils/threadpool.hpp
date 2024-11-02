@@ -15,7 +15,7 @@ public:
    * @brief: Task of ThreadPool
    */
   struct Task {
-    std::function<void()> task_func_;
+    std::function<void()> task_func;
   };
 
 public:

@@ -183,17 +183,24 @@ TEST(HttpServer, Middleware) {
   auto count_func = [&count](HttpContext &ctx) {
     DEBUG("use count");
     count++;
+    int temp = 10;
+    ctx.Set("temp", temp);
     ctx.Next();
   };
 
   server.Use(count_func);
 
-  server.GET("/hello", {count_func,
-                        [&](HttpContext &ctx) {
-                          ctx.resp().Text(HttpStatusCode::OK, "hello world");
-                          server.Stop();
-                        },
-                        count_func});
+  server.GET("/hello",
+             {count_func,
+              [&](HttpContext &ctx) {
+                ctx.resp().Text(HttpStatusCode::OK, "hello world");
+                auto val = ctx.Get<int>("temp");
+                MUST_TRUE(val == 10, "get wrong value " + to_string(val));
+                auto str_tmp = ctx.Get<std::string>("temp");
+                MUST_TRUE(str_tmp == "", "get wrong value " + str_tmp);
+                server.Stop();
+              },
+              count_func});
 
   // sync run server
   GO_JOIN([&] { server.Run(); });
