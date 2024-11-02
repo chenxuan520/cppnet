@@ -1,5 +1,6 @@
 # CppNet
 - A simple and lightweight C++ network library.
+- 一个简单轻量的C++网络库(cppweb 2.0 重构版)
 ## Author
 - [chenxuan](https://github.com/chenxuan520)
 ## TODO
@@ -13,10 +14,10 @@
 - [ ] 添加 release pkg的demo 和cmakelist
 - [x] httpclient 完成
 - [x] httpserver test
-- [ ] 添加更多log
+- [x] 添加更多log
 - [x] route 宽泛匹配
 - [x] post 参数设置
-- [ ] 触发模式控制修改
+- [x] 触发模式控制修改
 - [ ] 添加压力测试
 - [x] 抽象出epoll层
 - [x] 支持SSL

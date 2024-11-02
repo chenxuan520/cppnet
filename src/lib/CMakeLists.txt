@@ -9,18 +9,19 @@ set(CMAKE_CXX_STANDARD 17)
 # include dir add,split by<space>
 include_directories(../cppnet)
 
+# default enable ssl
+option(ENABLE_SSL "Enable SSL" on)
+
+# ssl
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	add_definitions(-DCPPNET_OPENSSL)
-	aux_source_directory(../cppnet/ssl DIR_SRCS)
+	link_libraries(-lssl -lcrypto)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+	include_directories(/opt/homebrew/Cellar/openssl@3/3.3.2/include)
+	link_directories(/opt/homebrew/Cellar/openssl@3/3.3.2/lib)
+	add_definitions(-DCPPNET_OPENSSL)
 	link_libraries(-lssl -lcrypto)
 endif()
-
-# for local
-include_directories(/opt/homebrew/Cellar/openssl@3/3.3.2/include)
-link_directories(/opt/homebrew/Cellar/openssl@3/3.3.2/lib)
-add_definitions(-DCPPNET_OPENSSL)
-aux_source_directory(../cppnet/ssl DIR_SRCS)
-link_libraries(-lssl -lcrypto)
 
 # link dir add
 link_libraries(-lpthread)
@@ -30,6 +31,7 @@ aux_source_directory(../cppnet/server/io_multiplexing DIR_SRCS)
 aux_source_directory(../cppnet/server DIR_SRCS)
 aux_source_directory(../cppnet/timer DIR_SRCS)
 aux_source_directory(../cppnet/utils DIR_SRCS)
+aux_source_directory(../cppnet/ssl DIR_SRCS)
 aux_source_directory(../cppnet/socket DIR_SRCS)
 aux_source_directory(../cppnet/log DIR_SRCS)
 

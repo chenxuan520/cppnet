@@ -25,7 +25,7 @@ let s:pwd=expand('%:p:h')
 let g:Term_project_task=[
 			\{
 			\'name'       : 'build',
-			\'command'    : './build.sh',
+			\'command'    : './build.sh true release',
 			\'mode'       : 'quickfix',
 			\'path'       : s:root.'/src',
 			\'close'      : 2,
@@ -58,7 +58,7 @@ let g:Term_project_task=[
 			\'close'      : 1,
 			\'type'       : 'split',
 			\'key'        : '\4',
-			\'end_script' : 'cclose|packadd termdebug|Termdebug ./bin/test_bin',
+			\'end_script' : 'cclose|packadd termdebug|Termdebug '. s:root.'/src/bin/test_bin',
 			\},
 			\{
 			\'name'       : 'coc',

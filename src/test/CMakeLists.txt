@@ -10,18 +10,19 @@ set(CMAKE_CXX_STANDARD 17)
 include_directories(../cppnet)
 include_directories(../third_party/cpptest)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+# default enable ssl
+option(ENABLE_SSL "Enable SSL" on)
+
+# ssl
+if(ENABLE_SSL)
+	if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+		# for author local mac
+		include_directories(/opt/homebrew/Cellar/openssl@3/3.3.2/include)
+		link_directories(/opt/homebrew/Cellar/openssl@3/3.3.2/lib)
+	endif()
 	add_definitions(-DCPPNET_OPENSSL)
-	aux_source_directory(../cppnet/ssl DIR_SRCS)
 	link_libraries(-lssl -lcrypto)
 endif()
-
-# for local
-include_directories(/opt/homebrew/Cellar/openssl@3/3.3.2/include)
-link_directories(/opt/homebrew/Cellar/openssl@3/3.3.2/lib)
-add_definitions(-DCPPNET_OPENSSL)
-aux_source_directory(../cppnet/ssl DIR_SRCS)
-link_libraries(-lssl -lcrypto)
 
 # link dir add
 link_libraries(-lpthread)
@@ -33,6 +34,7 @@ aux_source_directory(../cppnet/timer DIR_SRCS)
 aux_source_directory(../cppnet/utils DIR_SRCS)
 aux_source_directory(../cppnet/socket DIR_SRCS)
 aux_source_directory(../cppnet/log DIR_SRCS)
+aux_source_directory(../cppnet/ssl DIR_SRCS)
 
 # add http source
 file(GLOB HTTP_SRCS "../cppnet/http/*/*.cpp" "../cppnet/http/*/*/*.cpp")

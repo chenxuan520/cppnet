@@ -3,10 +3,10 @@
 #include "../../socket/socket.hpp"
 #include "../req/http_req.hpp"
 #include "../resp/http_resp.hpp"
+#include <memory>
 
 #ifdef CPPNET_OPENSSL
 #include "../../ssl/ssl_context.hpp"
-#include <memory>
 #endif
 
 namespace cppnet {
