@@ -10,7 +10,7 @@
 - [ ] 补全select
 - [x] 支持UDP协议(添加测试)
 - [x] 支持Http协议(彻底迁移 cppweb -> cppnet)
-- [x] 支持 cicd 生成 lib包
+- [x] 支持 cicd 生成 lib 包
 - [ ] 添加 release pkg的demo 和cmakelist
 - [x] httpclient 完成
 - [x] httpserver test

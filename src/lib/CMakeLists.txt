@@ -13,12 +13,12 @@ include_directories(../cppnet)
 option(ENABLE_SSL "Enable SSL" on)
 
 # ssl
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	add_definitions(-DCPPNET_OPENSSL)
-	link_libraries(-lssl -lcrypto)
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-	include_directories(/opt/homebrew/Cellar/openssl@3/3.3.2/include)
-	link_directories(/opt/homebrew/Cellar/openssl@3/3.3.2/lib)
+if(ENABLE_SSL)
+	if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+		# for author local mac
+		include_directories(/opt/homebrew/Cellar/openssl@3/3.3.2/include)
+		link_directories(/opt/homebrew/Cellar/openssl@3/3.3.2/lib)
+	endif()
 	add_definitions(-DCPPNET_OPENSSL)
 	link_libraries(-lssl -lcrypto)
 endif()
