@@ -153,6 +153,7 @@ int HttpGroup::StaticFile(
         if (!exist) {
           logger_->Warn("[logicerr]:static file not exist " + file_path);
           ctx.resp().NotFound();
+          ctx.Next();
           return;
         }
         auto rc = File::Read(file_path, ctx.resp().body());

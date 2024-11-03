@@ -124,3 +124,20 @@ TEST(File, LineCount) {
 
   MUST_TRUE(line_count == 2, "line count not equal, " + to_string(line_count));
 }
+
+TEST(File, IsDirFile) {
+  string path = "test.txt";
+  int rc = File::Create(path);
+  MUST_TRUE(rc == 0, "create file fail");
+  DEFER_DEFAULT {
+    File::Remove(path);
+    MUST_TRUE(!File::Exist(path), "file not remove");
+  };
+
+  MUST_TRUE(!File::IsDir(path), "file is dir");
+  MUST_TRUE(File::IsFile(path), "file is not file");
+  MUST_TRUE(!File::IsFile(path + "test"), "file is not file");
+  MUST_TRUE(!File::IsFile("."), "dir is file");
+  MUST_TRUE(File::IsDir("."), "dir is not dir");
+  MUST_TRUE(File::IsDir("./"), "dir is not dir");
+}
