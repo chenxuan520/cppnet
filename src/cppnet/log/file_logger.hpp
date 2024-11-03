@@ -58,6 +58,7 @@ private:
   static void FlushBuffer(std::string file_path,
                           std::shared_ptr<Buffer> buffer);
   void CheckFlush();
+  std::string GetNowTime();
 
 private:
   std::string file_path_;

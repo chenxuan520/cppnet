@@ -261,7 +261,6 @@ int TcpServer::Init() {
   loop_flag_ = true;
   listenfd_ = CreateSocket();
   if (listenfd_.status() != Socket::kInit) {
-    err_msg_ = "[logicerr]:listenfd not init";
     return kSysErr;
   }
 

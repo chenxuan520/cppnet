@@ -56,7 +56,7 @@ void FileLogger::Debug(const std::string &msg) {
   if (level_ > Logger::Level::DEBUG || cur_buffer_ == nullptr) {
     return;
   }
-  cur_buffer_->data += "[DEBUG]:" + msg + "\n";
+  cur_buffer_->data += "[DEBUG]" + GetNowTime() + "|" + msg + "\n";
   CheckFlush();
 }
 
@@ -64,7 +64,7 @@ void FileLogger::Info(const std::string &msg) {
   if (level_ > Logger::Level::INFO || cur_buffer_ == nullptr) {
     return;
   }
-  cur_buffer_->data += "[INFO]:" + msg + "\n";
+  cur_buffer_->data += "[INFO]" + GetNowTime() + "|" + msg + "\n";
   CheckFlush();
 }
 
@@ -72,7 +72,7 @@ void FileLogger::Warn(const std::string &msg) {
   if (level_ > Logger::Level::WARN || cur_buffer_ == nullptr) {
     return;
   }
-  cur_buffer_->data += "[WARN]:" + msg + "\n";
+  cur_buffer_->data += "[WARN]" + GetNowTime() + "|" + msg + "\n";
   CheckFlush();
 }
 
@@ -80,7 +80,7 @@ void FileLogger::Error(const std::string &msg) {
   if (level_ > Logger::Level::ERROR || cur_buffer_ == nullptr) {
     return;
   }
-  cur_buffer_->data += "[ERROR]:" + msg + "\n";
+  cur_buffer_->data += "[ERROR]" + GetNowTime() + "|" + msg + "\n";
   CheckFlush();
 }
 
@@ -88,7 +88,7 @@ void FileLogger::Fatal(const std::string &msg) {
   if (level_ > Logger::Level::FATAL || cur_buffer_ == nullptr) {
     return;
   }
-  cur_buffer_->data += "[FATAL]:" + msg + "\n";
+  cur_buffer_->data += "[FATAL]" + GetNowTime() + "|" + msg + "\n";
   CheckFlush();
 }
 
@@ -130,6 +130,14 @@ void FileLogger::FlushBuffer(std::string file_path,
   buffer->data.clear();
   buffer->need_flush = false;
   buffer->last_flush_time = time(nullptr);
+}
+
+std::string FileLogger::GetNowTime() {
+  static char buf[64];
+  time_t now = time(nullptr);
+  struct tm *tm_now = localtime(&now);
+  strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", tm_now);
+  return std::string(buf);
 }
 
 } // namespace cppnet
