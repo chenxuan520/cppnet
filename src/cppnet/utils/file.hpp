@@ -66,6 +66,18 @@ public:
    * @note: file not exist return 0
    */
   static int LineCount(const std::string &path);
+  /**
+   * @brief: judge path is dir
+   * @param path: file path
+   * @return: true is dir, false not dir
+   */
+  static bool IsDir(const std::string &path);
+  /**
+   * @brief: judge path is file
+   * @param path: file path
+   * @return: true is file, false not file
+   */
+  static bool IsFile(const std::string &path);
 };
 
 } // namespace cppnet

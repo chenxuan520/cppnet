@@ -102,4 +102,14 @@ int File::LineCount(const std::string &path) {
   return count;
 }
 
+bool File::IsDir(const std::string &path) {
+  return std::filesystem::exists(std::filesystem::path(path)) &&
+         std::filesystem::is_directory(std::filesystem::path(path));
+}
+
+bool File::IsFile(const std::string &path) {
+  return std::filesystem::exists(std::filesystem::path(path)) &&
+         std::filesystem::is_regular_file(std::filesystem::path(path));
+}
+
 } // namespace cppnet

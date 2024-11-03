@@ -107,6 +107,12 @@ int HttpGroup::StaticDir(
           return;
         }
         auto aim_path = route.substr(pos + path.size());
+        // avoid path like /static/../xxx
+        if (aim_path.find("..") != std::string::npos) {
+          logger_->Warn("[logicerr]:static dir path error " + aim_path);
+          ctx.resp().NotFound();
+          return;
+        }
         auto file_path = dir_path + "/" + aim_path;
         auto exist = File::Exist(file_path);
         if (!exist) {
