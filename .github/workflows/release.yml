@@ -32,6 +32,7 @@ jobs:
           cd src
           ./release.sh
           cp ./cppnet.tar.gz ../cppnet-${{ matrix.os }}-release.tar.gz
+          cp ./cppnet-ssl.tar.gz ../cppnet-${{ matrix.os }}-ssl-release.tar.gz
           cd ..
 
       - name: Release
@@ -41,5 +42,6 @@ jobs:
           body: Auto Create Release 
           files: |
             cppnet-${{ matrix.os }}-release.tar.gz
+            cppnet-${{ matrix.os }}-ssl-release.tar.gz
             LICENSE
 
