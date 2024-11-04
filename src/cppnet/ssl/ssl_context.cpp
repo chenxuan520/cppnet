@@ -127,8 +127,7 @@ int SSLContext::InitSvrFile(const std::string &cert_path,
                                SSL_OP_NO_COMPRESSION |
                                SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION);
 
-  if (SSL_CTX_use_certificate_file(ctx, cert_path.c_str(), SSL_FILETYPE_PEM) <=
-      0) {
+  if (SSL_CTX_use_certificate_chain_file(ctx, cert_path.c_str()) != 1) {
     err_msg_ = std::string("[syserr]:use certificate file failed ") +
                ERR_error_string(ERR_get_error(), nullptr);
     ERR_clear_error();
@@ -139,8 +138,8 @@ int SSLContext::InitSvrFile(const std::string &cert_path,
     SSL_CTX_set_default_passwd_cb_userdata(ctx, (void *)password.c_str());
   }
 
-  if (SSL_CTX_use_PrivateKey_file(ctx, key_path.c_str(), SSL_FILETYPE_PEM) <=
-      0) {
+  if (SSL_CTX_use_PrivateKey_file(ctx, key_path.c_str(), SSL_FILETYPE_PEM) !=
+      1) {
     err_msg_ = std::string("[syserr]:use private key file failed ") +
                ERR_error_string(ERR_get_error(), nullptr);
     ERR_clear_error();
