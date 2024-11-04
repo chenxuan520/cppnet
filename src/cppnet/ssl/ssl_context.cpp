@@ -16,10 +16,6 @@ int SSLContext::Init(SSL_CTX *ctx) {
     return kLogicErr;
   }
   ssl_ctx_ = ctx;
-  SSL_CTX_set_mode(ctx, SSL_MODE_AUTO_RETRY);
-  SSL_CTX_set_options(ctx, SSL_OP_ALL | SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 |
-                               SSL_OP_NO_COMPRESSION |
-                               SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION);
   return kSuccess;
 }
 
@@ -55,13 +51,23 @@ int SSLContext::InitSvr(const std::string &cert_data,
     return kLogicErr;
   }
 
-  SSL_CTX *ctx = SSL_CTX_new(TLS_server_method());
+  SSL_load_error_strings();
+  SSL_library_init();
+  OPENSSL_init_ssl(
+      OPENSSL_INIT_LOAD_SSL_STRINGS | OPENSSL_INIT_LOAD_CRYPTO_STRINGS, NULL);
+
+  SSL_CTX *ctx = SSL_CTX_new(TLS_method());
   if (ctx == nullptr) {
     err_msg_ = "[syserr]:create ssl context failed ";
     err_msg_ += ERR_error_string(ERR_get_error(), nullptr);
     ERR_clear_error();
     return kSysErr;
   }
+
+  SSL_CTX_set_mode(ctx, SSL_MODE_AUTO_RETRY);
+  SSL_CTX_set_options(ctx, SSL_OP_ALL | SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 |
+                               SSL_OP_NO_COMPRESSION |
+                               SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION);
 
   BIO *bio = BIO_new_mem_buf((void *)cert_data.c_str(), cert_data.size());
   if (bio == nullptr) {
@@ -105,11 +111,21 @@ int SSLContext::InitSvrFile(const std::string &cert_path,
     return kLogicErr;
   }
 
-  SSL_CTX *ctx = SSL_CTX_new(TLS_server_method());
+  SSL_load_error_strings();
+  SSL_library_init();
+  OPENSSL_init_ssl(
+      OPENSSL_INIT_LOAD_SSL_STRINGS | OPENSSL_INIT_LOAD_CRYPTO_STRINGS, NULL);
+
+  SSL_CTX *ctx = SSL_CTX_new(TLS_method());
   if (ctx == nullptr) {
     err_msg_ = "[syserr]:create ssl context failed";
     return kSysErr;
   }
+
+  SSL_CTX_set_mode(ctx, SSL_MODE_AUTO_RETRY);
+  SSL_CTX_set_options(ctx, SSL_OP_ALL | SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 |
+                               SSL_OP_NO_COMPRESSION |
+                               SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION);
 
   if (SSL_CTX_use_certificate_file(ctx, cert_path.c_str(), SSL_FILETYPE_PEM) <=
       0) {
