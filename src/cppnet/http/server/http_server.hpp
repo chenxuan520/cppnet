@@ -201,6 +201,16 @@ public:
    * @return tcp server
    */
   TcpServer &server() { return server_; }
+  /**
+   * @brief: set timeout of read
+   * @param: 0 stand for block until end
+   */
+  void SetReadTimeout(unsigned timeout_sec, unsigned timeout_usec);
+  /**
+   * @brief: set timeout of write
+   * @param: 0 stand for block until end
+   */
+  void SetWriteTimeout(unsigned timeout_sec, unsigned timeout_usec);
 
 #ifdef CPPNET_OPENSSL
 public:
@@ -230,6 +240,8 @@ private:
   TcpServer server_;
   Trie<TrieDataType> trie_;
   bool is_continue_ = false;
+  std::pair<int, int> read_timeout_{0, 0};
+  std::pair<int, int> write_timeout_{0, 0};
 };
 
 } // namespace cppnet

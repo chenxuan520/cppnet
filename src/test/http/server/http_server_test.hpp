@@ -249,7 +249,7 @@ TEST(HttpServer, HttpsServer) {
 
     server.GET("/hello", [&](HttpContext &ctx) {
       ctx.resp().Text(HttpStatusCode::OK, "hello world");
-      server.Stop();
+      // server.Stop();
     });
 
     // sync run server
@@ -271,6 +271,22 @@ TEST(HttpServer, HttpsServer) {
                   HttpStatusCodeUtil::ConvertToStr(resp.status_code()));
     MUST_TRUE(resp.body() == "hello world", "get wrong body " + resp.body());
     DEBUG("resp: " << resp.body());
+
+    // test timeout
+    server.SetReadTimeout(0, 100000);
+    SSLContext cli_ctx;
+    rc = cli_ctx.InitCli();
+    MUST_TRUE(rc == 0, cli_ctx.err_msg());
+    auto soc_ssl = cli_ctx.CreateSSLSocket();
+    rc = soc_ssl->Connect(addr);
+    MUST_TRUE(rc == 0, soc_ssl->err_msg());
+    rc = soc_ssl->Write("hello");
+    MUST_TRUE(rc == 5, soc_ssl->err_msg());
+    string tmp;
+    soc_ssl->Read(tmp, 100);
+    DEBUG(tmp);
+    soc_ssl->Close();
+
     client.Close();
     server.Stop();
   }

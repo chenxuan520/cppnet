@@ -270,6 +270,12 @@ void HttpServer::HandleLeave(TcpServer &server, Socket &event_soc) {
 void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
   const std::string kCRLF = "\r\n";
   std::shared_ptr<Socket> soc = nullptr;
+  if (read_timeout_.first != 0 || read_timeout_.second != 0) {
+    event_soc.SetReadTimeout(read_timeout_.first, read_timeout_.second);
+  }
+  if (write_timeout_.first != 0 || write_timeout_.second != 0) {
+    event_soc.SetWriteTimeout(write_timeout_.first, write_timeout_.second);
+  }
 #ifdef CPPNET_OPENSSL
   if (ssl_context_) {
     if (ssl_sockets_map_.find(event_soc.fd()) != ssl_sockets_map_.end()) {
@@ -390,6 +396,14 @@ void HttpServer::EventFunc(TcpServer::Event event, TcpServer &,
     HandleError(server_, event_soc);
     break;
   }
+}
+
+void HttpServer::SetReadTimeout(unsigned timeout_sec, unsigned timeout_usec) {
+  read_timeout_ = std::make_pair(timeout_sec, timeout_usec);
+}
+
+void HttpServer::SetWriteTimeout(unsigned timeout_sec, unsigned timeout_usec) {
+  write_timeout_ = std::make_pair(timeout_sec, timeout_usec);
 }
 
 #ifdef CPPNET_OPENSSL
