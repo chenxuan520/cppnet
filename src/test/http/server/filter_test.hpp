@@ -17,4 +17,14 @@ TEST(Filter, Host) {
 
   req.header().SetHost("www.google.com.cn");
   MUST_TRUE(!filter.IsMatchFilter(req), "Host filter failed");
+
+  req.header().SetHost("www.google.com");
+  filter.Init(".*\\.google\\.com");
+  MUST_TRUE(filter.IsMatchFilter(req), "Host filter failed");
+
+  req.header().SetHost("test.google.com");
+  MUST_TRUE(filter.IsMatchFilter(req), "Host filter failed");
+
+  req.header().SetHost("www.google.com.cn");
+  MUST_TRUE(!filter.IsMatchFilter(req), "Host filter failed");
 }

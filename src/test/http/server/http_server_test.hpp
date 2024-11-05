@@ -286,6 +286,19 @@ TEST(HttpServer, HttpsServer) {
     soc_ssl->Read(tmp, 100);
     DEBUG(tmp);
     soc_ssl->Close();
+    cli_ctx.Close();
+
+    // test accept ssl timeout
+    Socket soc;
+    rc = soc.Init();
+    MUST_TRUE(rc == 0, soc.err_msg());
+    rc = soc.Connect(addr);
+    MUST_TRUE(rc == 0, soc.err_msg());
+    rc = soc.Write("hello");
+    MUST_TRUE(rc == 5, soc.err_msg());
+    soc.Read(tmp, 100);
+    DEBUG(tmp);
+    soc.Close();
 
     client.Close();
     server.Stop();

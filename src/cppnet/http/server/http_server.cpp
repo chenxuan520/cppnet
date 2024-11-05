@@ -239,6 +239,14 @@ void HttpServer::HandleAccept(TcpServer &server, Socket &event_soc) {
   }
   logger_->Info("accept from " + recv_addr.ToString() +
                 " soc: " + std::to_string(event_soc.fd()));
+
+  if (read_timeout_.first != 0 || read_timeout_.second != 0) {
+    event_soc.SetReadTimeout(read_timeout_.first, read_timeout_.second);
+  }
+  if (write_timeout_.first != 0 || write_timeout_.second != 0) {
+    event_soc.SetWriteTimeout(write_timeout_.first, write_timeout_.second);
+  }
+
 #ifdef CPPNET_OPENSSL
   if (ssl_context_) {
     auto ssl_socket = ssl_context_->AcceptSSL(event_soc);
@@ -270,12 +278,6 @@ void HttpServer::HandleLeave(TcpServer &server, Socket &event_soc) {
 void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
   const std::string kCRLF = "\r\n";
   std::shared_ptr<Socket> soc = nullptr;
-  if (read_timeout_.first != 0 || read_timeout_.second != 0) {
-    event_soc.SetReadTimeout(read_timeout_.first, read_timeout_.second);
-  }
-  if (write_timeout_.first != 0 || write_timeout_.second != 0) {
-    event_soc.SetWriteTimeout(write_timeout_.first, write_timeout_.second);
-  }
 #ifdef CPPNET_OPENSSL
   if (ssl_context_) {
     if (ssl_sockets_map_.find(event_soc.fd()) != ssl_sockets_map_.end()) {
