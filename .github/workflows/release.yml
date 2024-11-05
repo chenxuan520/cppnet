@@ -14,6 +14,7 @@ jobs:
       - name: Checkout code #这部分是为了从github自动clone代码
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           submodules: true
 
       - name: Install ubuntu build tools #这部分是安装依赖
@@ -29,17 +30,19 @@ jobs:
 
       - name: Create Release File
         run: |
+          curl https://raw.githubusercontent.com/chenxuan520/gh-action-shell/main/git_commit_message_from_last_tag.sh | bash 1>commit-message.log 2>/dev/null
           cd src
           ./release.sh
           cp ./cppnet.tar.gz ../cppnet-${{ matrix.os }}-release.tar.gz
           cp ./cppnet-ssl.tar.gz ../cppnet-${{ matrix.os }}-ssl-release.tar.gz
           cd ..
 
+
       - name: Release
         uses: softprops/action-gh-release@v2 #具体参考https://github.com/softprops/action-gh-release
         if: startsWith(github.ref, 'refs/tags/') # 设置为有tag才进行上传
         with:
-          body: Auto Create Release 
+          body_path: commit-message.log
           files: |
             cppnet-${{ matrix.os }}-release.tar.gz
             cppnet-${{ matrix.os }}-ssl-release.tar.gz
