@@ -334,7 +334,7 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
                 " soc:" + std::to_string(event_soc.fd()));
 
   // step2:find route and run func
-  HttpContext ctx(req, resp, *soc);
+  HttpContext ctx(req, resp, soc);
   trie_.Search(path,
                [&](std::shared_ptr<TrieDataType> pdata, bool is_end) -> bool {
                  auto &data = *pdata;

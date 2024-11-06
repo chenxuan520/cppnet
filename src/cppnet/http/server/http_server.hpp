@@ -19,7 +19,7 @@ namespace cppnet {
 
 class HttpContext {
 public:
-  HttpContext(HttpReq &req, HttpResp &resp, Socket &soc)
+  HttpContext(HttpReq &req, HttpResp &resp, std::shared_ptr<Socket> &soc)
       : req_(req), resp_(resp), soc_(soc) {}
   // forbiden copy
   HttpContext(const HttpContext &) = delete;
@@ -50,12 +50,12 @@ public:
    */
   HttpReq &req() { return req_; }
   HttpResp &resp() { return resp_; }
-  Socket &soc() { return soc_; }
+  Socket &soc() { return *soc_; }
 
 private:
   HttpReq &req_;
   HttpResp &resp_;
-  Socket &soc_;
+  std::shared_ptr<Socket> soc_ = nullptr;
   bool is_continue_ = false;
   std::unordered_map<std::string, std::any> inline_data_;
 };
