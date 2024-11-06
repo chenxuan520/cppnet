@@ -7,8 +7,8 @@ class TimerSocket : public Socket {
 public:
   TimerSocket(int fd) : Socket(fd) {}
   TimerSocket(Socket &soc) : Socket(soc) {}
-  TimerSocket() = default;
   TimerSocket(int sec, int nsec) { Init(sec, nsec); }
+  TimerSocket() = default;
   ~TimerSocket() = default;
   // forbiden copy
   TimerSocket(const TimerSocket &) = delete;

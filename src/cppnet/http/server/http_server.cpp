@@ -269,7 +269,7 @@ void HttpServer::HandleLeave(TcpServer &server, Socket &event_soc) {
 #ifdef CPPNET_OPENSSL
   if (ssl_context_ &&
       ssl_sockets_map_.find(event_soc.fd()) != ssl_sockets_map_.end()) {
-    ssl_sockets_map_[event_soc.fd()]->Close();
+    ssl_sockets_map_[event_soc.fd()]->CloseSSL();
     ssl_sockets_map_.erase(event_soc.fd());
   }
 #endif

@@ -23,6 +23,7 @@ public:
   int Close() override;
   /**
    * @brief: close ssl
+   * @note: use close func will auto run close_ssl
    */
   int CloseSSL();
 
