@@ -175,6 +175,10 @@ public:
    * @brief: get system error string
    */
   static inline std::string err_msg() { return strerror(errno); }
+  /**
+   * @brief: get system error number
+   */
+  static inline int err_no() { return errno; }
 
 public:
   inline int fd() const { return fd_; }

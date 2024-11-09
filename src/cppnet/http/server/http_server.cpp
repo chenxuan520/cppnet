@@ -298,8 +298,18 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
   // step1:recv and parse http request
   std::string buf;
   auto len = soc->ReadUntil(buf, kCRLF + kCRLF);
-  if (len <= 0) {
-    logger_->Error("[soc.ReadUntil]:" + soc->err_msg());
+  if (len == 0) {
+    logger_->Error("[soc.ReadUntil]: peer close before read complete");
+    server.RemoveSoc(event_soc);
+    soc->Close();
+    return;
+  }
+  if (len < 0) {
+    if (soc->err_no() == EAGAIN || soc->err_no() == EWOULDBLOCK) {
+      logger_->Error("[soc.ReadUntil]: read timeout");
+    } else {
+      logger_->Error("[soc.ReadUntil]:" + soc->err_msg());
+    }
     server.RemoveSoc(event_soc);
     soc->Close();
     return;
@@ -325,7 +335,23 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
   auto content_size = req.header().GetContentLength();
   std::string body;
   if (content_size > 0) {
-    soc->Read(body, content_size, true);
+    rc = soc->Read(body, content_size, true);
+    if (rc == 0) {
+      logger_->Error("[soc.Read]: peer close before read complete");
+      server.RemoveSoc(event_soc);
+      soc->Close();
+      return;
+    }
+    if (rc < 0) {
+      if (soc->err_no() == EAGAIN || soc->err_no() == EWOULDBLOCK) {
+        logger_->Error("[soc.Read]: read body timeout");
+      } else {
+        logger_->Error("[soc.Read]: " + soc->err_msg());
+      }
+      server.RemoveSoc(event_soc);
+      soc->Close();
+      return;
+    }
     req.body() = body;
   }
   auto path = req.route().GetPath();
@@ -412,11 +438,11 @@ void HttpServer::SetWriteTimeout(unsigned timeout_sec, unsigned timeout_usec) {
 int HttpServer::InitSSL(const Address &addr,
                         std::shared_ptr<SSLContext> ssl_context) {
   if (server_.mode() == TcpServer::kMixed) {
-    err_msg_ = "mixed mode not support ssl";
+    err_msg_ = "[logicerr]:mixed mode not support ssl";
     return kNotSupport;
   }
   if (ssl_context == nullptr) {
-    err_msg_ = "ssl context is nullptr";
+    err_msg_ = "[logicerr]:ssl context is nullptr";
     return kLogicErr;
   }
   auto rc = Init(addr);

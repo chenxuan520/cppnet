@@ -38,3 +38,4 @@ cd src
 - [x] 支持SSL
 - [x] accept 改造
 - [x] 完善多线程
+- [ ] 提升trie

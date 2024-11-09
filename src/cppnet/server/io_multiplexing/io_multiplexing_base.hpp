@@ -1,6 +1,6 @@
 #pragma once
 
-#include "socket/socket.hpp"
+#include "../../socket/socket.hpp"
 #include <functional>
 namespace cppnet {
 

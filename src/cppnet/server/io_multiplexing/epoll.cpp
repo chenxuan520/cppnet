@@ -12,7 +12,7 @@ Epoll::TriggerType Epoll::trigger_type_ = Epoll::TriggerType::kLevelTrigger;
 int Epoll::Init() {
   epoll_fd_ = CreateEpoll();
   if (epoll_fd_.status() != Socket::kInit) {
-    err_msg_ = "[syserr]:" + std::string(strerror(errno));
+    err_msg_ = "[syserr]:" + Socket::err_msg();
     return kSysErr;
   }
   return kSuccess;
@@ -22,7 +22,7 @@ int Epoll::MonitorSoc(const Socket &fd) {
   if (trigger_type_ == kEdgeTrigger) {
     auto rc = fd.SetNoBlock();
     if (rc < 0) {
-      err_msg_ = "[syserr]:" + std::string(strerror(errno));
+      err_msg_ = "[syserr]:" + Socket::err_msg();
       return kSysErr;
     }
     return UpdateEpollEvents(epoll_fd_.fd(), EPOLL_CTL_ADD, fd.fd(),
@@ -53,7 +53,7 @@ int Epoll::Loop(NotifyCallBack callback) {
       if (errno == EINTR) {
         continue;
       }
-      err_msg_ = "[syserr]:" + std::string(strerror(errno));
+      err_msg_ = "[syserr]:" + Socket::err_msg();
       return kSysErr;
     }
     for (int i = 0; i < nfds; ++i) {

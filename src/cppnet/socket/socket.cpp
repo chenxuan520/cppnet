@@ -129,7 +129,7 @@ int Socket::ReadUntil(std::string &buf, const std::string &delim) {
          buf.substr(buf.size() - delim.size()) != delim) {
     auto rc = IORead(&ch, 1);
     if (rc <= 0) {
-      break;
+      return rc;
     }
     buf += ch;
   }
