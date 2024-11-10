@@ -1,5 +1,5 @@
 #pragma once
-#include "socket/socket.hpp"
+#include "../socket/socket.hpp"
 #ifdef CPPNET_OPENSSL
 
 #include "ssl_socket.hpp"

@@ -2,8 +2,8 @@
 #include "openssl/ssl.h"
 #ifdef CPPNET_OPENSSL
 
+#include "../utils/const.hpp"
 #include "ssl_socket.hpp"
-#include "utils/const.hpp"
 
 namespace cppnet {
 
