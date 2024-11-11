@@ -82,13 +82,12 @@ int Socket::SetNoBlock() const {
   u_long nonBlocking = 1; // 1 表示非阻塞
   int result = ioctlsocket(fd_, FIONBIO, &nonBlocking);
   if (result != 0) {
-      // 处理错误
-      return result;
+    // 处理错误
+    return result;
   }
   return 0;
 #endif
 }
-
 
 int Socket::SetBlock() const {
 #ifndef _WIN32
@@ -99,9 +98,9 @@ int Socket::SetBlock() const {
   return fcntl(fd_, F_SETFL, flags & ~O_NONBLOCK);
 #else
   u_long nonBlocking = 0; // 0 表示阻塞
-  int result = ioctlsocket(fd_,FIONBIO, &nonBlocking);
+  int result = ioctlsocket(fd_, FIONBIO, &nonBlocking);
   if (result != 0) {
-      return result;
+    return result;
   }
   return 0;
 #endif
@@ -182,7 +181,7 @@ int Socket::ReadUdp(void *buf, size_t len, Address &addr) {
   return ::recvfrom(fd_, buf, len, 0, addr.GetSockAddr(),
                     (socklen_t *)&addr_len);
 #else
-  return ::recvfrom(fd_, (char*)buf, len, 0, addr.GetSockAddr(),
+  return ::recvfrom(fd_, (char *)buf, len, 0, addr.GetSockAddr(),
                     (socklen_t *)&addr_len);
 #endif
 }
@@ -209,7 +208,8 @@ int Socket::WriteUdp(const void *buf, size_t len, Address &addr) {
 #ifndef _WIN32
   return ::sendto(fd_, buf, len, 0, addr.GetSockAddr(), sizeof(sockaddr));
 #else
-  return ::sendto(fd_, (char*)buf, len, 0, addr.GetSockAddr(), sizeof(sockaddr));
+  return ::sendto(fd_, (char *)buf, len, 0, addr.GetSockAddr(),
+                  sizeof(sockaddr));
 #endif
 }
 
@@ -238,7 +238,7 @@ int Socket::SetSockOpt(int level, int optname, const void *optval,
 #ifndef _WIN32
   return ::setsockopt(fd_, level, optname, optval, optlen);
 #else
-  return ::setsockopt(fd_, level, optname, (const char*)optval, optlen);
+  return ::setsockopt(fd_, level, optname, (const char *)optval, optlen);
 #endif
 }
 

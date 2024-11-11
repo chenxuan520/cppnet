@@ -200,7 +200,7 @@ protected:
 #ifndef _WIN32
     return ::recv(fd_, buf, len, flags);
 #else
-    return ::recv(fd_, (char*)buf, len, flags);
+    return ::recv(fd_, (char *)buf, len, flags);
 #endif
   }
 
@@ -208,7 +208,7 @@ protected:
 #ifndef _WIN32
     return ::send(fd_, buf, len, flags);
 #else
-    return ::send(fd_, (char*)buf, len, flags);
+    return ::send(fd_, (char *)buf, len, flags);
 #endif
   }
 
