@@ -2,8 +2,13 @@
 
 #include "address.hpp"
 #include <cstring>
-#include <sys/socket.h>
 #include <unistd.h>
+
+#ifndef _WIN32
+#include <sys/socket.h>
+#else
+#include <winsock2.h>
+#endif
 
 namespace cppnet {
 
@@ -192,11 +197,19 @@ public:
 
 protected:
   virtual inline int IORead(void *buf, size_t len, int flags = 0) {
+#ifndef _WIN32
     return ::recv(fd_, buf, len, flags);
+#else
+    return ::recv(fd_, (char*)buf, len, flags);
+#endif
   }
 
   virtual inline int IOWrite(const void *buf, size_t len, int flags = 0) {
+#ifndef _WIN32
     return ::send(fd_, buf, len, flags);
+#else
+    return ::send(fd_, (char*)buf, len, flags);
+#endif
   }
 
 protected:

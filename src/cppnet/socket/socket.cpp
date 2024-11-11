@@ -1,7 +1,11 @@
 #include "socket.hpp"
 #include <cstring>
 #include <fcntl.h>
+#ifndef _WIN32
 #include <sys/socket.h>
+#else
+#include <winsock2.h>
+#endif
 
 namespace cppnet {
 
@@ -68,19 +72,39 @@ int Socket::Close() {
 }
 
 int Socket::SetNoBlock() const {
+#ifndef _WIN32
   int flags = fcntl(fd_, F_GETFL, 0);
   if (flags == -1) {
     return -1;
   }
   return fcntl(fd_, F_SETFL, flags | O_NONBLOCK);
+#else
+  u_long nonBlocking = 1; // 1 表示非阻塞
+  int result = ioctlsocket(fd_, FIONBIO, &nonBlocking);
+  if (result != 0) {
+      // 处理错误
+      return result;
+  }
+  return 0;
+#endif
 }
 
+
 int Socket::SetBlock() const {
+#ifndef _WIN32
   int flags = fcntl(fd_, F_GETFL, 0);
   if (flags == -1) {
     return -1;
   }
   return fcntl(fd_, F_SETFL, flags & ~O_NONBLOCK);
+#else
+  u_long nonBlocking = 0; // 0 表示阻塞
+  int result = ioctlsocket(fd_,FIONBIO, &nonBlocking);
+  if (result != 0) {
+      return result;
+  }
+  return 0;
+#endif
 }
 
 int Socket::Read(std::string &buf, size_t len, bool complete) {
@@ -154,8 +178,13 @@ int Socket::ReadUdp(void *buf, size_t len, Address &addr) {
     return -1;
   }
   int addr_len = sizeof(sockaddr);
+#ifndef _WIN32
   return ::recvfrom(fd_, buf, len, 0, addr.GetSockAddr(),
                     (socklen_t *)&addr_len);
+#else
+  return ::recvfrom(fd_, (char*)buf, len, 0, addr.GetSockAddr(),
+                    (socklen_t *)&addr_len);
+#endif
 }
 
 int Socket::Write(const std::string &buf) {
@@ -177,7 +206,11 @@ int Socket::WriteUdp(const void *buf, size_t len, Address &addr) {
   if (status_ != kInit) {
     return -1;
   }
+#ifndef _WIN32
   return ::sendto(fd_, buf, len, 0, addr.GetSockAddr(), sizeof(sockaddr));
+#else
+  return ::sendto(fd_, (char*)buf, len, 0, addr.GetSockAddr(), sizeof(sockaddr));
+#endif
 }
 
 int Socket::SetReuseAddr() const {
@@ -202,7 +235,11 @@ int Socket::SetWriteTimeout(int timeout_sec, int timeout_usec) const {
 
 int Socket::SetSockOpt(int level, int optname, const void *optval,
                        size_t optlen) const {
+#ifndef _WIN32
   return ::setsockopt(fd_, level, optname, optval, optlen);
+#else
+  return ::setsockopt(fd_, level, optname, (const char*)optval, optlen);
+#endif
 }
 
 int Socket::GetAddr(Address &addr) const {

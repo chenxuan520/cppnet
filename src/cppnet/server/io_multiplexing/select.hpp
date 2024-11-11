@@ -15,10 +15,7 @@ public:
   void Close() override;
 
 private:
-  fd_set read_set_;
-  fd_set write_set_;
-  fd_set except_set_;
-  int max_fd_;
+  fd_set socket_set_;
 };
 
 } // namespace cppnet

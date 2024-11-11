@@ -26,7 +26,7 @@ int TimerSocket::Init(int sec, int nsec) {
 #elif __APPLE__
   return kNotSupport;
 #else
-  return kUnSupport;
+  return kNotSupport;
 #endif
 }
 

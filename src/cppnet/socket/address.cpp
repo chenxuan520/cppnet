@@ -1,7 +1,13 @@
 #include "address.hpp"
-#include <arpa/inet.h>
 #include <cstring>
+
+#ifndef _WIN32
+#include <arpa/inet.h>
 #include <netdb.h>
+#else
+#include <winsock2.h>
+#endif
+
 
 namespace cppnet {
 

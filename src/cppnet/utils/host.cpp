@@ -1,8 +1,12 @@
 #include "host.hpp"
 
+#ifndef _WIN32
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h>
+#else
+#include <winsock2.h>
+#endif
 
 namespace cppnet {
 

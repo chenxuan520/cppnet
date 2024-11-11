@@ -1,8 +1,15 @@
 #pragma once
 
-#include <netinet/in.h>
 #include <string>
+
+#ifndef _WIN32
+#include <netinet/in.h>
 #include <sys/socket.h>
+#else
+#include <winsock2.h>
+using socklen_t = int;
+#endif
+
 namespace cppnet {
 
 class Address {
