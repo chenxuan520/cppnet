@@ -26,6 +26,10 @@ endif()
 
 # link dir add
 link_libraries(-lpthread)
+# if windows add -lwsock32
+if(WIN32)
+	link_libraries(-lws2_32)
+endif()
 
 # add source
 aux_source_directory(../cppnet/server/io_multiplexing DIR_SRCS)
