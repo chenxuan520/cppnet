@@ -6,8 +6,8 @@ namespace cppnet {
 
 class Select : public IOMultiplexingBase {
 public:
-  Select() : IOMultiplexingBase() {}
-  ~Select() {}
+  Select();
+  ~Select();
   int Init() override;
   int MonitorSoc(const Socket &fd) override;
   int RemoveSoc(const Socket &fd) override;
@@ -16,6 +16,7 @@ public:
 
 private:
   fd_set socket_set_;
+  int max_fd_ = 0;
 };
 
 } // namespace cppnet

@@ -7,7 +7,11 @@ enum class HttpMethod {
   GET,
   POST,
   PUT,
-  DELETE,
+#ifndef _WIN32
+  DELELE,
+#else
+  DEL,
+#endif
   HEAD,
   OPTIONS,
   PATCH,
