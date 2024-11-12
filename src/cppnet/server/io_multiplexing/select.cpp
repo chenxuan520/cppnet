@@ -1,7 +1,6 @@
 
 #ifdef _WIN32
 #include "select.hpp"
-#include <iostream>
 #include <winsock2.h>
 
 namespace cppnet {
@@ -33,25 +32,23 @@ int Select::Loop(NotifyCallBack callback) {
   int ret = 0;
   while (loop_flag_) {
     fd_set event_set = monitor_set_;
-    std::cout << max_fd_ + 1 << " " << event_set.fd_count << std::endl;
     ret = select(0, &event_set, nullptr, nullptr, nullptr);
-    std::cout << max_fd_ + 1 << ret << std::endl;
     if (ret < 0) {
       return ret;
     }
     for (int i = 0; i < monitor_set_.fd_count; ++i) {
       if (FD_ISSET(monitor_set_.fd_array[i], &event_set)) {
-        Socket socket(monitor_set_.fd_array[i]);
-        std::string tmp_buf(1, 0);
-        auto rc = socket.ReadPeek(tmp_buf, 1);
-        if (rc == 0) {
-          callback(*this, socket, kIOEventLeave);
-        } else if (rc > 0) {
-          callback(*this, socket, kIOEventRead);
-        } else {
-          callback(*this, socket, kIOEventError);
-        }
-        // callback(*this, monitor_set_.fd_array[i],kIOEventRead);
+        // Socket socket(monitor_set_.fd_array[i]);
+        // std::string tmp_buf(1, 0);
+        // auto rc = socket.ReadPeek(tmp_buf, 1);
+        // if (rc == 0) {
+        //   callback(*this, socket, kIOEventLeave);
+        // } else if (rc > 0) {
+        //   callback(*this, socket, kIOEventRead);
+        // } else {
+        //   callback(*this, socket, kIOEventError);
+        // }
+        callback(*this, monitor_set_.fd_array[i], kIOEventRead);
       }
     }
   }

@@ -53,7 +53,7 @@ int FileLogger::Init(const std::string &file_path) {
 }
 
 void FileLogger::Debug(const std::string &msg) {
-  if (level_ > Logger::Level::DEBUG || cur_buffer_ == nullptr) {
+  if (level_ > Logger::Level::kDebug || cur_buffer_ == nullptr) {
     return;
   }
   cur_buffer_->data += "[DEBUG]" + GetNowTime() + "|" + msg + "\n";
@@ -61,7 +61,7 @@ void FileLogger::Debug(const std::string &msg) {
 }
 
 void FileLogger::Info(const std::string &msg) {
-  if (level_ > Logger::Level::INFO || cur_buffer_ == nullptr) {
+  if (level_ > Logger::Level::kInfo || cur_buffer_ == nullptr) {
     return;
   }
   cur_buffer_->data += "[INFO]" + GetNowTime() + "|" + msg + "\n";
@@ -69,7 +69,7 @@ void FileLogger::Info(const std::string &msg) {
 }
 
 void FileLogger::Warn(const std::string &msg) {
-  if (level_ > Logger::Level::WARN || cur_buffer_ == nullptr) {
+  if (level_ > Logger::Level::kWarn || cur_buffer_ == nullptr) {
     return;
   }
   cur_buffer_->data += "[WARN]" + GetNowTime() + "|" + msg + "\n";
@@ -77,7 +77,7 @@ void FileLogger::Warn(const std::string &msg) {
 }
 
 void FileLogger::Error(const std::string &msg) {
-  if (level_ > Logger::Level::ERROR || cur_buffer_ == nullptr) {
+  if (level_ > Logger::Level::kError || cur_buffer_ == nullptr) {
     return;
   }
   cur_buffer_->data += "[ERROR]" + GetNowTime() + "|" + msg + "\n";
@@ -85,7 +85,7 @@ void FileLogger::Error(const std::string &msg) {
 }
 
 void FileLogger::Fatal(const std::string &msg) {
-  if (level_ > Logger::Level::FATAL || cur_buffer_ == nullptr) {
+  if (level_ > Logger::Level::kFatal || cur_buffer_ == nullptr) {
     return;
   }
   cur_buffer_->data += "[FATAL]" + GetNowTime() + "|" + msg + "\n";

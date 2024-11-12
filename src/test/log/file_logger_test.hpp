@@ -28,7 +28,7 @@ TEST(FileLogger, Debug) {
     DEBUG(file_content);
   };
 
-  logger->set_level(Logger::Level::DEBUG);
+  logger->set_level(Logger::Level::kDebug);
   logger->Debug(write_msg);
 }
 

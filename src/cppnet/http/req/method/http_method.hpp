@@ -1,17 +1,19 @@
 #pragma once
 
 #include <string>
+
+#ifdef _WIN32
+// for avoid stupid wingdi.h header
+#undef DELETE
+#endif
+
 namespace cppnet {
 
 enum class HttpMethod {
   GET,
   POST,
   PUT,
-#ifndef _WIN32
   DELETE,
-#else
-  DEL,
-#endif
   HEAD,
   OPTIONS,
   PATCH,

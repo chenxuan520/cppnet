@@ -10,11 +10,7 @@ std::string HttpMethodUtil::ConvertToStr(const HttpMethod &method) {
     return "POST";
   case HttpMethod::PUT:
     return "PUT";
-#ifndef _WIN32
   case HttpMethod::DELETE:
-#else
-  case HttpMethod::DEL:
-#endif
     return "DELETE";
   case HttpMethod::HEAD:
     return "HEAD";
@@ -39,11 +35,7 @@ HttpMethod HttpMethodUtil::ConvertToMethod(const std::string &method) {
   else if (method == "PUT")
     return HttpMethod::PUT;
   else if (method == "DELETE")
-#ifndef _WIN32
     return HttpMethod::DELETE;
-#else
-    return HttpMethod::DEL;
-#endif
   else if (method == "HEAD")
     return HttpMethod::HEAD;
   else if (method == "OPTIONS")
