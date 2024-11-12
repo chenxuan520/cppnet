@@ -8,7 +8,7 @@ enum class HttpMethod {
   POST,
   PUT,
 #ifndef _WIN32
-  DELELE,
+  DELETE,
 #else
   DEL,
 #endif

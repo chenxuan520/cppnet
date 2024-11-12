@@ -6,6 +6,9 @@
 
 namespace cppnet {
 
+/**
+ * @note: this class not Thread-safe, do not use in multithreaded situations
+ */
 class FileLogger : public Logger {
 public:
   /*
