@@ -20,7 +20,16 @@
 
 INIT(Main) {
   // set for signal
+#ifndef WIN32
   signal(SIGPIPE, SIG_IGN);
+#else
+  WSADATA wsa; // web server api data
+  if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
+    printf("wsadata wrong\n");
+    exit(0);
+  }
+#endif
+
   GO([&]() {
     // max run time
     sleep(10);

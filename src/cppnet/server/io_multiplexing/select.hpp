@@ -15,7 +15,7 @@ public:
   void Close() override;
 
 private:
-  fd_set socket_set_;
+  fd_set monitor_set_;
   int max_fd_ = 0;
 };
 
