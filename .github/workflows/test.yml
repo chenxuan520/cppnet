@@ -28,14 +28,18 @@ jobs:
         run: |
           brew install cmake
 
-      - name: Setup Debug Session
+      - name: Run in windows
         uses: mxschmitt/action-tmate@v3
         if: matrix.os == 'windows-latest'
-        timeout-minutes: 10
-        with:
-          detached: false
+        run: |
+          cd src
+          mkdir build
+          cd build
+          cmake -G "MinGW Makefiles" .. -DENABLE_SSL=OFF
+          ../bin/test_bin.exe
 
       - name: Run test #需要执行的命令
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
         run: |
           cd src
           ./build.sh

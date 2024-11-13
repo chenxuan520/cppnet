@@ -1,6 +1,6 @@
+#ifdef CPPNET_OPENSSL
 #include "openssl/err.h"
 #include "openssl/ssl.h"
-#ifdef CPPNET_OPENSSL
 
 #include "../utils/const.hpp"
 #include "ssl_socket.hpp"
