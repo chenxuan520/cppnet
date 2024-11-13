@@ -51,7 +51,7 @@ TEST(HttpServer, HelloWorld) {
 TEST(HttpServer, Static) {
   HttpServer server;
 #ifdef _WIN32
-  Address addr{"127.0.0.1", rand()%1000+8000};
+  Address addr{"127.0.0.1", (uint16_t)(rand()%1000+8000)};
 #else
   Address addr{"127.0.0.1", 8080};
 #endif
@@ -137,7 +137,7 @@ TEST(HttpServer, Static) {
 
 TEST(HttpServer, Group) {
 #ifdef _WIN32
-  Address addr{"127.0.0.1", rand()%1000+8000};
+  Address addr{"127.0.0.1", (uint16_t)(rand()%1000+8000)};
 #else
   Address addr{"127.0.0.1", 8080};
 #endif
@@ -183,7 +183,7 @@ TEST(HttpServer, Group) {
 
 TEST(HttpServer, Middleware) {
 #ifdef _WIN32
-  Address addr{"127.0.0.1", rand()%1000+8000};
+  Address addr{"127.0.0.1", (uint16_t)(rand()%1000+8000)};
 #else
   Address addr{"127.0.0.1", 8080};
 #endif

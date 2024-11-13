@@ -24,11 +24,6 @@ INIT(Main) {
   signal(SIGPIPE, SIG_IGN);
 #else
   srand(time(nullptr));
-  WSADATA wsa; // web server api data
-  if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
-    printf("wsadata wrong\n");
-    exit(0);
-  }
 #endif
 
   GO([&]() {

@@ -217,4 +217,17 @@ protected:
   Status status_ = kUninit;
 };
 
+#ifdef  WIN32
+class WinSockApi {
+public:
+  WinSockApi() {
+    WSADATA wsaData;
+    WSAStartup(MAKEWORD(2, 2), &wsaData);
+  }
+  ~WinSockApi() { WSACleanup(); }
+};
+
+static WinSockApi g_win_sock_api;
+#endif
+
 } // namespace cppnet
