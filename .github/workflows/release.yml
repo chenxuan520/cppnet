@@ -34,7 +34,6 @@ jobs:
           cd src
           ./win_release.sh
           cp ./cppnet.tar.gz ../cppnet-${{ matrix.os }}-release.tar.gz
-          cp ./cppnet-ssl.tar.gz ../cppnet-${{ matrix.os }}-ssl-release.tar.gz
           cd ..
 
       - name: Unix Release
