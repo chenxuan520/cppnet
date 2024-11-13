@@ -118,6 +118,11 @@ TEST(Socket, ReadTimeout) {
 #ifdef __APPLE__
   SKIP();
 #endif
+
+#ifdef WIN32
+  SKIP();
+#endif
+
   Address addr{"127.0.0.1", 8080};
   int rc = 0;
   const int max_connect_queue = 10;

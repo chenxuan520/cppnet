@@ -50,7 +50,11 @@ TEST(HttpServer, HelloWorld) {
 
 TEST(HttpServer, Static) {
   HttpServer server;
+#ifdef _WIN32
+  Address addr{"127.0.0.1", rand()%1000+8000};
+#else
   Address addr{"127.0.0.1", 8080};
+#endif
   auto rc = server.Init(addr);
   MUST_TRUE(rc == 0, server.err_msg());
   server.set_logger(std::make_shared<StdLogger>());
@@ -132,8 +136,12 @@ TEST(HttpServer, Static) {
 }
 
 TEST(HttpServer, Group) {
-  HttpServer server;
+#ifdef _WIN32
+  Address addr{"127.0.0.1", rand()%1000+8000};
+#else
   Address addr{"127.0.0.1", 8080};
+#endif
+  HttpServer server;
   auto rc = server.Init(addr);
   MUST_TRUE(rc == 0, server.err_msg());
 
@@ -174,8 +182,12 @@ TEST(HttpServer, Group) {
 }
 
 TEST(HttpServer, Middleware) {
-  HttpServer server;
+#ifdef _WIN32
+  Address addr{"127.0.0.1", rand()%1000+8000};
+#else
   Address addr{"127.0.0.1", 8080};
+#endif
+  HttpServer server;
   auto rc = server.Init(addr);
   MUST_TRUE(rc == 0, server.err_msg());
 

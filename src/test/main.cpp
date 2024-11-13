@@ -23,6 +23,7 @@ INIT(Main) {
 #ifndef WIN32
   signal(SIGPIPE, SIG_IGN);
 #else
+  srand(time(nullptr));
   WSADATA wsa; // web server api data
   if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
     printf("wsadata wrong\n");

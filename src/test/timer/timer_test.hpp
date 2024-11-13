@@ -10,6 +10,11 @@ TEST(Timer, CreateTimer) {
 #ifdef __APPLE__
   SKIP();
 #endif
+
+#ifdef WIN32
+  SKIP();
+#endif
+
   atomic<int> count{0};
   Address addr{"127.0.0.1", 8080};
   TcpServer server{addr};

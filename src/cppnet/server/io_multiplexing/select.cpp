@@ -38,17 +38,17 @@ int Select::Loop(NotifyCallBack callback) {
     }
     for (int i = 0; i < monitor_set_.fd_count; ++i) {
       if (FD_ISSET(monitor_set_.fd_array[i], &event_set)) {
-        // Socket socket(monitor_set_.fd_array[i]);
-        // std::string tmp_buf(1, 0);
-        // auto rc = socket.ReadPeek(tmp_buf, 1);
-        // if (rc == 0) {
-        //   callback(*this, socket, kIOEventLeave);
-        // } else if (rc > 0) {
-        //   callback(*this, socket, kIOEventRead);
-        // } else {
-        //   callback(*this, socket, kIOEventError);
-        // }
-        callback(*this, monitor_set_.fd_array[i], kIOEventRead);
+        Socket socket(monitor_set_.fd_array[i]);
+        std::string tmp_buf(1, 0);
+        auto rc = socket.ReadPeek(tmp_buf, 1);
+        if (rc == 0) {
+          callback(*this, socket, kIOEventLeave);
+        } else if (rc > 0) {
+          callback(*this, socket, kIOEventRead);
+        } else {
+          callback(*this, socket, kIOEventError);
+        }
+        // callback(*this, monitor_set_.fd_array[i], kIOEventRead);
       }
     }
   }

@@ -68,7 +68,11 @@ int Socket::Close() {
     return -1;
   }
   status_ = kClosed;
+#ifndef _WIN32
   return ::close(fd_);
+#else
+  return closesocket(fd_);
+#endif
 }
 
 int Socket::SetNoBlock() const {

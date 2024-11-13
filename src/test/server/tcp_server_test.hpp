@@ -11,6 +11,11 @@ Address addr{"127.0.0.1", 8080};
 TcpServer server{addr};
 
 TEST(TcpServer, SigleClient) {
+#ifdef _WIN32
+  Address addr{"127.0.0.1",(uint16_t)(rand() % 1000 + 8000)};
+  server.set_addr(addr);
+#endif
+
   // init server
   auto rc = server.Init();
   MUST_TRUE(rc == 0, server.err_msg());
@@ -69,6 +74,11 @@ TEST(TcpServer, SigleClient) {
 }
 
 TEST(TcpServer, MultiClient) {
+#ifdef _WIN32
+  Address addr{"127.0.0.1",(uint16_t)(rand() % 1000 + 8000)};
+  server.set_addr(addr);
+#endif
+
   int loop_time = 1;
 #ifdef __linux__
   loop_time = 1;
@@ -182,6 +192,10 @@ TEST(TcpServer, MultiClient) {
 }
 
 TEST(TcpServer, MultiThread) {
+#ifdef _WIN32
+  Address addr{"127.0.0.1",(uint16_t)(rand() % 1000 + 8000)};
+  server.set_addr(addr);
+#endif
   // init msg
   string msg = "hello world";
 
@@ -272,6 +286,10 @@ TEST(TcpServer, MultiThread) {
 }
 
 TEST(TcpServer, MixMode) {
+#ifdef _WIN32
+  Address addr{"127.0.0.1",(uint16_t)(rand() % 1000 + 8000)};
+  server.set_addr(addr);
+#endif
   // SKIP();
   int loop_time = 1;
 
