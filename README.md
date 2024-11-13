@@ -22,7 +22,7 @@ cd src
 - [ ] 补充完整 readme
 - [x] 支持设置LT和ET模式下的事件触发方式
 - [x] 支持设置连接的超时时间
-- [x] 补全select(目前还是存在bug)
+- [x] 补全select
 - [x] 支持UDP协议(添加测试)
 - [x] 支持Http协议(彻底迁移 cppweb -> cppnet)
 - [x] 支持 cicd 生成 lib 包

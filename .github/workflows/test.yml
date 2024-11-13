@@ -17,16 +17,12 @@ jobs:
         with:
           submodules: true
 
-      - name: Install ubuntu build tools #这部分是安装依赖
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential cmake
-
-      - name: Install macos build tools #这部分是安装依赖
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install cmake
+      - name: Setup Debug Session
+        uses: mxschmitt/action-tmate@v3
+        if: matrix.os == 'windows-latest'
+        timeout-minutes: 15
+        with:
+          detached: false
 
       - name: Run in windows
         if: matrix.os == 'windows-latest'
