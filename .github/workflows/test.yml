@@ -35,6 +35,7 @@ jobs:
           mkdir build
           cd build
           cmake -G "MinGW Makefiles" .. -DENABLE_SSL=OFF
+          make
           ../bin/test_bin.exe
 
       - name: Run test #需要执行的命令
