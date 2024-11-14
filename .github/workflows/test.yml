@@ -17,17 +17,6 @@ jobs:
         with:
           submodules: true
 
-      - name: Install macos build tools #这部分是安装依赖
-        if: matrix.os == 'macos-latest'
-        run: |
-          wget https://www.openssl.org/source/openssl-1.1.1w.tar.gz
-          tar -xvf openssl-1.1.1w.tar.gz
-          cd openssl-1.1.1w
-          ./config --prefix=/usr/local/openssl
-          make
-          sudo make install
-          export PATH=/usr/local/openssl/bin:$PATH
-
       - name: Run in windows
         if: matrix.os == 'windows-latest'
         run: |

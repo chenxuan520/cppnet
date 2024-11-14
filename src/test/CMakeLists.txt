@@ -16,9 +16,18 @@ option(ENABLE_SSL "Enable SSL" on)
 # ssl
 if(ENABLE_SSL)
 	if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+		set(OPENSSL_VERSION "")
+		execute_process(
+			COMMAND brew list --versions openssl
+			OUTPUT_VARIABLE OPENSSL_VERSION_OUTPUT
+			OUTPUT_STRIP_TRAILING_WHITESPACE
+		)
+		string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" OPENSSL_VERSION "${OPENSSL_VERSION_OUTPUT}")
+		message(STATUS "OpenSSL version: ${OPENSSL_VERSION}")
+
 		# for author local mac
-		include_directories(/opt/homebrew/Cellar/openssl@3/3.3.2/include)
-		link_directories(/opt/homebrew/Cellar/openssl@3/3.3.2/lib)
+		include_directories(/opt/homebrew/Cellar/openssl@3/${OPENSSL_VERSION}/include)
+		link_directories(/opt/homebrew/Cellar/openssl@3/${OPENSSL_VERSION}/lib)
 	endif()
 	add_definitions(-DCPPNET_OPENSSL)
 	link_libraries(-lssl -lcrypto)
