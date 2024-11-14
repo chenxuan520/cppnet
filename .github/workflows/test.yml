@@ -23,7 +23,7 @@ jobs:
           cd src
           mkdir build
           cd build
-          cmake -G "MinGW Makefiles" ..
+          cmake -G "MinGW Makefiles" .. -DENABLE_SSL=OFF
           make
           cd ..
           ./bin/test_bin.exe
