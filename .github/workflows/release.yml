@@ -8,7 +8,7 @@ jobs:
   build:
     strategy:
       matrix: # 会分开成两个任务分别执行
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code #这部分是为了从github自动clone代码
