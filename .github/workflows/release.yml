@@ -27,12 +27,13 @@ jobs:
           cp ./cppnet-ssl.tar.gz ../cppnet-${{ matrix.os }}-ssl-release.tar.gz
           cd ..
 
-      # - name: Create Windows Release File
-      #   if: matrix.os == 'windows-latest'
-      #   run: |
-      #     bash ./win_release.sh
-      #     cp ./cppnet.tar.gz ../cppnet-${{ matrix.os }}-release.tar.gz
-      #     cd ..
+      - name: Create Windows Release File
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd src
+          bash ./win_release.sh
+          cp ./cppnet.tar.gz ../cppnet-${{ matrix.os }}-release.tar.gz
+          cd ..
 
       - name: Unix Release
         uses: softprops/action-gh-release@v2 #具体参考https://github.com/softprops/action-gh-release
@@ -43,11 +44,11 @@ jobs:
             cppnet-${{ matrix.os }}-ssl-release.tar.gz
             LICENSE
 
-      # - name: Windows Release
-      #   uses: softprops/action-gh-release@v2 #具体参考https://github.com/softprops/action-gh-release
-      #   if: matrix.os == 'windows-latest' && startsWith(github.ref, 'refs/tags/') # 设置为有tag才进行上传
-      #   with:
-      #     body_path: commit-message.log
-      #     files: |
-      #       cppnet-${{ matrix.os }}-release.tar.gz
-      #       LICENSE
+      - name: Windows Release
+        uses: softprops/action-gh-release@v2 #具体参考https://github.com/softprops/action-gh-release
+        if: matrix.os == 'windows-latest' && startsWith(github.ref, 'refs/tags/') # 设置为有tag才进行上传
+        with:
+          body_path: commit-message.log
+          files: |
+            cppnet-${{ matrix.os }}-release.tar.gz
+            LICENSE
