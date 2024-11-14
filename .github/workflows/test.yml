@@ -17,7 +17,15 @@ jobs:
         with:
           submodules: true
 
+      - name: Run in windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd src
+          ./build.sh
+          ./bin/test_bin.exe
+
       - name: Run test #需要执行的命令
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
         run: |
           cd src
           ./build.sh
