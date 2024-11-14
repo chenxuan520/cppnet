@@ -17,25 +17,7 @@ jobs:
         with:
           submodules: true
 
-      - name: Setup Debug Session
-        uses: mxschmitt/action-tmate@v3
-        if: matrix.os == 'windows-latest'
-        timeout-minutes: 15
-        with:
-          detached: false
-
-      - name: Run in windows
-        if: matrix.os == 'windows-latest'
-        run: |
-          cd src
-          mkdir build
-          cd build
-          cmake -G "MinGW Makefiles" .. -DENABLE_SSL=OFF
-          make
-          ../bin/test_bin.exe
-
       - name: Run test #需要执行的命令
-        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
         run: |
           cd src
           ./build.sh

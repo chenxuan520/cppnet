@@ -15,8 +15,15 @@ else
     CMAKE_BUILD_TYPE="-DCMAKE_BUILD_TYPE=${2}"
 fi
 
-
 mkdir -p ./build
 cd build
-cmake ${CMAKE_ENABLE_SSL} ${CMAKE_BUILD_TYPE} ..
+
+# for win
+result=$(uname)
+if echo $result | grep -q "WIN"; then
+    cmake -G "MinGW Makefiles" ${CMAKE_ENABLE_SSL} ${CMAKE_BUILD_TYPE} ..
+else
+    cmake ${CMAKE_ENABLE_SSL} ${CMAKE_BUILD_TYPE} ..
+fi
+
 make
