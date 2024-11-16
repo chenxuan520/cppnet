@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"="width=device-width, initial-scale=1.0">
+    <title>MNIST Canvas</title>
+    <style>
+        body {
+            background-color: lightblue;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+       .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        canvas {
+            background-color: white;
+            width: 256px;
+            height: 256px;
+            border: 1px solid black;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 0;
+            position: relative;
+            top: -70px; /* 根据实际情况微调此值以使mnist在画布正上方合适位置 */
+        }
+
+        button {
+            display: block;
+            margin: 10px auto 0; /* 上下边距为10px，左右自动居中 */
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="canvas-container">
+        <h1>mnist</h1>
+        <canvas id="mnistCanvas"></canvas>
+        <button id="commitButton">Commit</button>
+    </div>
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        // 获取画布和上下文
+        const canvas = document.getElementById('mnistCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 设置画布大小为256x256
+        canvas.width = 256;
+        canvas.height = 256;
+
+        // 计算每个点的大小
+        const pointSize = canvas.width / 28;
+
+        // 创建一个二维数组来存储每个点的颜色状态（0表示白色，1表示黑色）
+        const pointsArray = [];
+        for (let i = 0; i < 28; i++) {
+            pointsArray[i] = [];
+            for (let j = 0; j < 28; j++) {
+                pointsArray[i][j] = 0;
+            }
+        }
+
+        // 用于记录上一次鼠标位置
+        let lastMouseX = -1;
+        let lastMouseY = -1;
+
+        // 鼠标按下事件处理函数
+        canvas.addEventListener('mousedown', function (e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((e.clientX - rect.left) / pointSize);
+            const y = Math.floor((e.clientY - rect.top) / pointSize);
+
+            // 将点击的点设置为黑色
+            drawPoint(x, y, true);
+
+            // 更新上一次鼠标位置
+            lastMouseX = x;
+            lastMouseY = y;
+        });
+
+        // 鼠标移动事件处理函数
+        canvas.addEventListener('mousemove', function (e) {
+            if (e.buttons === 1) {
+                const rect = canvas.getBoundingClientRect();
+                const x = Math.floor((e.clientX - rect.left) / pointSize);
+                const y = Math.floor((e.clientY - rect.top) / pointSize);
+
+                // 将鼠标经过的点设置为黑色
+                drawPoint(x, y, true);
+
+                // 如果上一次鼠标位置有效，填充上一次位置到当前位置之间的点为黑色
+                if (lastMouseX!== -1 && lastMouseY!== -1) {
+                    fillPointsBetween(lastMouseX, lastMouseY, x, y);
+                }
+
+                // 更新上一次鼠标位置
+                lastMouseX = x;
+                lastMouseY = y;
+            }
+        });
+
+        // 填充两个点之间的所有点为黑色的函数
+        function fillPointsBetween(x1, y1, x2, y2) {
+            const dx = Math.abs(x2 - x1);
+            const dy = Math.abs(y2 - y1);
+            const sx = x1 < x2? 1 : -1;
+            const sy = y1 < y2? 1 : -1;
+            let err = dx - dy;
+
+            while (true) {
+                drawPoint(x1, y1, true);
+
+                if (x1 === x2 && y1 === y2) {
+                    break;
+                }
+
+                let e2 = 2 * err;
+                if (e2 > -dy) {
+                    err -= dy;
+                    x1 += sx;
+                }
+                if (e2 < dx) {
+                    err += dx;
+                    y1 += sy;
+                }
+            }
+        }
+
+        // 鼠标松开事件处理函数，这里不再自动提交，仅记录位置
+        canvas.addEventListener('mouseup', function () {
+            // 更新上一次鼠标位置（虽然此时鼠标松开，但记录最后位置以便后续操作）
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((e.clientX - rect.left) / pointSize);
+            const y = Math.floor((e.clientY - rect.top) / pointSize);
+            lastMouseX = x;
+            lastMouseY = y;
+        });
+
+        // Commit按钮点击事件处理函数
+        const commitButton = document.getElementById('commitButton');
+        commitButton.addEventListener('click', function () {
+            // 将数据封装成指定格式的JSON
+            const dataToSend = {
+                data: pointsArray
+            };
+            const jsonData = JSON.stringify(dataToSend);
+
+            // 使用axios发送POST请求
+            axios.post('/mnist', jsonData, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+         .then(function (response) {
+                    const result = response.data.result;
+                    alert('返回结果：' + result);
+
+                    // 重置画布和数据数组
+                    resetCanvas();
+                })
+         .then(function (error) {
+                    console.error('请求出错：', error);
+                });
+        });
+
+        // 绘制单个点的函数
+        function drawPoint(x, y, isBlack) {
+            if (x >= 0 && x < 28 && y >= 0 && y < 28) {
+                pointsArray[y][x] = isBlack? 1 : 0;
+
+                const rect = canvas.getBoundingClientRect();
+                const pointX = x * pointSize;
+                const pointY = y * pointSize;
+
+                ctx.beginPath();
+                ctx.rect(pointX, pointY, pointSize, pointSize);
+                ctx.fillStyle = isBlack? 'black' : 'white';
+                ctx.fill();
+            }
+        }
+
+        // 重置画布的函数
+        function resetCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < 28; i++) {
+                for (let j = 0; j < 28; j++) {
+                    pointsArray[i][j] = 0;
+                }
+            }
+
+            // 重置上一次鼠标位置
+            lastMouseX = -1;
+            lastMouseY = -1;
+        }
+    </script>
+</body>
+
+</html>
