@@ -1,6 +1,8 @@
 # cppnet
 - 一个轻量级 C++ 网络框架, cppweb 2.0 升级版
 - 避免了之前 cppweb 单个头文件的臃肿的问题, 并且使用更加友善的使用方式
+## Author
+> ![](http://cdn.androidftp.top/pic/chenxuanweb/dog.png)
 ## 优势
 1. 使用简单,入侵性小, 不要求强行安装到系统的include目录中, 推荐直接作为一个submodule 引用或者直接使用静态库
 2. 使用现代的C++构建, 使用方式和函数和 Go 的 gin 框架类似 , 学习和入门成本小, 可适合作为初学者进行源码学习

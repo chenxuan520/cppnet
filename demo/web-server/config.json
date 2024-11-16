@@ -1,0 +1,27 @@
+{
+	"port":5200,
+	"host":"127.0.0.1",
+	"is_background":true,
+	"is_guard":false,
+	"log_path":"./server.log",
+	"redirects":[
+		{
+			"route":"/hello",
+			"redirect":"https://chenxuanweb.top"
+		}
+	],
+	"statics":[
+		{
+			"route":"/",
+			"path":"./blog-home/index.html"
+		},
+		{
+			"route":"/",
+			"path":"./blog-home"
+		}
+	],
+	"ssl":{
+		"cert_path":"./ssl/cert_demo.pem",
+		"key_path":"./ssl/cert_key.pem"
+	}
+}

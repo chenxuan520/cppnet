@@ -8,4 +8,10 @@ test_bin
 *.tar.gz
 release
 *.a
+*.log
+*.pid
 .obsidian
+blog-home
+demo/*/cppnet
+demo/*/ssl
+cppjson
