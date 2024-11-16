@@ -8,3 +8,4 @@ test_bin
 *.tar.gz
 release
 *.a
+.obsidian
