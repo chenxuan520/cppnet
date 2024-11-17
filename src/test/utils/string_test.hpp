@@ -43,3 +43,19 @@ TEST(StringUtil, UrlCode) {
 
   ASSERT_EQ(res2, str);
 }
+
+TEST(StringUtil, WildCardMatch) {
+  MUST_TRUE(
+      StringUtil::WildCardMatch("*.chenxuanweb.top", "www.chenxuanweb.top"),
+      "not match");
+
+  MUST_TRUE(StringUtil::WildCardMatch("*chenxuanweb.top", "chenxuanweb.top"),
+            "not match");
+
+  MUST_TRUE(
+      StringUtil::WildCardMatch("*.chenxuanweb.top", "blog.chenxuanweb.top"),
+      "not match");
+
+  MUST_TRUE(!StringUtil::WildCardMatch("*.chenxuanweb", "www.chenxuanweb.top"),
+            "not match");
+}

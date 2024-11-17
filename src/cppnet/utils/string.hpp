@@ -32,6 +32,15 @@ public:
    */
   static std::string UrlEncode(const std::string &url);
 
+  /**
+   * @brief: wild card match
+   * @param pattern: wild card pattern
+   * @param source: source string
+   * @return: true: match, false: not match
+   */
+  static bool WildCardMatch(const std::string &pattern,
+                            const std::string &source);
+
 private:
 };
 
