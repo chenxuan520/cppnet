@@ -1,20 +1,20 @@
 # cppnet
-- 一个轻量级 C++ 网络框架, cppweb 2.0 升级版
-- 避免了之前 cppweb 单个头文件的臃肿的问题, 并且使用更加友善的使用方式
+- A lightweight C++ network framework, an upgraded version of cppweb 2.0
+- Avoids the bloatiness of the previous cppweb single header file, and uses a more friendly way of using
 ## Author
 > ![](http://cdn.androidftp.top/pic/chenxuanweb/dog.png)
 ## Docs
-- [cppnet 在线文档地址](https://chenxuan520.github.io/cppnet/)
-## 优势
-1. 使用简单,入侵性小, 不要求强行安装到系统的include目录中, 推荐直接作为一个submodule 引用或者直接使用静态库
-2. 使用现代的C++构建, 使用方式和函数和 Go 的 gin 框架类似 , 学习和入门成本小, 可适合作为初学者进行源码学习
-3. 轻量化框架, 非常小, 源码不到5000行, 避免了大型网络框架的臃肿
+- [cppnet online docs](https://chenxuan520.github.io/cppnet/)
+## Advantages
+1. Simple to use, low intrusiveness, does not require forced installation in the system's include directory. It is recommended to引用directly as a submodule or use the static library directly.
+2. Built with modern C++, with a similar usage and function to Go's gin framework. It has a low learning and entry cost and can be suitable for beginners to learn the source code.
+3. Lightweight framework, very small, with less than 5,000 lines of source code, avoiding the bloat of large-scale network frameworks.
 ## Quick Start
-### 使用 Release 包
-1. 下载 release 库([Releases · chenxuan520/cppnet](https://github.com/chenxuan520/cppnet/releases)) , 并且解压(地点可以随意, 可以放到系统的 include 也可以不放 下文假设是解压到当前目录), 需要编译器支持C++17
-	- 这里如果是需要ssl (需要安装 openssl ),就下载 ssl 的版本, 都这下载默认即可
-	- **目前只支持 linux和mac(因为作者只有这两种系统的电脑), 后续会添加对windows 的支持**
-2. 编写代码, 这一步可以根据需要编写代码, 下面是两个简单的demo , 分别是 没有ssl 和有ssl的两个demo, 具体的函数介绍可以参考文档内容
+### Using the Release Package
+1. Download the release library ([Releases · chenxuan520/cppnet](https://github.com/chenxuan520/cppnet/releases)), and extract it (you can choose any location, you can put it in the system's include directory or not. In the following, it is assumed that the extraction is to the current directory). A C++17-compatible compiler is required.
+    - If you need SSL (you need to install OpenSSL), download the SSL version. The default option is fine.
+    - **Currently, only Linux and Mac support ssl (because the author only has computers with these two operating systems) are supported. Support ssl for Windows will be added in the future.**
+2. Write code. You can write code according to your needs. The following are two simple demos, one without SSL and the other with SSL. For specific function descriptions, you can refer to the documentation.
 ```cpp
 #include "./cppnet/include/cppnet/http/server/http_server.hpp"
 #include "./cppnet/include/cppnet/utils/const.hpp"
@@ -78,38 +78,38 @@ int main() {
 }
 
 ```
-3. 编写编译文件
-	1. 如果是使用 CMake 编译, 需要在CMakeLists 添加如下内容 , 实际上就是加上了链接库
-	```cmake
-	# 是否使用ssl都需要添加
-	link_directories(./cppnet/lib)
-	link_libraries(-lcppnet)
-	
-	# **如果使用的是 ssl版本并且需要使用ssl的功能,才需要添加下面的**
-	add_definitions(-DCPPNET_OPENSSL)
-	link_libraries(-lssl -lcrypto)
-	```
-	2. 如果是使用 Makefile 编译, 需要在编译选项中添加 `-L./cppnet/lib` 和 `-lcppnet`, 下面是一个 Makefile 编译 demo, 当然如果是ssl的编译也是同理添加 lib 库 和 **添加 PPNET_OPENSSL 宏**
-	```Makefile
-	all: libserver-makefile
-	
-	libserver-makefile:
-		g++ -O2 -Wall -std=c++17 ./main.cpp -o libserver-makefile -lcppnet -L./cppnet/lib
-		# ssl 版本的是
-		g++ -O2 -Wall -std=c++17 ./main.cpp -o libserver-makefile -DCPPNET_OPENSSL -lcppnet -lssl -lcrypto -L./cppnet/lib
-	```
-4. 执行编译, 获得编译的文件就成功了
-### 从源码编译
-1. 使用 `git clone https://github.com/chenxuan520/cppnet --recurse-submodules` 拉取源代码
-	1. 默认是编译出 ssh版本的, 如果需要无ssl版本的需要手动修改cmake文件
-2. 运行 `cd src;./build.sh` 生成的静态库在lib中
-## 源码结构
-- 仓库结构如下
-	- cppnet 放置所以的源码以及编译文件
-	- lib 放置生成的静态库以及静态库构建的 CMakeLists 文件
-	- test 是测试用例
-	- third_party 是第三方仓库, 目前只依赖 cpptest 用于test 文件夹的单元测试
-	- build.sh 生成 lib 静态库以及 单元测试的二进制文件
+3. Compiling the build file
+    1. If you are using CMake to compile, you need to add the following content to the CMakeLists.txt file. In fact, you just add the link library
+    ```cmake
+    # Whether to use SSL or not, you need to add this
+    link_directories(./cppnet/lib)
+    link_libraries(-lcppnet)
+    
+    # **If you are using the SSL version and need to use the SSL function, you need to add the following**
+    add_definitions(-DCPPNET_OPENSSL)
+    link_libraries(-lssl -lcrypto)
+    ```
+    2. If you are using Makefile to compile, you need to add `-L./cppnet/lib` and `-lcppnet` to the compilation options. Here is a Makefile compilation demo. Of course, if it is an SSL compilation, you also need to add the lib library and **add the PPNET_OPENSSL macro**.
+    ```Makefile
+    all: libserver-makefile
+    
+    libserver-makefile:
+        g++ -O2 -Wall -std=c++17./main.cpp -o libserver-makefile -lcppnet -L./cppnet/lib
+        # SSL version
+        g++ -O2 -Wall -std=c++17./main.cpp -o libserver-makefile -DCPPNET_OPENSSL -lcppnet -lssl -lcrypto -L./cppnet/lib
+    ```
+4. Execute the compilation to obtain the compiled file successfully.
+### Compiling from source
+1. Use `git clone https://github.com/chenxuan520/cppnet --recurse-submodules` to pull the source code
+    1. By default, the ssh version is compiled. If you need an ssl-free version, you need to modify the cmake file manually
+2. Run `cd src;./build.sh` to generate the static library in lib
+## Source code structure
+- The repository structure is as follows
+    - cppnet stores all source code and build files
+    - lib stores the generated static library and the CMakeLists file for static library construction
+    - test is the test case
+    - third_party is a third-party repository, currently only depends on cpptest for unit testing in the test folder
+    - build.sh generates the lib static library and the unit test binary file
 ```tree
 .
 ├── LICENSE
@@ -123,7 +123,7 @@ int main() {
     ├── test
     └── third_party
 ```
-- 源码主要放置在 `src/cppnet`
+- The source code is mainly placed in `src/cppnet`.
 ```txt
 cppnet
 ├── http
@@ -205,26 +205,5 @@ cppnet
 
 18 directories, 58 files
 ```
-### 类关系图
+### Class Diagram
 ![](http://cdn.androidftp.top/test/2024111110142533pasteboard.paste)
-## TODO
-- [x] 补充完整 readme
-- [x] 支持设置LT和ET模式下的事件触发方式
-- [x] 支持设置连接的超时时间
-- [x] 补全select
-- [x] 支持UDP协议(添加测试)
-- [x] 支持Http协议(彻底迁移 cppweb -> cppnet)
-- [x] 支持 cicd 生成 lib 包
-- [x] 添加 release pkg的demo 和cmakelist
-- [x] httpclient 完成
-- [x] httpserver test
-- [x] 添加更多log
-- [x] route 宽泛匹配
-- [x] post 参数设置
-- [x] 触发模式控制修改
-- [x] 抽象出epoll层
-- [x] 支持SSL
-- [x] accept 改造
-- [x] 完善多线程
-- [ ] 添加压力测试
-- [ ] 提升trie
