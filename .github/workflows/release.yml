@@ -35,13 +35,13 @@ jobs:
           cp ./cppnet.tar.gz ../cppnet-${{ matrix.os }}-release.tar.gz
           cd ..
 
-      - name: Create Demo Release File
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          cd demo
-          ./build.sh
-          tar -zcvf ./cppnet-demo-${{ matrix.os }}.tar.gz ./bin
-          mv ./cppnet-demo-${{ matrix.os }}.tar.gz ../
+      # - name: Create Demo Release File
+      #   if: matrix.os == 'ubuntu-latest'
+      #   run: |
+      #     cd demo
+      #     ./build.sh
+      #     tar -zcvf ./cppnet-demo-${{ matrix.os }}.tar.gz ./bin/*
+      #     mv ./cppnet-demo-${{ matrix.os }}.tar.gz ../
 
       - name: Unix Release
         uses: softprops/action-gh-release@v2 #具体参考https://github.com/softprops/action-gh-release
@@ -61,10 +61,10 @@ jobs:
             cppnet-${{ matrix.os }}-release.tar.gz
             LICENSE
 
-      - name: Demo Release
-        uses: softprops/action-gh-release@v2
-        if: matrix.os == 'ubuntu-latest' && startsWith(github.ref, 'refs/tags/') # 设置为有tag才进行上传
-        with:
-          files: |
-            cppnet-demo-${{ matrix.os }}.tar.gz
-            LICENSE
+      # - name: Demo Release
+      #   uses: softprops/action-gh-release@v2
+      #   if: matrix.os == 'ubuntu-latest' && startsWith(github.ref, 'refs/tags/') # 设置为有tag才进行上传
+      #   with:
+      #     files: |
+      #       cppnet-demo-${{ matrix.os }}.tar.gz
+      #       LICENSE

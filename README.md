@@ -1,4 +1,5 @@
 # cppnet
+> English version is [here](./README.en.md)
 - 一个轻量级 C++ 网络框架, cppweb 2.0 升级版
 - 避免了之前 cppweb 单个头文件的臃肿的问题, 并且使用更加友善的使用方式
 ## Author
