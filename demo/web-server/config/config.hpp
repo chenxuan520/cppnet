@@ -7,18 +7,22 @@ using namespace cppjson;
 struct RedirectConfig {
   std::string route;
   std::string redirect;
+  std::string host;
   void Parse(Json::Object &json) {
     route = json["route"].str_val;
     redirect = json["redirect"].str_val;
+    host = json["host"].str_val;
   }
 };
 
 struct StaticConfig {
   std::string route;
   std::string path;
+  std::string host;
   void Parse(Json::Object &json) {
     route = json["route"].str_val;
     path = json["path"].str_val;
+    host = json["host"].str_val;
   }
 };
 

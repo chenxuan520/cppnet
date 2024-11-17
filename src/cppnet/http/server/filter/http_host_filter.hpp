@@ -10,7 +10,7 @@ class HttpHostFilter : public HttpFilter {
 public:
   HttpHostFilter() = default;
 
-  inline void Init(const std::string &regex_host) { host_ = regex_host; }
+  inline void InitRegex(const std::string &regex_host) { host_ = regex_host; }
   inline void InitWildCard(const std::string &wild_card) {
     wild_card_ = wild_card;
   }

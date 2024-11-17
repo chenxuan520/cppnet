@@ -1,5 +1,6 @@
 #include "argc_deal.hpp"
 #include "config/config.hpp"
+#include "http/server/filter/http_host_filter.hpp"
 #include "http/server/http_server.hpp"
 #include "log/file_logger.hpp"
 #include "log/multi_logger.hpp"
@@ -11,6 +12,7 @@
 #include <iostream>
 #include <memory>
 #include <unistd.h>
+#include <vector>
 using namespace std;
 using namespace cppnet;
 using namespace cppapp;
@@ -60,15 +62,31 @@ void RunWithConfig(Config &config) {
 
   for (auto &item : config.redirects) {
     cout << "redirect: " << item.route << " -> " << item.redirect << endl;
-    server.GET(item.route,
-               [=](HttpContext &ctx) { ctx.resp().Redirect(item.redirect); });
+    vector<shared_ptr<HttpFilter>> filter_arr;
+    if (item.host != "") {
+      auto host_filter = std::make_shared<HttpHostFilter>();
+      host_filter->InitWildCard(item.host);
+      filter_arr.push_back(host_filter);
+    }
+    server.GET(
+        item.route,
+        [=](HttpContext &ctx) { ctx.resp().Redirect(item.redirect); },
+        filter_arr);
   }
+
   for (auto &item : config.statics) {
+    vector<shared_ptr<HttpFilter>> filter_arr;
+    if (item.host != "") {
+      auto host_filter = std::make_shared<HttpHostFilter>();
+      host_filter->InitWildCard(item.host);
+      filter_arr.push_back(host_filter);
+    }
+
     if (File::IsDir(item.path)) {
-      server.StaticDir(item.route, item.path);
+      server.StaticDir(item.route, item.path, filter_arr);
       cout << "statics dir: " << item.route << " -> " << item.path << endl;
     } else if (File::IsFile(item.path)) {
-      server.StaticFile(item.route, item.path);
+      server.StaticFile(item.route, item.path, filter_arr);
       cout << "statics file: " << item.route << " -> " << item.path << endl;
     } else {
       cout << "static file not found: " << item.path << endl;
