@@ -57,6 +57,7 @@ jobs:
   demo:
     needs: release
     runs-on: ubuntu-latest
+    steps:
       - name: Create Demo Release File
         run: |
           cd demo
