@@ -17,3 +17,9 @@
     - `url`：要进行 URL 编码的字符串。
 - 返回值：`std::string`类型，编码后的字符串。
 - 作用：对给定的字符串进行 URL 编码操作。
+## static bool WildCardMatch(const std::string &pattern, const std::string &source);
+- 参数：
+    - `pattern`：通配符模式。
+    - `source`：要匹配的字符串。
+- 返回值：`bool`类型，匹配结果。
+- 作用：使用通配符模式匹配给定的字符串。
