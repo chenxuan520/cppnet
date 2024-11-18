@@ -18,4 +18,4 @@ add_definitions(-DCPPNET_OPENSSL)
 link_libraries(-lssl -lcrypto)
 
 # add source
-add_executable(libserver main.cpp)
+add_executable(libserverssl main.cpp)

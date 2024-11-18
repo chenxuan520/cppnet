@@ -1,4 +1,6 @@
 #!/bin/bash
+mkdir -p bin
+mkdir -p pack
 
 # 遍历当前文件夹下的所有子文件夹
 for dir in $(find . -type d); do

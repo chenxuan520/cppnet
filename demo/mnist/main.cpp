@@ -54,7 +54,7 @@ int GetMnistResult(const vector<vector<int>> &mnist_data) {
 
 int main() {
   HttpServer server;
-  auto rc = server.Init({"127.0.0.0", 8080});
+  auto rc = server.Init({"127.0.0.1", 8080});
   if (rc != 0) {
     cout << "init server error " << server.err_msg() << endl;
     return -1;

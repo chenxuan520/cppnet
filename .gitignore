@@ -1,6 +1,7 @@
 *.out
 bin
 build
+pack
 compile_commands.json
 .cache
 test_bin
