@@ -1,0 +1,31 @@
+version: '1.0'
+name: test
+displayName: test
+triggers:
+  trigger: auto
+  push:
+    branches:
+      prefix:
+        - master
+stages:
+  - name: stage-688a396e
+    displayName: test
+    strategy: naturally
+    trigger: auto
+    executor: []
+    steps:
+      - step: execute@docker
+        name: execute_by_docker
+        displayName: build_and_test
+        certificate: ''
+        image: hub.atomgit.com/amd64/ubuntu:23.10
+        command:
+          - apt-get update
+          - apt-get install -y build-essential curl cmake openssl libssl-dev git
+          - git submodule update --init --recursive --depth=1
+          - cd src
+          - ./build.sh
+          - ./bin/test_bin
+        notify: []
+        strategy:
+          retry: '0'
