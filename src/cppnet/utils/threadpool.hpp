@@ -53,17 +53,11 @@ public:
    */
   void GetBusyAndTaskNum(unsigned &busy, unsigned &task);
 
-public:
-  inline void MutexLock() { user_lock_.lock(); }
-  inline void MutexUnlock() { user_lock_.unlock(); }
-  inline void MutexTryLock() { user_lock_.try_lock(); }
-
 private:
   static void Worker(void *arg);
 
 private:
   std::mutex que_lock_;
-  std::mutex user_lock_;
   std::condition_variable cond_;
   std::queue<Task> task_que_;
   unsigned thread_num_{0};
