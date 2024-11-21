@@ -281,6 +281,7 @@ void HttpServer::HandleLeave(TcpServer &server, Socket &event_soc) {
 
 void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
   const std::string kCRLF = "\r\n";
+  const std::string kEndl = "\n";
   std::shared_ptr<Socket> soc = nullptr;
 #ifdef CPPNET_OPENSSL
   if (ssl_context_) {
@@ -331,7 +332,7 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
     soc->Write(resp_buf);
     logger_->Info(
         "resp: " + HttpStatusCodeUtil::ConvertToStr(resp.status_code()) +
-        " soc:" + std::to_string(event_soc.fd()) + kCRLF);
+        " soc:" + std::to_string(event_soc.fd()) + kEndl);
     server.RemoveSoc(event_soc);
     soc->Close();
     return;
@@ -409,7 +410,7 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
   }
   logger_->Info(
       "resp: " + HttpStatusCodeUtil::ConvertToStr(resp.status_code()) +
-      " soc:" + std::to_string(event_soc.fd()) + kCRLF);
+      " soc:" + std::to_string(event_soc.fd()) + kEndl);
 }
 
 void HttpServer::EventFunc(TcpServer::Event event, TcpServer &,
