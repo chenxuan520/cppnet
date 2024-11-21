@@ -50,6 +50,7 @@ public:
   void Redirect(const std::string &location, bool forever = false);
   void SuccessWithBinary(const std::string &body);
   void SuccessWithJson(const std::string &body);
+  void Success() { status_code_ = HttpStatusCode::OK; }
   void Success(HttpHeader::ContentType content_type,
                const std::string &body = "");
   void BadRequest(const std::string &body = "");

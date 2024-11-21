@@ -44,3 +44,10 @@ TEST(HttpReq, Parse) {
             "cookie not exist " + http_req.header().GetCookieVal("BIDUPSID"));
   MUST_TRUE(http_req.header().GetCookieVal("unexist") == "", "cookie exist");
 }
+
+TEST(HttpReq, CustomType) {
+  std::string file_type = "temp";
+  HttpHeader::SetCustomContentType(file_type, "example");
+  auto type = HttpHeader::ConvertFileType(file_type);
+  MUST_EQUAL(HttpHeader::ConvertToStr(type, file_type), "example");
+}

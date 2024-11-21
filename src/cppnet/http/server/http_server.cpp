@@ -164,8 +164,12 @@ int HttpGroup::StaticFile(
         }
         logger_->Info("static_file: return static file success " + file_path);
         ctx.resp().header().SetLongConnection(true);
-        ctx.resp().Success(
-            HttpHeader::ConvertFileType(File::Suffix(file_path)));
+
+        auto suffix = File::Suffix(file_path);
+        auto type_str = HttpHeader::ConvertToStr(
+            HttpHeader::ConvertFileType(suffix), suffix);
+        ctx.resp().header().SetContentType(type_str);
+        ctx.resp().Success();
       },
       new_filters);
   if (rc != kSuccess) {

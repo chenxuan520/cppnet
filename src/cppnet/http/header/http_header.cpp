@@ -102,12 +102,16 @@ HttpHeader::ConvertFileType(const std::string &file_type) {
     return HttpHeader::ContentType::kImageGif;
   else if (file_type == "webp")
     return HttpHeader::ContentType::kImageWebp;
+  else if (HttpHeader::custom_content_type_.find(file_type) !=
+           HttpHeader::custom_content_type_.end())
+    return HttpHeader::ContentType::kCustom;
   else
     return HttpHeader::ContentType::kApplicationOctetStream;
 }
 
 std::string
-HttpHeader::ConvertToStr(const HttpHeader::ContentType &content_type) {
+HttpHeader::ConvertToStr(const HttpHeader::ContentType &content_type,
+                         const std::string &file_type) {
   switch (content_type) {
   case HttpHeader::ContentType::kTextPlain:
     return "text/plain";
@@ -129,6 +133,8 @@ HttpHeader::ConvertToStr(const HttpHeader::ContentType &content_type) {
     return "image/gif";
   case HttpHeader::ContentType::kImageWebp:
     return "image/webp";
+  case cppnet::HttpHeader::ContentType::kCustom:
+    return custom_content_type_[file_type];
   default:
     return "unknown";
   }
@@ -142,6 +148,13 @@ HttpHeader::ContentType HttpHeader::GetContentType() const {
     return ConvertToContentType(it->second);
   }
 }
+
+void HttpHeader::SetCustomContentType(const std::string &file_type,
+                                      const std::string &content_type) {
+  custom_content_type_[file_type] = content_type;
+}
+
+std::unordered_map<std::string, std::string> HttpHeader::custom_content_type_;
 
 int HttpHeader::GetContentLength() const {
   auto it = headers_.find("Content-Length");

@@ -51,7 +51,7 @@ TEST(HttpServer, HelloWorld) {
 TEST(HttpServer, Static) {
   HttpServer server;
 #ifdef _WIN32
-  Address addr{"127.0.0.1", (uint16_t)(rand()%1000+8000)};
+  Address addr{"127.0.0.1", (uint16_t)(rand() % 1000 + 8000)};
 #else
   Address addr{"127.0.0.1", 8080};
 #endif
@@ -64,11 +64,16 @@ TEST(HttpServer, Static) {
 
   server.StaticDir("/test/", "./");
   server.StaticFile("/test/", "./index.html");
+  server.StaticFile("/demo", "./index.demo");
 
   // create file
   rc = File::Write("./index.html", "hello world");
   MUST_TRUE(rc == 0, "write file failed");
-  DEFER([]() { remove("./index.html"); });
+  DEFER([]() { File::Remove("./index.html"); });
+
+  rc = File::Write("./index.demo", "hello world");
+  MUST_TRUE(rc == 0, "write file failed");
+  DEFER([]() { File::Remove("./index.demo"); });
 
   // sync run server
   GO_JOIN([&] { server.Run(); });
@@ -132,12 +137,40 @@ TEST(HttpServer, Static) {
                 HttpStatusCodeUtil::ConvertToStr(resp.status_code()));
   MUST_TRUE(resp.body() == "hello world", "get wrong body " + resp.body());
 
+  // test custom type
+  req.Clear();
+  req.GET("/demo");
+  resp.Clear();
+  rc = client.Send(req, resp);
+  MUST_TRUE(rc == 0, client.err_msg());
+  MUST_TRUE(resp.status_code() == HttpStatusCode::OK,
+            "get wrong status code " +
+                HttpStatusCodeUtil::ConvertToStr(resp.status_code()));
+  MUST_TRUE(resp.body() == "hello world", "get wrong body " + resp.body());
+  MUST_TRUE(resp.header().GetContentType() ==
+                HttpHeader::ContentType::kApplicationOctetStream,
+            "get wrong content type " +
+                HttpHeader::ConvertToStr(resp.header().GetContentType()));
+
+  HttpHeader::SetCustomContentType("demo", "application/demo");
+  req.Clear();
+  req.GET("/demo");
+  resp.Clear();
+  rc = client.Send(req, resp);
+  MUST_TRUE(rc == 0, client.err_msg());
+  MUST_TRUE(resp.status_code() == HttpStatusCode::OK,
+            "get wrong status code " +
+                HttpStatusCodeUtil::ConvertToStr(resp.status_code()));
+  MUST_TRUE(resp.body() == "hello world", "get wrong body " + resp.body());
+  MUST_TRUE(resp.header()["Content-Type"] == "application/demo",
+            "get wrong content type " +
+                HttpHeader::ConvertToStr(resp.header().GetContentType()));
   server.Stop();
 }
 
 TEST(HttpServer, Group) {
 #ifdef _WIN32
-  Address addr{"127.0.0.1", (uint16_t)(rand()%1000+8000)};
+  Address addr{"127.0.0.1", (uint16_t)(rand() % 1000 + 8000)};
 #else
   Address addr{"127.0.0.1", 8080};
 #endif
@@ -183,7 +216,7 @@ TEST(HttpServer, Group) {
 
 TEST(HttpServer, Middleware) {
 #ifdef _WIN32
-  Address addr{"127.0.0.1", (uint16_t)(rand()%1000+8000)};
+  Address addr{"127.0.0.1", (uint16_t)(rand() % 1000 + 8000)};
 #else
   Address addr{"127.0.0.1", 8080};
 #endif

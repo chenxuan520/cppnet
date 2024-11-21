@@ -21,11 +21,15 @@ public:
     kImageJpeg,
     kImageGif,
     kImageWebp,
+    kCustom,
     kUnknown
   };
   static ContentType ConvertToContentType(const std::string &content_type);
   static ContentType ConvertFileType(const std::string &file_type);
-  static std::string ConvertToStr(const ContentType &content_type);
+  static std::string ConvertToStr(const ContentType &content_type,
+                                  const std::string &file_type = "");
+  static void SetCustomContentType(const std::string &file_type,
+                                   const std::string &content_type);
 
 public:
   HttpHeader() = default;
@@ -106,6 +110,9 @@ private:
   std::unordered_map<std::string, std::string> headers_;
 
   std::string err_msg_;
+
+private:
+  static std::unordered_map<std::string, std::string> custom_content_type_;
 };
 
 } // namespace cppnet
