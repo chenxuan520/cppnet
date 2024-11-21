@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - 'docs/**'
+      - '.github/workflows/docs.yml'
 
 jobs:
   build:
@@ -20,14 +21,17 @@ jobs:
         run: |
           cd ./docs
           ./update.sh
+          rm -rf ./obsidian2web
+          mv ./cppnet/README.md Home.md
+          mv ./cppnet/README.en.md .
           cd ..
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./book
 
-      - name: Wiki deploy
-        uses: spenserblack/actions-wiki@0.3.0
+      - name: Wiki Update
+        uses: spenserblack/actions-wiki@v0.3.0
         with:
           # Whatever directory you choose will be mirrored to the GitHub
           # .wiki.git. The default is .github/wiki.
