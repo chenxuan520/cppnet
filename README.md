@@ -7,14 +7,14 @@
 ## Docs
 - [cppnet 在线文档地址](https://chenxuan520.github.io/cppnet/)
 ## 优势
-1. 使用简单,入侵性小, 不要求强行安装到系统的include目录中, 推荐直接作为一个submodule 引用或者直接使用静态库
+1. 使用简单,入侵性小,**全平台支持**, 不要求强行安装到系统的include目录中, 推荐直接作为一个submodule 引用或者直接使用静态库
 2. 使用现代的C++构建, 使用方式和函数和 Go 的 gin 框架类似 , 学习和入门成本小, 可适合作为初学者进行源码学习
 3. 轻量化框架, 非常小, 源码不到5000行, 避免了大型网络框架的臃肿
 ## Quick Start
+- 需要编译器支持 C++17
 ### 使用 Release 包
 1. 下载 release 库([Releases · chenxuan520/cppnet](https://github.com/chenxuan520/cppnet/releases)) , 并且解压(地点可以随意, 可以放到系统的 include 也可以不放 下文假设是解压到当前目录), 需要编译器支持C++17
-	- 这里如果是需要ssl (需要安装 openssl ),就下载 ssl 的版本, 都这下载默认即可
-	- **目前只支持 linux和mac(因为作者只有这两种系统的电脑), 后续会添加对windows 的支持**
+	- 这里如果是需要ssl (需要安装 openssl ),就下载 ssl 的版本, 否则下载默认即可
 2. 编写代码, 这一步可以根据需要编写代码, 下面是两个简单的demo , 分别是 没有ssl 和有ssl的两个demo, 具体的函数介绍可以参考文档内容
 ```cpp
 #include "./cppnet/include/cppnet/http/server/http_server.hpp"
@@ -104,6 +104,8 @@ int main() {
 1. 使用 `git clone https://github.com/chenxuan520/cppnet --recurse-submodules` 拉取源代码
 	1. 默认是编译出 ssh版本的, 如果需要无ssl版本的需要手动修改cmake文件
 2. 运行 `cd src;./build.sh` 生成的静态库在lib中
+    - 需要 cmake
+    - 需要编译器支持 C++17
 ## 源码结构
 - 仓库结构如下
 	- cppnet 放置所以的源码以及编译文件
@@ -111,6 +113,8 @@ int main() {
 	- test 是测试用例
 	- third_party 是第三方仓库, 目前只依赖 cpptest 用于test 文件夹的单元测试
 	- build.sh 生成 lib 静态库以及 单元测试的二进制文件
+    - docs 是接口文档
+    - demo 是参考的事例
 ```tree
 .
 ├── LICENSE

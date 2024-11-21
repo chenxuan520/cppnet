@@ -6,14 +6,13 @@
 ## Docs
 - [cppnet online docs](https://chenxuan520.github.io/cppnet/)
 ## Advantages
-1. Simple to use, low intrusiveness, does not require forced installation in the system's include directory. It is recommended to引用directly as a submodule or use the static library directly.
-2. Built with modern C++, with a similar usage and function to Go's gin framework. It has a low learning and entry cost and can be suitable for beginners to learn the source code.
-3. Lightweight framework, very small, with less than 5,000 lines of source code, avoiding the bloat of large-scale network frameworks.
+1. Easy to use, low invasiveness, **full platform support**, does not require forcible installation into the system's include directory, recommended to be directly referenced as a submodule or used directly with static libraries
+2. Built with modern C++, similar in usage and functions to Go's gin framework, small learning and entry cost, suitable for beginners to learn source code
+3. Lightweight framework, very small, with less than 5000 lines of source code, avoiding the bloat of large network frameworks
 ## Quick Start
 ### Using the Release Package
 1. Download the release library ([Releases · chenxuan520/cppnet](https://github.com/chenxuan520/cppnet/releases)), and extract it (you can choose any location, you can put it in the system's include directory or not. In the following, it is assumed that the extraction is to the current directory). A C++17-compatible compiler is required.
     - If you need SSL (you need to install OpenSSL), download the SSL version. The default option is fine.
-    - **Currently, only Linux and Mac support ssl (because the author only has computers with these two operating systems) are supported. Support ssl for Windows will be added in the future.**
 2. Write code. You can write code according to your needs. The following are two simple demos, one without SSL and the other with SSL. For specific function descriptions, you can refer to the documentation.
 ```cpp
 #include "./cppnet/include/cppnet/http/server/http_server.hpp"
@@ -103,6 +102,8 @@ int main() {
 1. Use `git clone https://github.com/chenxuan520/cppnet --recurse-submodules` to pull the source code
     1. By default, the ssh version is compiled. If you need an ssl-free version, you need to modify the cmake file manually
 2. Run `cd src;./build.sh` to generate the static library in lib
+    - Requires cmake
+    - Requires a compiler that supports C++17
 ## Source code structure
 - The repository structure is as follows
     - cppnet stores all source code and build files
@@ -110,6 +111,8 @@ int main() {
     - test is the test case
     - third_party is a third-party repository, currently only depends on cpptest for unit testing in the test folder
     - build.sh generates the lib static library and the unit test binary file
+    - docs is the interface documentation
+    - demo is the reference example
 ```tree
 .
 ├── LICENSE
