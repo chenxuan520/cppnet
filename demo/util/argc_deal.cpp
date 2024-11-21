@@ -23,9 +23,9 @@ bool ArgcDeal::GetOption(std::string name) {
 }
 
 void ArgcDeal::SetOption(std::string option, std::string usage, bool must) {
-  std::string temp = "\tno must";
+  std::string temp = ",no must";
   if (must)
-    temp = "\tmust";
+    temp = ",must";
   message_.insert({option, usage + temp});
   if (must && arg_all_.find(option) == arg_all_.end()) {
     app.pfunc = NULL;
@@ -48,9 +48,9 @@ int ArgcDeal::MsgPrint() {
   printf("\t%s\n", app.usage.c_str());
   printf("options:\n");
   for (auto iter : message_) {
-    printf("\t%s\t\t%s\n", iter.first.c_str(), iter.second.c_str());
+    printf("\t--%-32s %-32s\n", iter.first.c_str(), iter.second.c_str());
   }
-  printf("\t-h,--help\t\tget help of app\tno must\n");
+  printf("\t--%-32s %-32s\n", "help,-h", "get help of app,no must");
   return 0;
 }
 
@@ -63,10 +63,10 @@ std::string ArgcDeal::GetVar(std::string key) {
 }
 
 void ArgcDeal::SetVar(std::string variName, std::string usage, bool must) {
-  std::string temp = "\tno must";
+  std::string temp = ",no must";
   if (must)
-    temp = "\tmust";
-  message_.insert({"--" + variName + "=(variable)", usage + temp});
+    temp = ",must";
+  message_.insert({variName + "=(variable)", usage + temp});
   if (must && arg_all_.find(variName) == arg_all_.end()) {
     app.pfunc = NULL;
   }

@@ -181,11 +181,11 @@ int main(int argc, char *argv[]) {
   args.app.pfunc = _main;
   args.app.usage =
       "thank using chenxuanweb,if you have any question\n"
-      "\tsend email to 1607772321@qq.com to deal problem,thank you!\n"
+      "\tsend email to chenxuanweb@qq.com to deal problem,thank you!\n"
       "\t! only in linux the argv is accepted\n";
   args.app.version = "v2.0.1";
   args.SetOption("reload", "restart the server");
   args.SetOption("stop", "stop the server");
-  args.SetVar("config", "choose the file to be config file");
+  args.SetVar("config", "choose config file");
   return args.Run();
 }
