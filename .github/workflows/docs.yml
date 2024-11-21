@@ -4,6 +4,8 @@ on:
     branches:
       - main
       - master
+    paths:
+      - 'docs/**'
 
 jobs:
   build:
@@ -24,6 +26,13 @@ jobs:
         with:
           path: ./book
 
+      - name: Wiki deploy
+        uses: spenserblack/actions-wiki@0.3.0
+        with:
+          # Whatever directory you choose will be mirrored to the GitHub
+          # .wiki.git. The default is .github/wiki.
+          path: docs
+
   # Deploy job
   deploy:
     # Add a dependency to the build job
@@ -42,5 +51,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4 # or specific "vX.X.X" version tag for this action
-
-

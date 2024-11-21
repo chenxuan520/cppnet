@@ -1,4 +1,8 @@
 # cppnet::HttpFilter
+- 这是一个抽象基类，用于定义 HTTP 过滤器的接口。
+- 目前实现的过滤器包括：`htto_host_filter`,`http_method_filter`
+    - `http_host_filter`：用于检查 HTTP 请求的 Host 头部是否匹配指定的主机名。
+    - `http_method_filter`：用于检查 HTTP 请求的方法是否匹配指定的方法。
 ## HttpFilter()
 - 参数：无
 - 返回值：无
