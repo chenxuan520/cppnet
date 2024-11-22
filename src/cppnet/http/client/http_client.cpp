@@ -5,6 +5,10 @@
 namespace cppnet {
 
 int HttpClient::Init(Address &addr) {
+  if (addr.GetPort() == 0) {
+    // default 80 port
+    addr = {addr.GetIP(), 80};
+  }
   soc_ = std::make_shared<Socket>();
   auto rc = soc_->Init();
   rc = soc_->Connect(addr);
@@ -77,6 +81,10 @@ void HttpClient::Close() {
 
 #ifdef CPPNET_OPENSSL
 int HttpClient::InitSSL(Address &addr) {
+  if (addr.GetPort() == 0) {
+    // default 443 port
+    addr = {addr.GetIP(), 443};
+  }
   ssl_context_ = std::make_shared<SSLContext>();
   auto rc = ssl_context_->InitCli();
   soc_ = ssl_context_->CreateSSLSocket();

@@ -7,6 +7,8 @@ on:
     paths:
       - 'docs/**'
       - '.github/workflows/docs.yml'
+      - 'README.md'
+      - 'README.en.md'
 
 jobs:
   build:

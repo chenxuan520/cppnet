@@ -104,6 +104,166 @@ int main() {
 2. Run `cd src;./build.sh` to generate the static library in lib
     - Requires cmake
     - Requires a compiler that supports C++17
+## More Demo
+- More demo references can be found in the "demo" folder and the "test" folder.
+### Create a TcpServer
+```cpp
+  Address addr{"128.0.0.1", 8080};
+  TcpServer server{addr};
+
+  // init server
+  auto rc = server.Init();
+  if (rc != kSuccess) {
+    std::cout << "init server wrong " << server.err_msg() << std::endl;
+    return rc;
+  }
+
+  // init event function
+  auto event_func = [&](TcpServer::Event event, TcpServer &server, Socket fd) {
+    if (event == TcpServer::kEventAccept) {
+      // accept
+      std::cout << "accept " << fd.fd() << std::endl;
+
+    } else if (event == TcpServer::kEventRead) {
+      // read
+      string buf;
+      auto ser_rc = fd.Read(buf, msg.size());
+      std::cout << "read " << buf << std::endl;
+
+    } else if (event == TcpServer::kEventLeave) {
+      // leave
+      std::cout << "leave " << fd.fd() << std::endl;
+    } else {
+      // error event
+      std::cout << "dismiss " << fd.fd() << std::endl;
+    }
+  };
+  // register event function
+  server.Register(event_func);
+```
+### Connect to the server using socket
+```cpp
+  Socket sock;
+  auto rc = sock.Init();
+  if (rc != kSuccess) {
+    std::cout << "init socket wrong " << sock.err_msg() << std::endl;
+    return rc;
+  }
+  rc = sock.Connect(addr);
+  if (rc != kSuccess) {
+    std::cout << "connect wrong " << sock.err_msg() << std::endl;
+    return rc;
+  }
+  // write
+  string msg = "hello world";
+  rc = sock.Write(msg);
+  if (rc != kSuccess) {
+    std::cout << "write wrong " << sock.err_msg() << std::endl;
+    return rc;
+  }
+  // read
+  string buf;
+  rc = sock.Read(buf, msg.size());
+  if (rc <= 0) {
+    std::cout << "read wrong " << sock.err_msg() << std::endl;
+    return rc;
+  }
+  std::cout << "read " << buf << std::endl;
+  // close
+  rc = sock.Close();
+  if (rc != kSuccess) {
+    std::cout << "close wrong " << sock.err_msg() << std::endl;
+    return rc;
+  }
+```
+### Create HttpServer
+```cpp
+  HttpServer server;
+  auto rc = server.Init({"127.0.0.1", 8080});
+  if (rc != kSuccess) {
+    std::cout << "init server wrong " << server.err_msg() << std::endl;
+    return rc;
+  }
+  server.set_logger(std::make_shared<StdLogger>());
+  server.GET("/", [](HttpContext &ctx) {
+    ctx.resp().Success(HttpHeader::ContentType::kTextHtml,
+                       "<h1>Hello, World!</h1>");
+  });
+  rc = server.Run();
+  if (rc != kSuccess) {
+    std::cout << "run server wrong " << server.err_msg() << std::endl;
+    return rc;
+  }
+```
+### Create HttpsServer ssl
+```cpp
+  HttpServer server;
+  std::shared_ptr<SSLContext> ssl_ctx = std::make_shared<SSLContext>();
+  auto rc = ssl_ctx->InitSvrFile("./ssl/cacert.pem", "./ssl/privkey.pem");
+  if (rc != kSuccess) {
+    std::cout << "init ssl context wrong " << ssl_ctx->err_msg() << std::endl;
+    return rc;
+  }
+  rc = server.InitSSL({"127.0.0.1", 8080}, ssl_ctx);
+  if (rc != kSuccess) {
+    std::cout << "init server wrong " << server.err_msg() << std::endl;
+    return rc;
+  }
+  server.set_logger(std::make_shared<StdLogger>());
+  server.GET("/", [](HttpContext &ctx) {
+    ctx.resp().Success(HttpHeader::ContentType::kTextHtml,
+                       "<h1>Hello, World!</h1>");
+  });
+  rc = server.Run();
+  if (rc != kSuccess) {
+    std::cout << "run server wrong " << server.err_msg() << std::endl;
+    return rc;
+  }
+```
+### Create HttpClient
+```cpp
+  HttpClient client;
+  Address addr;
+  addr.InitWithDomain("www.androidftp.top", 80);
+  auto rc = client.Init(addr);
+  // If it is the https 443 port ssl
+  // auto rc = client.InitSSL(addr);
+  if (rc != kSuccess) {
+    std::cout << "init client wrong " << client.err_msg() << std::endl;
+    return rc;
+  }
+  HttpReq req;
+  req.GET("/");
+  HttpResp resp;
+  rc = client.Send(req, resp);
+  if (rc != kSuccess) {
+    std::cout << "send request wrong " << client.err_msg() << std::endl;
+    return rc;
+  }
+  std::string resp_str;
+  rc = resp.Build(resp_str);
+  if (rc != kSuccess) {
+    std::cout << "build response wrong " << resp.err_msg() << std::endl;
+    return rc;
+  }
+```
+### Timer trigger server
+- To use AddSoc to listen for the timesocket and wait for a trigger.
+```cpp
+  TcpServer server{addr};
+  auto rc = server.Init();
+  if (rc != kSuccess) {
+    std::cout << "init server wrong " << server.err_msg() << std::endl;
+    return rc;
+  }
+
+  TimerSocket timerfd(0, 1e5);
+  if (rc != kSuccess) {
+    std::cout << "init timerfd wrong " << timerfd.err_msg() << std::endl;
+    return rc;
+  }
+  rc = server.AddSoc(timerfd);
+```
 ## Source code structure
 - The repository structure is as follows
     - cppnet stores all source code and build files

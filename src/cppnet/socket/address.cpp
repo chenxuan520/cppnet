@@ -8,7 +8,6 @@
 #include <winsock2.h>
 #endif
 
-
 namespace cppnet {
 
 Address::Address() {
@@ -46,6 +45,10 @@ void Address::GetIPAndPort(std::string &ip, uint16_t &port) const {
   ip = inet_ntoa(addr_.sin_addr);
   port = ntohs(addr_.sin_port);
 }
+
+uint16_t Address::GetPort() const { return ntohs(addr_.sin_port); }
+
+std::string Address::GetIP() const { return inet_ntoa(addr_.sin_addr); }
 
 std::string Address::ToString() const {
   std::string ip;

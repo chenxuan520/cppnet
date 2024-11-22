@@ -30,6 +30,14 @@ public:
    */
   void GetIPAndPort(std::string &ip, uint16_t &port) const;
   /**
+   * @brief: Get ip from addr_.
+   */
+  std::string GetIP() const;
+  /**
+   * @brief: Get port from addr_.
+   */
+  uint16_t GetPort() const;
+  /**
    * @brief: Make to string
    */
   std::string ToString() const;

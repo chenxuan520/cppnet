@@ -106,6 +106,166 @@ int main() {
 2. 运行 `cd src;./build.sh` 生成的静态库在lib中
     - 需要 cmake
     - 需要编译器支持 C++17
+## More Demo
+- 更多demo参考 demo 文件夹和 test 文件夹
+### 创建TcpServer
+```cpp
+  Address addr{"128.0.0.1", 8080};
+  TcpServer server{addr};
+
+  // init server
+  auto rc = server.Init();
+  if (rc != kSuccess) {
+    std::cout << "init server wrong " << server.err_msg() << std::endl;
+    return rc;
+  }
+
+  // init event function
+  auto event_func = [&](TcpServer::Event event, TcpServer &server, Socket fd) {
+    if (event == TcpServer::kEventAccept) {
+      // accept
+      std::cout << "accept " << fd.fd() << std::endl;
+
+    } else if (event == TcpServer::kEventRead) {
+      // read
+      string buf;
+      auto ser_rc = fd.Read(buf, msg.size());
+      std::cout << "read " << buf << std::endl;
+
+    } else if (event == TcpServer::kEventLeave) {
+      // leave
+      std::cout << "leave " << fd.fd() << std::endl;
+    } else {
+      // error event
+      std::cout << "dismiss " << fd.fd() << std::endl;
+    }
+  };
+  // register event function
+  server.Register(event_func);
+```
+### socket连接服务器
+```cpp
+  Socket sock;
+  auto rc = sock.Init();
+  if (rc != kSuccess) {
+    std::cout << "init socket wrong " << sock.err_msg() << std::endl;
+    return rc;
+  }
+  rc = sock.Connect(addr);
+  if (rc != kSuccess) {
+    std::cout << "connect wrong " << sock.err_msg() << std::endl;
+    return rc;
+  }
+  // write
+  string msg = "hello world";
+  rc = sock.Write(msg);
+  if (rc != kSuccess) {
+    std::cout << "write wrong " << sock.err_msg() << std::endl;
+    return rc;
+  }
+  // read
+  string buf;
+  rc = sock.Read(buf, msg.size());
+  if (rc <= 0) {
+    std::cout << "read wrong " << sock.err_msg() << std::endl;
+    return rc;
+  }
+  std::cout << "read " << buf << std::endl;
+  // close
+  rc = sock.Close();
+  if (rc != kSuccess) {
+    std::cout << "close wrong " << sock.err_msg() << std::endl;
+    return rc;
+  }
+```
+### 创建httpserver
+```cpp
+  HttpServer server;
+  auto rc = server.Init({"127.0.0.1", 8080});
+  if (rc != kSuccess) {
+    std::cout << "init server wrong " << server.err_msg() << std::endl;
+    return rc;
+  }
+  server.set_logger(std::make_shared<StdLogger>());
+  server.GET("/", [](HttpContext &ctx) {
+    ctx.resp().Success(HttpHeader::ContentType::kTextHtml,
+                       "<h1>Hello, World!</h1>");
+  });
+  rc = server.Run();
+  if (rc != kSuccess) {
+    std::cout << "run server wrong " << server.err_msg() << std::endl;
+    return rc;
+  }
+```
+### 创建httpsserver ssl
+```cpp
+  HttpServer server;
+  std::shared_ptr<SSLContext> ssl_ctx = std::make_shared<SSLContext>();
+  auto rc = ssl_ctx->InitSvrFile("./ssl/cacert.pem", "./ssl/privkey.pem");
+  if (rc != kSuccess) {
+    std::cout << "init ssl context wrong " << ssl_ctx->err_msg() << std::endl;
+    return rc;
+  }
+  rc = server.InitSSL({"127.0.0.1", 8080}, ssl_ctx);
+  if (rc != kSuccess) {
+    std::cout << "init server wrong " << server.err_msg() << std::endl;
+    return rc;
+  }
+  server.set_logger(std::make_shared<StdLogger>());
+  server.GET("/", [](HttpContext &ctx) {
+    ctx.resp().Success(HttpHeader::ContentType::kTextHtml,
+                       "<h1>Hello, World!</h1>");
+  });
+  rc = server.Run();
+  if (rc != kSuccess) {
+    std::cout << "run server wrong " << server.err_msg() << std::endl;
+    return rc;
+  }
+```
+### 创建httpclient
+```cpp
+  HttpClient client;
+  Address addr;
+  addr.InitWithDomain("www.androidftp.top", 80);
+  auto rc = client.Init(addr);
+  // 如果是https 443 端口 ssl
+  // auto rc = client.InitSSL(addr);
+  if (rc != kSuccess) {
+    std::cout << "init client wrong " << client.err_msg() << std::endl;
+    return rc;
+  }
+  HttpReq req;
+  req.GET("/");
+  HttpResp resp;
+  rc = client.Send(req, resp);
+  if (rc != kSuccess) {
+    std::cout << "send request wrong " << client.err_msg() << std::endl;
+    return rc;
+  }
+  std::string resp_str;
+  rc = resp.Build(resp_str);
+  if (rc != kSuccess) {
+    std::cout << "build response wrong " << resp.err_msg() << std::endl;
+    return rc;
+  }
+```
+### 定时触发器server
+- 使用 AddSoc 监听timesocket, 等待触发即可
+```cpp
+  TcpServer server{addr};
+  auto rc = server.Init();
+  if (rc != kSuccess) {
+    std::cout << "init server wrong " << server.err_msg() << std::endl;
+    return rc;
+  }
+
+  TimerSocket timerfd(0, 1e5);
+  if (rc != kSuccess) {
+    std::cout << "init timerfd wrong " << timerfd.err_msg() << std::endl;
+    return rc;
+  }
+  rc = server.AddSoc(timerfd);
+```
 ## 源码结构
 - 仓库结构如下
 	- cppnet 放置所以的源码以及编译文件
