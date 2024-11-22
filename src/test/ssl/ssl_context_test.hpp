@@ -118,7 +118,8 @@ TEST(SSLContext, SSLServer) {
       std::string buf;
       auto rc = ssl_sock->Read(buf, 5, true);
       DEBUG(fd.fd() << " read " << buf);
-      MUST_TRUE(buf == msg, ssl_sock->err_msg());
+      MUST_TRUE(buf == msg,
+                "recv data error " + buf + " " + ssl_sock->err_msg());
     } break;
 
     case TcpServer::Event::kEventLeave: {
@@ -152,8 +153,11 @@ TEST(SSLContext, SSLServer) {
     MUST_TRUE(rc == 0, send_ssl_sock->err_msg());
     DEBUG("send_sock connected");
 
-    rc = send_ssl_sock->Write(msg);
-    MUST_TRUE(rc == 5, send_ssl_sock->err_msg());
+    rc = send_ssl_sock->Write(msg.substr(0, 2));
+    MUST_TRUE(rc == 2, send_ssl_sock->err_msg());
+    usleep(100);
+    rc = send_ssl_sock->Write(msg.substr(2));
+    MUST_TRUE(rc == 3, send_ssl_sock->err_msg());
     DEBUG("send_msg: " << msg);
 
     usleep(100);

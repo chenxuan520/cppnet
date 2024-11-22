@@ -31,13 +31,8 @@ public:
   inline std::string err_msg() const { return err_msg_; }
 
 protected:
-  inline int IORead(void *buf, size_t len, int flag = 0) override {
-    return SSL_read(ssl_, buf, len);
-  }
-
-  inline int IOWrite(const void *buf, size_t len, int flag = 0) override {
-    return SSL_write(ssl_, buf, len);
-  }
+  int IORead(void *buf, size_t len, int flag = 0) override;
+  int IOWrite(const void *buf, size_t len, int flag = 0) override;
 
 private:
   SSL *ssl_ = nullptr;

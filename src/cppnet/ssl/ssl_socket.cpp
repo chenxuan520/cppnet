@@ -60,6 +60,29 @@ int SSLSocket::Connect(Address &addr) {
   return kSuccess;
 }
 
+int SSLSocket::IORead(void *buf, size_t len, int flag) {
+  if (flag == MSG_WAITALL) {
+    auto rc = 0;
+    auto total_len = 0;
+    while (total_len < len) {
+      rc = SSL_read(ssl_, (char *)buf + total_len, len - total_len);
+      if (rc <= 0) {
+        err_msg_ = std::string("[syserr]:ssl complete read failed") +
+                   ERR_error_string(ERR_get_error(), nullptr);
+        return kSysErr;
+      }
+      total_len += rc;
+    }
+    return total_len;
+  } else {
+    return SSL_read(ssl_, buf, len);
+  }
+}
+
+int SSLSocket::IOWrite(const void *buf, size_t len, int flag) {
+  return SSL_write(ssl_, buf, len);
+}
+
 } // namespace cppnet
 
 #endif
