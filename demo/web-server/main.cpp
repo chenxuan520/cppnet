@@ -7,6 +7,7 @@
 #include "log/std_logger.hpp"
 #include "process_ctrl.hpp"
 #include "utils/file.hpp"
+#include "utils/version.hpp"
 #include <csignal>
 #include <ctime>
 #include <iostream>
@@ -179,11 +180,11 @@ int main(int argc, char *argv[]) {
   ArgcDeal args(argc, argv);
   args.app.name = "chenxuanweb server";
   args.app.pfunc = _main;
-  args.app.usage =
-      "thank using chenxuanweb,if you have any question\n"
-      "\tsend email to chenxuanweb@qq.com to deal problem,thank you!\n"
-      "\t! only in linux the argv is accepted\n";
-  args.app.version = "v2.0.1";
+  args.app.usage = {
+      "thank using chenxuanweb,if you have any question",
+      "send email to chenxuanweb@qq.com to deal problem,thank you!",
+      "only in linux the argv is accepted"};
+  args.app.version = Version::GetStr() + "  " + Version::GetDate();
   args.SetOption("reload", "restart the server");
   args.SetOption("stop", "stop the server");
   args.SetVar("config", "choose config file");

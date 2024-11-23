@@ -11,7 +11,7 @@ public:
   struct AppMsg {
     std::string name;
     std::string version;
-    std::string usage;
+    std::vector<std::string> usage;
     std::function<int(ArgcDeal &)> pfunc;
   };
 

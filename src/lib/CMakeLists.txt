@@ -50,5 +50,20 @@ aux_source_directory(../cppnet/log DIR_SRCS)
 file(GLOB HTTP_SRCS "../cppnet/http/*/*.cpp" "../cppnet/http/*/*/*.cpp")
 list(APPEND DIR_SRCS ${HTTP_SRCS})
 
+# record git hash version
+# add commit_version_output to macro
+execute_process(
+	COMMAND git describe --tags --always
+	OUTPUT_VARIABLE CPPNET_VERSION
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+add_definitions(-DCPPNET_VERSION="${CPPNET_VERSION}")
+execute_process(
+	COMMAND git log -1 --pretty=format:"%cd" --date=format:"%Y-%m-%d"
+	OUTPUT_VARIABLE CPPNET_VERSION_DATE
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+add_definitions(-DCPPNET_VERSION_DATE="${CPPNET_VERSION_DATE}")
+
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 add_library(cppnet STATIC ${DIR_SRCS})

@@ -45,7 +45,9 @@ int ArgcDeal::MsgPrint() {
   printf("app name:\n");
   printf("\t%s  %s\n", app.name.c_str(), app.version.c_str());
   printf("usage:\n");
-  printf("\t%s\n", app.usage.c_str());
+  for (auto &iter : app.usage) {
+    printf("\t%s\n", iter.c_str());
+  }
   printf("options:\n");
   for (auto iter : message_) {
     printf("\t--%-32s %-32s\n", iter.first.c_str(), iter.second.c_str());
