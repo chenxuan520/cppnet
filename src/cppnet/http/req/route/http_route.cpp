@@ -24,13 +24,15 @@ int HttpRoute::Parse(const std::string &origin_path) {
   StringUtil::Split(origin_param, delimiter, single_param);
   // parse param
   for (auto &it : single_param) {
+    std::string key = "", value = "";
     size_t pos = it.find("=");
     if (pos == std::string::npos) {
-      err_msg_ = "param format error";
-      return kLogicErr;
+      // value is empty
+      key = it;
+    } else {
+      key = it.substr(0, pos);
+      value = StringUtil::UrlDecode(it.substr(pos + 1));
     }
-    std::string key = it.substr(0, pos);
-    std::string value = StringUtil::UrlDecode(it.substr(pos + 1));
     params_[key] = value;
   }
   path_ = origin_path.substr(0, param_start);
