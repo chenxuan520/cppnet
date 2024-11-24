@@ -5,8 +5,9 @@ rm ../bin/webserver
 
 mkdir -p build
 cd build
-cmake ..
+cmake  -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ..
 make
+cp ./compile_commands.json ..
 cd ..
 
 mv ./build/webserver ../bin

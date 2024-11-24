@@ -43,6 +43,6 @@ TEST(HttpClient, Https) {
                 HttpStatusCodeUtil::ConvertToStr(resp.status_code()) + "\r\n" +
                 resp_str);
   MUST_TRUE(rc == 0, resp.err_msg());
-  DEBUG(resp_str);
+  // DEBUG(resp_str);
 }
 #endif

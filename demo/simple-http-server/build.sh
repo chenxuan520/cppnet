@@ -5,8 +5,10 @@ rm ./demo
 
 mkdir -p build
 cd build
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ..
 cmake ..
 make
+cp ./compile_commands.json ..
 cd ..
 
 mv ./build/demo ../bin

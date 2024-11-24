@@ -159,18 +159,12 @@ int _main(ArgcDeal &args) {
     exit(0);
   }
 
-  Json json;
-  auto re = json.Parse(config_str.c_str());
-  if (!re) {
-    cout << "parse json err " << json.err_msg() << endl;
-  }
-  if (json.err_msg() != nullptr) {
-    cout << "parse json err " << json.err_msg() << endl;
-    exit(0);
-  }
-
   Config config;
-  config.Parse(json.GetRootObj());
+  rc = Json::Parse(config_str, config);
+  if (rc != 0) {
+    cout << "parse config error" << endl;
+    exit(-1);
+  }
 
   RunWithConfig(config);
   return 0;

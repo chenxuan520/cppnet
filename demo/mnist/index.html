@@ -15,7 +15,7 @@
             margin: 0;
         }
 
-       .canvas-container {
+        .canvas-container {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -32,12 +32,14 @@
             text-align: center;
             margin: 0;
             position: relative;
-            top: -70px; /* 根据实际情况微调此值以使mnist在画布正上方合适位置 */
+            top: -70px;
+            /* 根据实际情况微调此值以使mnist在画布正上方合适位置 */
         }
 
         button {
             display: block;
-            margin: 10px auto 0; /* 上下边距为10px，左右自动居中 */
+            margin: 10px auto 0;
+            /* 上下边距为10px，左右自动居中 */
             padding: 10px 20px;
             font-size: 16px;
             background-color: #4CAF50;
@@ -45,6 +47,7 @@
             border: none;
             border-radius: 4px;
         }
+
     </style>
 </head>
 
@@ -106,7 +109,7 @@
                 drawPoint(x, y, true);
 
                 // 如果上一次鼠标位置有效，填充上一次位置到当前位置之间的点为黑色
-                if (lastMouseX!== -1 && lastMouseY!== -1) {
+                if (lastMouseX !== -1 && lastMouseY !== -1) {
                     fillPointsBetween(lastMouseX, lastMouseY, x, y);
                 }
 
@@ -120,8 +123,8 @@
         function fillPointsBetween(x1, y1, x2, y2) {
             const dx = Math.abs(x2 - x1);
             const dy = Math.abs(y2 - y1);
-            const sx = x1 < x2? 1 : -1;
-            const sy = y1 < y2? 1 : -1;
+            const sx = x1 < x2 ? 1 : -1;
+            const sy = y1 < y2 ? 1 : -1;
             let err = dx - dy;
 
             while (true) {
@@ -144,7 +147,7 @@
         }
 
         // 鼠标松开事件处理函数，这里不再自动提交，仅记录位置
-        canvas.addEventListener('mouseup', function () {
+        canvas.addEventListener('mouseup', function (e) {
             // 更新上一次鼠标位置（虽然此时鼠标松开，但记录最后位置以便后续操作）
             const rect = canvas.getBoundingClientRect();
             const x = Math.floor((e.clientX - rect.left) / pointSize);
@@ -168,22 +171,26 @@
                     'Content-Type': 'application/json'
                 }
             })
-         .then(function (response) {
+                .then(function (response) {
                     const result = response.data.result;
                     alert('返回结果：' + result);
 
                     // 重置画布和数据数组
                     resetCanvas();
                 })
-         .then(function (error) {
-                    console.error('请求出错：', error);
+                .then(function (error) {
+                    // error not null
+                    if (error) {
+                        console.error('请求出错：', error);
+                    }
                 });
+
         });
 
         // 绘制单个点的函数
         function drawPoint(x, y, isBlack) {
             if (x >= 0 && x < 28 && y >= 0 && y < 28) {
-                pointsArray[y][x] = isBlack? 1 : 0;
+                pointsArray[y][x] = isBlack ? 1 : 0;
 
                 const rect = canvas.getBoundingClientRect();
                 const pointX = x * pointSize;
@@ -191,7 +198,7 @@
 
                 ctx.beginPath();
                 ctx.rect(pointX, pointY, pointSize, pointSize);
-                ctx.fillStyle = isBlack? 'black' : 'white';
+                ctx.fillStyle = isBlack ? 'black' : 'white';
                 ctx.fill();
             }
         }

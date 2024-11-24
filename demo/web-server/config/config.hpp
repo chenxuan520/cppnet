@@ -8,10 +8,11 @@ struct RedirectConfig {
   std::string route;
   std::string redirect;
   std::string host;
-  void Parse(Json::Object &json) {
+  int ParseFromJson(Json::Object &json) {
     route = json["route"].str_val;
     redirect = json["redirect"].str_val;
     host = json["host"].str_val;
+    return 0;
   }
 };
 
@@ -19,10 +20,11 @@ struct StaticConfig {
   std::string route;
   std::string path;
   std::string host;
-  void Parse(Json::Object &json) {
+  int ParseFromJson(Json::Object &json) {
     route = json["route"].str_val;
     path = json["path"].str_val;
     host = json["host"].str_val;
+    return 0;
   }
 };
 
@@ -30,10 +32,11 @@ struct SSLConfig {
   std::string cert_path;
   std::string key_path;
   std::string password;
-  void Parse(Json::Object &json) {
+  int ParseFromJson(Json::Object &json) {
     cert_path = json["cert_path"].str_val;
     key_path = json["key_path"].str_val;
     password = json["password"].str_val;
+    return 0;
   }
 };
 
@@ -46,7 +49,7 @@ struct Config {
   std::vector<RedirectConfig> redirects;
   std::vector<StaticConfig> statics;
   SSLConfig ssl;
-  void Parse(Json::Object &json) {
+  int ParseFromJson(Json::Object &json) {
     port = json["port"].int_val;
     host = json["host"].str_val;
     is_background = json["is_background"].bool_val;
@@ -54,16 +57,17 @@ struct Config {
     log_path = json["log_path"].str_val;
     for (int i = 0; i < json["redirects"].arr.size(); i++) {
       RedirectConfig redirect;
-      redirect.Parse(json["redirects"][i]);
+      redirect.ParseFromJson(json["redirects"][i]);
       redirects.push_back(redirect);
     }
     for (int i = 0; i < json["statics"].arr.size(); i++) {
       StaticConfig sta;
-      sta.Parse(json["statics"][i]);
+      sta.ParseFromJson(json["statics"][i]);
       statics.push_back(sta);
     }
     if (json["ssl"] != Json::npos()) {
-      ssl.Parse(json["ssl"]);
+      ssl.ParseFromJson(json["ssl"]);
     }
+    return 0;
   }
 };

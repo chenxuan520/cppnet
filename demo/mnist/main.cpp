@@ -11,6 +11,31 @@ using namespace cppnet;
 using namespace cppjson;
 using namespace deeplearning;
 
+struct MnistReq {
+  vector<vector<int>> data;
+  int ParseFromJson(Json::Object &obj) {
+    auto &data_obj = obj["data"];
+    for (int i = 0; i < data_obj.arr.size(); i++) {
+      data.push_back(vector<int>());
+      for (int j = 0; j < data_obj[i].arr.size(); j++) {
+        data[i].push_back(data_obj[i][j].int_val);
+      }
+    }
+    return 0;
+  }
+};
+
+struct MnistResp {
+  int code;
+  string msg;
+  int result;
+  void DumpToJson(Json::Node &node) {
+    node["code"] = code;
+    node["msg"] = msg;
+    node["result"] = result;
+  }
+};
+
 int GetMnistResult(const vector<vector<int>> &mnist_data) {
   NeuralNetwork network;
   NeuralNetwork::NetworkParam param;
@@ -62,47 +87,43 @@ int main() {
   server.set_logger(std::make_shared<StdLogger>());
 
   server.POST("/mnist", [](HttpContext &ctx) {
+    const int arr_size = 28;
     auto raw_data = ctx.req().body();
-    Json req_json, resp_json;
-    auto is_success = req_json.Parse(raw_data.c_str());
-    if (!is_success) {
-      resp_json["code"] = 400;
-      resp_json["msg"] = string("parse json wrong ") + req_json.err_msg();
-      ctx.resp().BadRequest(resp_json());
+    MnistReq req;
+    MnistResp resp;
+    auto rc = Json::Parse(raw_data, req);
+    if (rc != 0) {
+      resp.code = int(HttpStatusCode::BAD_REQUEST);
+      resp.msg = string("parse json wrong ");
+      ctx.resp().BadRequest(Json::Dump(resp));
       return;
     }
-    vector<vector<int>> mnist_data(28);
-    auto obj = req_json.GetRootObj();
-    if (obj["data"].arr.size() != 28) {
-      resp_json["code"] = 400;
-      resp_json["msg"] =
-          "data size must be 28 " + to_string(obj["data"].arr.size());
-      ctx.resp().BadRequest(resp_json());
+    if (req.data.size() != arr_size) {
+      resp.code = int(HttpStatusCode::BAD_REQUEST);
+      resp.msg = string("data size must be 28 ");
+      ctx.resp().BadRequest(Json::Dump(resp));
+      return;
     }
-    for (auto i = 0; i < 28; i++) {
-      if (obj["data"].arr[i]->arr.size() != 28) {
-        resp_json["code"] = 400;
-        resp_json["msg"] =
-            "data size must be 28 " + to_string(obj["data"].arr[i]->arr.size());
-        ctx.resp().BadRequest(resp_json());
+    for (auto i = 0; i < arr_size; i++) {
+      if (req.data[i].size() != arr_size) {
+        resp.code = int(HttpStatusCode::BAD_REQUEST);
+        resp.msg = string("data size must be 28 ");
+        ctx.resp().BadRequest(Json::Dump(resp));
         return;
-      }
-      for (auto j = 0; j < 28; j++) {
-        mnist_data[i].push_back(obj["data"].arr[i]->arr[j]->int_val);
       }
     }
     // print mnist_data in stdio
-    for (auto i = 0; i < 28; i++) {
-      for (auto j = 0; j < 28; j++) {
-        cout << mnist_data[i][j];
+    for (auto i = 0; i < arr_size; i++) {
+      for (auto j = 0; j < arr_size; j++) {
+        cout << req.data[i][j];
       }
       cout << endl;
     }
 
-    resp_json["code"] = 200;
-    resp_json["msg"] = "ok";
-    resp_json["result"] = GetMnistResult(mnist_data);
-    ctx.resp().SuccessWithJson(resp_json());
+    resp.result = GetMnistResult(req.data);
+    resp.code = int(HttpStatusCode::OK);
+    resp.msg = string("ok");
+    ctx.resp().SuccessWithJson(Json::Dump(resp));
   });
 
   server.StaticFile("/", "./index.html");
