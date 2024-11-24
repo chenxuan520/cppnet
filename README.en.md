@@ -3,6 +3,7 @@
 - Avoids the bloatiness of the previous cppweb single header file, and uses a more friendly way of using
 ![](https://chenxuanweb.top/cppnet/cppnet.png)
 ## Author
+- **chenxuan**
 > ![](http://cdn.androidftp.top/pic/chenxuanweb/dog.png)
 ## Docs
 - [cppnet online docs](https://chenxuan520.github.io/cppnet/)
