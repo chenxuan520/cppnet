@@ -8,6 +8,18 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(ENABLE_SSL ON)
 add_definitions(-DCPPNET_OPENSSL)
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+	set(OPENSSL_VERSION "")
+	execute_process(
+		COMMAND brew list --versions openssl
+		OUTPUT_VARIABLE OPENSSL_VERSION_OUTPUT
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+	string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" OPENSSL_VERSION "${OPENSSL_VERSION_OUTPUT}")
+
+	include_directories(/opt/homebrew/Cellar/openssl@3/${OPENSSL_VERSION}/include)
+	link_directories(/opt/homebrew/Cellar/openssl@3/${OPENSSL_VERSION}/lib)
+endif()
 # link_libraries(-lssl -lcrypto)
 
 add_subdirectory(../../src/lib cppnet)

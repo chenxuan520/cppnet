@@ -3,6 +3,8 @@ bin
 build
 pack
 compile_commands.json
+metrics*
+*.png
 .cache
 test_bin
 .clangd

@@ -277,18 +277,38 @@ int main() {
 	- build.sh 生成 lib 静态库以及 单元测试的二进制文件
     - docs 是接口文档
     - demo 是参考的事例
+    - bench 是性能测试
 ```tree
 .
 ├── LICENSE
+├── README.en.md
 ├── README.md
+├── bench
+│   ├── build.sh
+│   └── init.sh
+├── demo
+│   ├── asset
+│   ├── build.sh
+│   ├── mnist
+│   ├── pack
+│   ├── simple-http-server
+│   ├── use-lib-server
+│   ├── use-lib-server-ssl
+│   ├── util
+│   └── web-server
+├── docs
+│   ├── cppnet
+│   └── update.sh
 └── src
-    ├── build.sh
     ├── CMakeLists.txt
+    ├── build.sh
     ├── cppnet
     ├── lib
     ├── release.sh
     ├── test
-    └── third_party
+    ├── third_party
+    └── win_release.sh
+
 ```
 - 源码主要放置在 `src/cppnet`
 ```txt
@@ -393,5 +413,5 @@ cppnet
 - [x] 支持SSL
 - [x] accept 改造
 - [x] 完善多线程
-- [ ] 添加压力测试
+- [x] 添加压力测试
 - [ ] 提升trie

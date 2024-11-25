@@ -30,8 +30,8 @@ int main() {
     ctx.resp().Redirect("https://chenxuanweb.top");
   });
 
-  server.StaticDir("/", "./blog-home");
-  server.StaticFile("/", "./blog-home/index.html");
+  server.StaticFile("/", "../asset/index.html");
+  server.StaticDir("/", "../asset/blog-home/");
 
   rc = server.Run();
   if (rc != 0) {

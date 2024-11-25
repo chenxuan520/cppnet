@@ -275,18 +275,38 @@ int main() {
     - build.sh generates the lib static library and the unit test binary file
     - docs is the interface documentation
     - demo is the reference example
+    - bench is the benchmark
 ```tree
 .
 ├── LICENSE
+├── README.en.md
 ├── README.md
+├── bench
+│   ├── build.sh
+│   └── init.sh
+├── demo
+│   ├── asset
+│   ├── build.sh
+│   ├── mnist
+│   ├── pack
+│   ├── simple-http-server
+│   ├── use-lib-server
+│   ├── use-lib-server-ssl
+│   ├── util
+│   └── web-server
+├── docs
+│   ├── cppnet
+│   └── update.sh
 └── src
-    ├── build.sh
     ├── CMakeLists.txt
+    ├── build.sh
     ├── cppnet
     ├── lib
     ├── release.sh
     ├── test
-    └── third_party
+    ├── third_party
+    └── win_release.sh
+
 ```
 - The source code is mainly placed in `src/cppnet`.
 ```txt
@@ -372,4 +392,3 @@ cppnet
 ```
 ### Class Diagram
 ![](http://cdn.androidftp.top/test/2024111122224337cppnet.drawio.png)
-## TODO

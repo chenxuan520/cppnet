@@ -1,5 +1,5 @@
 {
-	"port":5200,
+	"port":8080,
 	"host":"127.0.0.1",
 	"is_background":false,
 	"is_guard":false,
@@ -13,19 +13,19 @@
 	"statics":[
 		{
 			"route":"/",
-			"path":"./index.html"
+			"path":"../asset/index.html"
 		},
 		{
 			"route":"/home",
-			"path":"./blog-home/index.html"
+			"path":"../asset/blog-home/index.html"
 		},
 		{
 			"route":"/",
-			"path":"./blog-home"
+			"path":"../asset/blog-home"
 		}
 	],
 	"ssl":{
-		"cert_path":"./ssl/cert_demo.pem",
-		"key_path":"./ssl/cert_key.pem"
+		"cert_path":"./ssl/cacert.pem",
+		"key_path":"./ssl/privkey.pem"
 	}
 }

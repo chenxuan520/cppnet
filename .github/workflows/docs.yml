@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - 'docs/**'
+      - 'bench/**'
       - '.github/workflows/docs.yml'
       - 'README.md'
       - 'README.en.md'
@@ -27,6 +28,17 @@ jobs:
           mv ./cppnet/README.md Home.md
           mv ./cppnet/README.en.md .
           cd ..
+
+      - name: Run Benchtest
+        run: |
+          cd ./bench
+          ./init.sh
+          ./build.sh
+          python3 ./plot.py
+          mkdir -p ../book/img
+          mv ./result.png ../book/img/
+          cd ..
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
