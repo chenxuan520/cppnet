@@ -107,8 +107,16 @@ int main() {
     - Requires cmake
     - Requires a compiler that supports C++17
 ## Performance Testing
-- Automatically run updates based on the code committed each time.
-![](https://chenxuan520.github.io/cppnet/img/result.png)
+- Automated testing is performed using ubuntu-latest from github action, with machine configuration [refer to](https://docs.github.com/zh/actions/writing-workflows/choosing-where-your-workflow-runs/choosing-the-runner-for-a-job#%E7%94%A8%E4%BA%8E%E5%85%AC%E5%85%B1%E5%AD%98%E5%82%A8%E5%BA%93%E7%9A%84-github-%E6%89%98%E7%AE%A1%E7%9A%84%E6%A0%87%E5%87%86%E8%BF%90%E8%A1%8C%E5%99%A8)
+    - 4 cores, 16GB of memory, and 14GB of hard disk
+- Automatically run updated test results based on each commit's code, referring to the scripts in the bench folder, and the hash value will also be in the picture.
+- Use [vegeta](https://github.com/tsenart/vegeta) for stress testing, testing at different QPS respectively
+    - Average response time
+    - p99 response time
+    - Accuracy
+    - Wait time
+- Compare cppnet framework and go gin framework, and implement the same function with both
+
 ## More Demo
 - More demo references can be found in the "demo" folder and the "test" folder.
 ### Create a TcpServer

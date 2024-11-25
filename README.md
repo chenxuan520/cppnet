@@ -109,7 +109,15 @@ int main() {
     - 需要 cmake
     - 需要编译器支持 C++17
 ## 性能测试
-- 根据每次 commit 的代码自动运行更新
+- 使用 github action的ubuntu-latest进行自动化测试, 机器配置[参考](https://docs.github.com/zh/actions/writing-workflows/choosing-where-your-workflow-runs/choosing-the-runner-for-a-job#%E7%94%A8%E4%BA%8E%E5%85%AC%E5%85%B1%E5%AD%98%E5%82%A8%E5%BA%93%E7%9A%84-github-%E6%89%98%E7%AE%A1%E7%9A%84%E6%A0%87%E5%87%86%E8%BF%90%E8%A1%8C%E5%99%A8)
+    - 4核 16G 内存 14G 硬盘
+- 根据每次 commit 的代码自动运行更新测试结果, 参考 bench 文件夹下脚本, 图片中也会有 hash 值
+- 使用 [vegeta](https://github.com/tsenart/vegeta) 进行压力测试, 分别测试在不同QPS下
+    - 平均响应时间
+    - p99 响应时间
+    - 正确率
+    - 等待时间
+- 使用 cppnet 框架 和 go gin 框架进行对比, 使用两者实现同样的功能
 ![](https://chenxuan520.github.io/cppnet/img/result.png)
 ## More Demo
 - 更多demo参考 demo 文件夹和 test 文件夹

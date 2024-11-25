@@ -1,6 +1,7 @@
 *.out
 bin
 build
+demo
 pack
 compile_commands.json
 metrics*
