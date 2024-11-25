@@ -12,7 +12,7 @@ y_right_rate = np.array([])
 arr = []
 
 i = 500
-while i < 7000:
+while i < 5000:
     # load metrics{i}.json file as json, append to arr
     with open(f'metrics{i}.json', 'r') as f:
         data = json.load(f)
@@ -42,4 +42,4 @@ axs[1].set_title('Right Rate vs QPS')
 
 fig.tight_layout()
 plt.savefig('result.png')
-plt.show()
+# plt.show()

@@ -9,7 +9,7 @@ cd $path
 
 echo -e "\nBegin bench test"
 
-for ((i=500; i< 7000; i+=500)); do
+for ((i=500; i< 5000; i+=500)); do
 
     cd ../demo/simple-http-server
     # ./build.sh
