@@ -7,6 +7,7 @@ on:
     paths:
       - 'docs/**'
       - 'bench/**'
+      - 'src/cppnet/**'
       - '.github/workflows/docs.yml'
       - 'README.md'
       - 'README.en.md'

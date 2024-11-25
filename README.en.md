@@ -106,6 +106,9 @@ int main() {
 2. Run `cd src;./build.sh` to generate the static library in lib
     - Requires cmake
     - Requires a compiler that supports C++17
+## Performance Testing
+- Automatically run updates based on the code committed each time.
+![](https://chenxuan520.github.io/cppnet/img/result.png)
 ## More Demo
 - More demo references can be found in the "demo" folder and the "test" folder.
 ### Create a TcpServer

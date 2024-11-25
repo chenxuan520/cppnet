@@ -108,6 +108,9 @@ int main() {
 2. 运行 `cd src;./build.sh` 生成的静态库在lib中
     - 需要 cmake
     - 需要编译器支持 C++17
+## 性能测试
+- 根据每次 commit 的代码自动运行更新
+![](https://chenxuan520.github.io/cppnet/img/result.png)
 ## More Demo
 - 更多demo参考 demo 文件夹和 test 文件夹
 ### 创建TcpServer
