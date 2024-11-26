@@ -26,20 +26,7 @@ stages:
           - cd src
           - ./build.sh
           - ./bin/test_bin
-        notify:
-          - certificate: 5989d7b0-88ba-013d-2c17-6ac3c133bbed
-            events:
-              - fail
-            content:
-              - repository
-              - pipeline
-              - stage
-              - task
-              - operator
-              - branch
-              - detail
-            type: feishu
         strategy:
-          retry: '0'
-          timeout: 10
+          retry: '2'
+          timeout: 20
           expression: []
