@@ -40,5 +40,6 @@
 - 信息打印到标准输入输出
 ### FileLogger
 - 信息打印到文件中, 通过 `Init` 函数制定文件位置
+- **经过测试性能约为每秒 150万 条日志**,测试基准为ubuntu 4核16G SSD
 ### MultiLogger
 - 做个logger 作为init, 同时打听到多个logger中

@@ -7,7 +7,7 @@ cd ../demo/simple-http-server
 ./build.sh
 cd $path
 
-end=5500
+end=4000
 begin=500
 step=500
 

@@ -18,7 +18,7 @@ y_wait = np.array([])
 y_wait_gin = np.array([])
 
 begin = 500
-end = 5500
+end = 4000
 step = 500
 
 i = begin
