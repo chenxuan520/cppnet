@@ -29,7 +29,7 @@ INIT(Main) {
 
   GO([&]() {
     // max run time
-    sleep(10);
+    sleep(15);
     WARNING("Test Task Cost Too Much Time, Killed");
     exit(-1);
   });

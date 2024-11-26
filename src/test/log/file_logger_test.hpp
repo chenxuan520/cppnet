@@ -64,3 +64,14 @@ TEST(FileLogger, FirstWrite) {
   MUST_TRUE(count == write_time * 5,
             to_string(count) + " != " + to_string(write_time * 5));
 }
+
+BENCHMARK(FileLogger, WriteRate) {
+  const std::string file_path = "file_benct_test.log";
+  const std::string write_msg = "[test]:test-for-benchmark";
+  auto logger = std::make_shared<FileLogger>();
+  logger->Init(file_path);
+
+  DEFER_DEFAULT { File::Remove(file_path); };
+
+  BENCHFUNC([&]() { logger->Debug(write_msg); });
+}

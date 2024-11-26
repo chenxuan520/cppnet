@@ -1,7 +1,7 @@
 #!/bin/bash
 mkdir -p ../bin
 mkdir -p ../pack/simple-http-server
-rm ./demo
+rm ../bin/demo
 
 mkdir -p build
 cd build

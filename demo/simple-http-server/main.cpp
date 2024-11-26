@@ -7,6 +7,7 @@ using namespace std;
 
 int main() {
   HttpServer server;
+  // server.server().set_mode(TcpServer::kMixed);
   auto rc = server.Init({"127.0.0.1", 8080});
   // auto ssl_context = make_shared<SSLContext>();
   // auto rc =
