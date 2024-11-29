@@ -29,15 +29,8 @@ void Trie::Reset() {
 }
 
 bool Trie::Check(const std::string &key) const {
-  Node *temp = root_;
-  for (unsigned i = 0; i < key.size(); i++) {
-    if (temp->next_[key[i]] == nullptr) {
-      return false;
-    } else {
-      temp = temp->next_[key[i]];
-    }
-  }
-  if (temp->stop_ == false) {
+  auto node = GetNode(key);
+  if (node == nullptr) {
     return false;
   }
   return true;

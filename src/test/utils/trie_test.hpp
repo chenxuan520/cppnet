@@ -29,6 +29,7 @@ TEST(Trie, Test) {
 
   ptr = trie.Get<int>("hello.world");
   MUST_TRUE(ptr != nullptr, "Get data failed");
+  MUST_TRUE(trie.Check("hello.world"), "Get wrong data");
   MUST_TRUE(*ptr == 3, "Get wrong data");
 
   ptr = trie.Get<int>("hello.world.cppnet.cppnet.cppnet");

@@ -8,7 +8,6 @@
 
 namespace cppnet {
 
-// Because of template,so cannot use cpp file
 class Trie {
 public:
   Trie();
