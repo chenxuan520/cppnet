@@ -55,7 +55,7 @@ int HttpGroup::RegisterHandler(
     const std::string &path, HttpCallback callback,
     const std::vector<std::shared_ptr<HttpFilter>> &filters,
     bool is_exact_match) {
-  auto pdata = trie_.Get(path);
+  auto pdata = trie_.Get<TrieDataType>(path);
   if (pdata == nullptr) {
     auto set_data = std::make_shared<TrieDataType>();
     set_data->push_back(HttpTrieData{callback, is_exact_match, filters});
@@ -366,30 +366,30 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
 
   // step2:find route and run func
   HttpContext ctx(req, resp, soc);
-  trie_.Search(path,
-               [&](std::shared_ptr<TrieDataType> pdata, bool is_end) -> bool {
-                 auto &data = *pdata;
-                 for (auto &node : data) {
-                   auto route_func = node.callback;
-                   if (!is_end && node.is_exact_match) {
-                     continue;
-                   }
-                   for (auto filter : node.filters) {
-                     auto is_match = filter->IsMatchFilter(req);
-                     if (!is_match) {
-                       route_func = nullptr;
-                       break;
-                     }
-                   }
-                   if (route_func) {
-                     route_func(ctx);
-                     if (!is_continue_) {
-                       return false;
-                     }
-                   }
-                 }
-                 return true;
-               });
+  trie_.Search<TrieDataType>(
+      path, [&](std::shared_ptr<TrieDataType> pdata, bool is_end) -> bool {
+        auto &data = *pdata;
+        for (auto &node : data) {
+          auto route_func = node.callback;
+          if (!is_end && node.is_exact_match) {
+            continue;
+          }
+          for (auto filter : node.filters) {
+            auto is_match = filter->IsMatchFilter(req);
+            if (!is_match) {
+              route_func = nullptr;
+              break;
+            }
+          }
+          if (route_func) {
+            route_func(ctx);
+            if (!is_continue_) {
+              return false;
+            }
+          }
+        }
+        return true;
+      });
 
   // step3:build resp and send
   if (resp.status_code() == HttpStatusCode::UNKNOWN) {

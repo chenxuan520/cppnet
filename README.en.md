@@ -8,6 +8,8 @@
 ## Repository Address
 - [github](https://github.com/chenxuan520/cppnet)
 - [gitee](https://gitee.com/chenxuan520/cppnet)
+## Official Website
+- [chenxuanweb.top/cppnet/index.html](https://chenxuanweb.top/cppnet/index.html)
 ## Docs
 - [cppnet online docs](https://chenxuan520.github.io/cppnet/)
 ## Advantages
@@ -124,7 +126,7 @@ int main() {
 - More demo references can be found in the "demo" folder and the "test" folder.
 ### Create a TcpServer
 ```cpp
-  Address addr{"128.0.0.1", 8080};
+  Address addr{"127.0.0.1", 8080};
   TcpServer server{addr};
 
   // init server

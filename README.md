@@ -9,6 +9,8 @@
 ## 仓库地址
 - [github](https://github.com/chenxuan520/cppnet)
 - [gitee](https://gitee.com/chenxuan520/cppnet)
+## 官网
+- [chenxuanweb.top/cppnet/index.html](https://chenxuanweb.top/cppnet/index.html)
 ## Docs
 - [cppnet 在线文档地址](https://chenxuan520.github.io/cppnet/)
 ## 优势
@@ -126,7 +128,7 @@ int main() {
 - 更多demo参考 demo 文件夹和 test 文件夹
 ### 创建TcpServer
 ```cpp
-  Address addr{"128.0.0.1", 8080};
+  Address addr{"127.0.0.1", 8080};
   TcpServer server{addr};
 
   // init server
@@ -430,4 +432,4 @@ cppnet
 - [x] accept 改造
 - [x] 完善多线程
 - [x] 添加压力测试
-- [ ] 提升trie
+- [x] 提升trie

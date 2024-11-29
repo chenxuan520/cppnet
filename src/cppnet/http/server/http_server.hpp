@@ -71,7 +71,7 @@ using TrieDataType = std::vector<HttpTrieData>;
 
 class HttpGroup {
 protected:
-  HttpGroup(const std::string &route, Trie<TrieDataType> &trie,
+  HttpGroup(const std::string &route, Trie &trie,
             std::shared_ptr<Logger> logger)
       : route_(route), trie_(trie), logger_(logger) {};
 
@@ -169,7 +169,7 @@ public:
 
 protected:
   std::string route_;
-  Trie<TrieDataType> &trie_;
+  Trie &trie_;
   std::string err_msg_;
   std::shared_ptr<Logger> logger_ = std::make_shared<Logger>();
 };
@@ -238,7 +238,7 @@ private:
 
 private:
   TcpServer server_;
-  Trie<TrieDataType> trie_;
+  Trie trie_;
   bool is_continue_ = false;
   std::pair<int, int> read_timeout_{0, 0};
   std::pair<int, int> write_timeout_{0, 0};
