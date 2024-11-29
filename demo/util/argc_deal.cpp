@@ -36,6 +36,10 @@ int ArgcDeal::Run() {
   if (app.pfunc == NULL || arg_all_.find("h") != arg_all_.end() ||
       arg_all_.find("help") != arg_all_.end()) {
     return MsgPrint();
+  } else if (arg_all_.find("v") != arg_all_.end() ||
+             arg_all_.find("version") != arg_all_.end()) {
+    printf("app version:\t%s\n", app.version.c_str());
+    return 0;
   } else {
     return app.pfunc(*this);
   }
@@ -53,6 +57,7 @@ int ArgcDeal::MsgPrint() {
     printf("\t--%-32s %-32s\n", iter.first.c_str(), iter.second.c_str());
   }
   printf("\t--%-32s %-32s\n", "help,-h", "get help of app,no must");
+  printf("\t--%-32s %-32s\n", "version,-v", "get version of app,no must");
   return 0;
 }
 
