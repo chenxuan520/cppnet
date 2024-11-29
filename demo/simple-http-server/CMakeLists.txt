@@ -20,7 +20,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	include_directories(/opt/homebrew/Cellar/openssl@3/${OPENSSL_VERSION}/include)
 	link_directories(/opt/homebrew/Cellar/openssl@3/${OPENSSL_VERSION}/lib)
 endif()
-# link_libraries(-lssl -lcrypto)
+link_libraries(-lssl -lcrypto)
 
 add_subdirectory(../../src/lib cppnet)
 
