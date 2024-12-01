@@ -12,7 +12,7 @@ TcpServer server{addr};
 
 TEST(TcpServer, SigleClient) {
 #ifdef _WIN32
-  Address addr{"127.0.0.1",(uint16_t)(rand() % 1000 + 8000)};
+  Address addr{"127.0.0.1", (uint16_t)(rand() % 1000 + 8000)};
   server.set_addr(addr);
 #endif
 
@@ -75,7 +75,7 @@ TEST(TcpServer, SigleClient) {
 
 TEST(TcpServer, MultiClient) {
 #ifdef _WIN32
-  Address addr{"127.0.0.1",(uint16_t)(rand() % 1000 + 8000)};
+  Address addr{"127.0.0.1", (uint16_t)(rand() % 1000 + 8000)};
   server.set_addr(addr);
 #endif
 
@@ -193,7 +193,7 @@ TEST(TcpServer, MultiClient) {
 
 TEST(TcpServer, MultiThread) {
 #ifdef _WIN32
-  Address addr{"127.0.0.1",(uint16_t)(rand() % 1000 + 8000)};
+  Address addr{"127.0.0.1", (uint16_t)(rand() % 1000 + 8000)};
   server.set_addr(addr);
 #endif
   // init msg
@@ -287,7 +287,7 @@ TEST(TcpServer, MultiThread) {
 
 TEST(TcpServer, MixMode) {
 #ifdef _WIN32
-  Address addr{"127.0.0.1",(uint16_t)(rand() % 1000 + 8000)};
+  Address addr{"127.0.0.1", (uint16_t)(rand() % 1000 + 8000)};
   server.set_addr(addr);
 #endif
   // SKIP();
@@ -374,7 +374,7 @@ TEST(TcpServer, MixMode) {
         string buf;
         cli_rc = client.Read(buf, 1);
         MUST_EQUAL(cli_rc, buf.size());
-        DEBUG("client read " << buf << " " << i);
+        DEBUG("client read " << buf);
 
         // close
         usleep(1000);

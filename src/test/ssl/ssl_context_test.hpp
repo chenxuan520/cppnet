@@ -68,6 +68,7 @@ TEST(SSLContext, SSLConnect) {
   recv_soc->Read(recv_msg, 5);
   DEBUG("recv_msg: " << recv_msg);
   MUST_TRUE(recv_msg == "hello", "recv data error " + recv_soc->err_msg());
+  recv_soc->Close();
 }
 
 TEST(SSLContext, SSLConnectData) {

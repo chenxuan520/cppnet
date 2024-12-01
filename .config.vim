@@ -52,7 +52,7 @@ let g:Term_project_task=[
 			\},
 			\{
 			\'name'       : 'debug',
-			\'command'    : './build.sh Debug',
+			\'command'    : './build.sh ON Debug',
 			\'mode'       : 'quickfix',
 			\'path'       : s:root.'/src',
 			\'close'      : 1,

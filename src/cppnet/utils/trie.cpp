@@ -50,7 +50,9 @@ void Trie::ForkNode(Node *node, int key_pos) {
   // clean node
   node->data_ = nullptr;
   node->stop_ = false;
-  node->next_.clear();
+  for (unsigned i = 0; i < node->next_.size(); i++) {
+    node->next_[i] = nullptr;
+  }
   node->next_[node->key_[key_pos]] = new_node;
   node->key_ = node->key_.substr(0, key_pos);
 }

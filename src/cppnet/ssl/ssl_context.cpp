@@ -78,6 +78,7 @@ int SSLContext::InitSvr(const std::string &cert_data,
   }
 
   X509 *cert = PEM_read_bio_X509(bio, nullptr, nullptr, nullptr);
+  BIO_free(bio);
   if (cert == nullptr) {
     err_msg_ = "[syserr]:read certificate failed";
     err_msg_ += ERR_error_string(ERR_get_error(), nullptr);
@@ -95,7 +96,7 @@ int SSLContext::InitSvr(const std::string &cert_data,
   if (!password.empty()) {
     SSL_CTX_set_default_passwd_cb_userdata(ctx, (void *)password.c_str());
   }
-
+  X509_free(cert);
   return Init(ctx);
 }
 
@@ -190,6 +191,7 @@ std::shared_ptr<SSLSocket> SSLContext::AcceptSSL(const Socket &soc) {
   if (rc < 0) {
     err_msg_ = std::string("[syserr]:ssl accept failed ") +
                ERR_error_string(ERR_get_error(), nullptr);
+    SSL_free(new_ssl);
     ERR_clear_error();
     return nullptr;
   }

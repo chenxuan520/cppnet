@@ -20,6 +20,9 @@ void FileLogger::Stop() {
     }
     cur_buffer_ = cur_buffer_->next;
   }
+  // for delete shared_ptr memory
+  cur_buffer_ = nullptr;
+  buffers_list_->next = nullptr;
 }
 
 int FileLogger::Init(const std::string &file_path) {

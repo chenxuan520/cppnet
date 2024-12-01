@@ -66,6 +66,10 @@ execute_process(
 )
 add_definitions(-DCPPNET_VERSION_DATE="${CPPNET_VERSION_DATE}")
 
+# for check memory
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=leak -fsanitize=undefined -fno-omit-frame-pointer")
+# link_libraries(-fsanitize=address -fsanitize=leak -fsanitize=undefined)
+
 set(EXECUTABLE_OUTPUT_PATH ../../bin)
 
 add_executable(test_bin ./main.cpp ${DIR_SRCS})
