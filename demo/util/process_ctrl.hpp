@@ -3,6 +3,7 @@
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
+#include <functional>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -17,7 +18,7 @@ public:
    *      2. If the child process is created, the parent process will exit.
    *      3. The child process will continue to run in the background.
    */
-  static int BackGround();
+  static void BackGround();
   /*
    * @brief Guard
    * @note 1. Fork a child process.
@@ -26,8 +27,15 @@ public:
    *      3. The child process will continue to run in the background.
    *      4. If the child process is killed, the parent process will fork a new
    * child process.
+   *      5. If the exit_code_handler is not null, the parent process will call,
+   * return code to control if continue to fork a new child process.
+   *      6. The parent process will sleep for wait_seconds before forking a new
+   * child
    */
-  static void Guard();
+  using ExitCodeHandler =
+      std::function<bool(int exit_code, bool is_normal_exit)>;
+  static void Guard(const ExitCodeHandler &exit_code_handler = nullptr,
+                    int wait_seconds = 5);
   /*
    * @brief Kill
    * @param pid

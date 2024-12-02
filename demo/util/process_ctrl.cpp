@@ -2,7 +2,7 @@
 
 namespace cppapp {
 
-int ProcessCtrl::BackGround() {
+void ProcessCtrl::BackGround() {
   int pid = 0;
 #ifndef _WIN32
   if ((pid = fork()) != 0) {
@@ -10,23 +10,31 @@ int ProcessCtrl::BackGround() {
     exit(0);
   }
 #endif
-  return pid;
 }
 
-void ProcessCtrl::Guard() {
-  const int wait_seconds = 5;
+void ProcessCtrl::Guard(const ExitCodeHandler &exit_code_handler,
+                        int wait_seconds) {
 #ifndef _WIN32
   signal(SIGINT, EndGuard);
   signal(SIGQUIT, EndGuard);
   signal(SIGTERM, EndGuard);
   while (1) {
     int pid = fork();
+    int status = 0;
     if (pid != 0) {
       child_pid_ = pid;
-      waitpid(pid, NULL, 0);
+      waitpid(pid, &status, 0);
+      if (exit_code_handler != nullptr) {
+        int exit_status = WEXITSTATUS(status);
+        auto is_continue = exit_code_handler(exit_status, WIFEXITED(status));
+        if (!is_continue) {
+          break;
+        }
+      }
       sleep(wait_seconds);
-    } else
+    } else {
       break;
+    }
   }
 #endif
 }

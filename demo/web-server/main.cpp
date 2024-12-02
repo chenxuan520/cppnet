@@ -26,7 +26,17 @@ void RunWithConfig(Config &config) {
   }
 
   if (config.is_guard) {
-    ProcessCtrl::Guard();
+    ProcessCtrl::Guard([](int exit_code, bool is_normal_exit) -> bool {
+      if (!is_normal_exit) {
+        cout << "child exit code:" << exit_code
+             << " not normal exit:" << is_normal_exit << endl;
+        return true;
+      } else {
+        cout << "child exit code:" << exit_code
+             << " normal exit:" << is_normal_exit << endl;
+        return false;
+      }
+    });
   }
 
   // get now time str
