@@ -200,15 +200,12 @@ int HttpServer::Run() {
   }
 #ifdef CPPNET_OPENSSL
   if (ssl_context_) {
-    logger_->Info("https server run in https://" + server_.addr().ToString() +
-                  "\r\n");
+    logger_->Info("https server run in https://" + server_.addr().ToString());
   } else {
-    logger_->Info("http server run in http://" + server_.addr().ToString() +
-                  "\r\n");
+    logger_->Info("http server run in http://" + server_.addr().ToString());
   }
 #else
-  logger_->Info("http server run in http://" + server_.addr().ToString() +
-                "\r\n");
+  logger_->Info("http server run in http://" + server_.addr().ToString());
 #endif
   auto rc = server_.EventLoop();
   if (rc != RC::kSuccess) {
