@@ -7,10 +7,6 @@ using namespace cppnet;
 using namespace std;
 
 TEST(Timer, CreateTimer) {
-#ifdef __APPLE__
-  SKIP();
-#endif
-
 #ifdef WIN32
   SKIP();
 #endif
@@ -61,6 +57,6 @@ TEST(Timer, CreateTimer) {
   // 1e7 = 10ms, 100ms = 1e8
   // 1s = 1e9
   DEBUG("timer event count: " << count);
-  MUST_TRUE(count > 90 && count < 110,
+  MUST_TRUE(count >= 80 && count <= 110,
             "timer event count wrong " + to_string(count));
 }

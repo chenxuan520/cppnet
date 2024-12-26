@@ -36,6 +36,17 @@ protected:
   inline int IOWrite(const void *buf, size_t len, int flag = 0) override {
     return ::write(fd_, buf, len);
   }
+
+#ifdef __APPLE__
+public:
+  int Close() override {
+    Socket::Close();
+    return Socket(send_fd_).Close();
+  }
+
+private:
+  int send_fd_ = -1;
+#endif
 };
 
 } // namespace cppnet
