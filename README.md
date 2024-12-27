@@ -97,7 +97,7 @@ int main() {
 	add_definitions(-DCPPNET_OPENSSL)
 	link_libraries(-lssl -lcrypto)
 	```
-	2. 如果是使用 Makefile 编译, 需要在编译选项中添加 `-L./cppnet/lib` 和 `-lcppnet`, 下面是一个 Makefile 编译 demo, 当然如果是ssl的编译也是同理添加 lib 库 和 **添加 PPNET_OPENSSL 宏**
+	2. 如果是使用 Makefile 编译, 需要在编译选项中添加 `-L./cppnet/lib` 和 `-lcppnet`, 下面是一个 Makefile 编译 demo, 当然如果是ssl的编译也是同理添加 lib 库 和 **添加 CPPNET_OPENSSL 宏**
 	```Makefile
 	all: libserver-makefile
 	

@@ -95,7 +95,7 @@ int main() {
     add_definitions(-DCPPNET_OPENSSL)
     link_libraries(-lssl -lcrypto)
     ```
-    2. If you are using Makefile to compile, you need to add `-L./cppnet/lib` and `-lcppnet` to the compilation options. Here is a Makefile compilation demo. Of course, if it is an SSL compilation, you also need to add the lib library and **add the PPNET_OPENSSL macro**.
+    2. If you are using Makefile to compile, you need to add `-L./cppnet/lib` and `-lcppnet` to the compilation options. Here is a Makefile compilation demo. Of course, if it is an SSL compilation, you also need to add the lib library and **add the CPPNET_OPENSSL macro**.
     ```Makefile
     all: libserver-makefile
     
