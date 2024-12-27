@@ -3,8 +3,6 @@
 
 #ifdef __linux__
 #include <sys/timerfd.h>
-#elif __APPLE__
-#include <thread>
 #endif
 
 #include <unistd.h>
@@ -55,26 +53,36 @@ int TimerSocket::Reset(int sec, int nsec) {
   send_fd_ = pipe_fd[1];
   status_ = kInit;
 
-  std::thread(
-      [](int send_fd, int sec, int nsec) {
-        uint64_t exp;
-        TimerSocket soc(send_fd);
-        while (true) {
-          std::this_thread::sleep_for(
-              std::chrono::nanoseconds((long long)(sec * 1e9) + nsec));
-          auto rc = soc.Write(&exp, sizeof(uint64_t));
-          if (rc <= 0) {
-            // close socket
-            break;
-          }
-        }
-      },
-      send_fd_, sec, nsec)
-      .detach();
+  auto timer_func = [=](int send_fd, int sec, int nsec) {
+    uint64_t exp;
+    TimerSocket soc(send_fd);
+    while (true) {
+      std::this_thread::sleep_for(
+          std::chrono::nanoseconds((long long)(sec * 1e9) + nsec));
+      auto rc = soc.Write(&exp, sizeof(uint64_t));
+      if (rc <= 0) {
+        // close socket
+        break;
+      }
+    }
+  };
+
+  thread_ = std::move(std::thread(timer_func, send_fd_, sec, nsec));
 
   return kSuccess;
 #else
   return kNotSupport;
 #endif
 }
+
+#ifdef __APPLE__
+int TimerSocket::Close() {
+  Socket::Close();
+  Socket(send_fd_).Close();
+  thread_.join();
+  send_fd_ = -1;
+  return 0;
+}
+#endif
+
 } // namespace cppnet

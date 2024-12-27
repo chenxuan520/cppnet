@@ -1,6 +1,10 @@
 #pragma once
 
 #include "../socket/socket.hpp"
+#ifdef __APPLE__
+#include <thread>
+#endif
+
 namespace cppnet {
 
 class TimerSocket : public Socket {
@@ -39,13 +43,11 @@ protected:
 
 #ifdef __APPLE__
 public:
-  int Close() override {
-    Socket::Close();
-    return Socket(send_fd_).Close();
-  }
+  int Close() override;
 
 private:
   int send_fd_ = -1;
+  std::thread thread_;
 #endif
 };
 
