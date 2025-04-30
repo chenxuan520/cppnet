@@ -16,6 +16,7 @@
 1. Easy to use, low invasiveness, **full platform support**, does not require forcible installation into the system's include directory, recommended to be directly referenced as a submodule or used directly with static libraries
 2. Built with modern C++, similar in usage and functions to Go's gin framework, small learning and entry cost, suitable for beginners to learn source code
 3. Lightweight framework, very small, with less than 5000 lines of source code, avoiding the bloat of large network frameworks
+4. The website's documentation system and testing framework ensure usability and stability.
 ## Quick Start
 ### Using the Release Package
 1. Download the release library ([Releases · chenxuan520/cppnet](https://github.com/chenxuan520/cppnet/releases)), and extract it (you can choose any location, you can put it in the system's include directory or not. In the following, it is assumed that the extraction is to the current directory). A C++17-compatible compiler is required.
@@ -48,7 +49,11 @@ int main() {
   return 0;
 }
 
-// ssl 版本
+```
+
+- Below is the SSL version, please be prepared with the pem file.
+```cpp
+// ssl version
 
 #include "./cppnet/include/cppnet/http/server/http_server.hpp"
 #include "./cppnet/include/cppnet/utils/const.hpp"

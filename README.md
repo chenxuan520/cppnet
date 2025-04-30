@@ -17,6 +17,7 @@
 1. 使用简单,入侵性小,**全平台支持**, 不要求强行安装到系统的include目录中, 推荐直接作为一个submodule 引用或者直接使用静态库
 2. 使用现代的C++构建, 使用方式和函数和 Go 的 gin 框架类似 , 学习和入门成本小, 可适合作为初学者进行源码学习
 3. 轻量化框架, 非常小, 源码不到5000行, 避免了大型网络框架的臃肿
+4. 网站的文档体系和测试体系,保障易用性和稳定性
 ## Quick Start
 - 需要编译器支持 C++17
 ### 使用 Release 包
@@ -49,7 +50,9 @@ int main() {
   }
   return 0;
 }
-
+```
+- 下面是 SSL 版本, 需要准备好 pem 文件
+```cpp
 // ssl 版本
 
 #include "./cppnet/include/cppnet/http/server/http_server.hpp"
