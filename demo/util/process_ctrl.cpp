@@ -1,4 +1,5 @@
 #include "process_ctrl.hpp"
+#include <cstdio>
 
 namespace cppapp {
 
@@ -47,9 +48,11 @@ void ProcessCtrl::EndGuard(int) {
 #endif
 }
 
-void ProcessCtrl::Kill(int pid, int signal) {
+int ProcessCtrl::Kill(int pid, int signal) {
 #ifndef _WIN32
-  kill(pid, signal);
+  return kill(pid, signal);
+#else
+  return -1;
 #endif
 }
 

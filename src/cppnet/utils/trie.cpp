@@ -143,6 +143,11 @@ const Trie::Node *Trie::GetNode(const std::string &key) const {
       pos = 1;
     }
   }
+
+  if (pos != now->key_.size()) {
+    return nullptr;
+  }
+
   if (now->stop_ == false) {
     return nullptr;
   }

@@ -116,6 +116,11 @@ void RunWithConfig(Config &config) {
     server.set_logger(logger);
   }
 
+  // add header server for sign cppnet server
+  server.Use([](HttpContext &ctx) {
+    ctx.resp().header().Add("Server", "cppnet/" + Version::GetStr());
+  });
+
   //  write pid into file
   File::Write("./server.pid", to_string(pid));
 
@@ -145,12 +150,20 @@ int _main(ArgcDeal &args) {
         cout << "pid too small, check if error";
         exit(0);
       }
-      ProcessCtrl::Kill(pid);
+      auto kill_result = ProcessCtrl::Kill(pid);
+      if (kill_result != 0) {
+        cout << "kill " << pid << " error" << endl;
+        exit(-1);
+      }
+      cout << "kill " << pid << " stop ok" << endl;
       if (args.GetOption("stop")) {
-        cout << "kill " << pid << " stop ok" << endl;
+        // delete file
+        File::Remove("./server.pid");
+        cout << "delete pid file" << endl;
         exit(0);
+
       } else {
-        printf("wait for the port unbound...\n");
+        cout << "wait for the port unbound..." << endl;
         sleep(1);
       }
     }

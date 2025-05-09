@@ -1,7 +1,6 @@
 #pragma once
 
 #include <csignal>
-#include <cstdio>
 #include <cstdlib>
 #include <functional>
 #include <sys/wait.h>
@@ -41,7 +40,7 @@ public:
    * @param pid
    * @note 1. Send a signal to the process with the specified pid.
    */
-  static void Kill(int pid, int signal = SIGINT);
+  static int Kill(int pid, int signal = SIGINT);
 
 private:
   static void EndGuard(int);

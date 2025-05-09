@@ -77,6 +77,11 @@ TEST(Trie, Test) {
   });
   MUST_TRUE(count == 0, "count is " << count);
 
+  trie.Search<int>("world.cdsc", [&](shared_ptr<int> data, bool last) -> bool {
+    EXPECT_EQ(last, false);
+    return true;
+  });
+
   // test
   trie.Reset();
   MUST_TRUE(trie.Get<int>("hello") == nullptr, "");
@@ -141,4 +146,18 @@ TEST(Trie, OriginApi) {
     return false;
   });
   MUST_TRUE(count == 1, "error count of " << count);
+}
+
+TEST(Trie, Search) {
+  Trie trie;
+  trie.Set("/hello", std::make_shared<vector<int>>(1));
+  auto temp = trie.Get<int>("/he");
+  trie.Set("/", std::make_shared<int>(2));
+
+  MUST_TRUE(temp == nullptr, "not null");
+
+  trie.SearchNode("/hello", [&](const Trie::Node *node, bool last) -> bool {
+    DEBUG("node temp " << node->key_ << " is_end " << last);
+    return true;
+  });
 }

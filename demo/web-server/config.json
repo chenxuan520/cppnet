@@ -7,14 +7,14 @@
 	"redirects":[
 		{
 			"route":"/hello",
-			"redirect":"https://chenxuanweb.top"
+			"redirect":"https://www.chenxuanweb.top"
+		},
+		{
+			"route":"/",
+			"redirect":"../asset/index.html"
 		}
 	],
 	"statics":[
-		{
-			"route":"/",
-			"path":"../asset/index.html"
-		},
 		{
 			"route":"/home",
 			"path":"../asset/blog-home/index.html"
