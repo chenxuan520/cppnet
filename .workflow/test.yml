@@ -22,7 +22,7 @@ stages:
         command:
           - apt-get update
           - apt-get install -y build-essential curl cmake openssl libssl-dev git
-          - git clone https://gitee.com/chenxuan520/cpptest src/third_party/cpptest
+          - git submodule update --init --recursive --depth=1
           - cd src
           - ./build.sh
           - ./bin/test_bin
