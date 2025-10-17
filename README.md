@@ -5,12 +5,12 @@
 ![](https://chenxuanweb.top/cppnet/cppnet.png)
 ## Author
 - **chenxuan**
-> ![](http://cdn.androidftp.top/pic/chenxuanweb/dog.png)
+> ![](http://cdn.androidftp.top/test/2025101017224732pasteboard.paste)
 ## 仓库地址
 - [github](https://github.com/chenxuan520/cppnet)
 - [gitee](https://gitee.com/chenxuan520/cppnet)
 ## 官网
-- [chenxuanweb.top/cppnet/index.html](https://chenxuanweb.top/cppnet/index.html)
+- [chenxuanweb.top/cppnet](https://www.chenxuanweb.top/cppnet)
 ## Docs
 - [cppnet 在线文档地址](https://chenxuan520.github.io/cppnet/)
 ## 优势
@@ -437,3 +437,4 @@ cppnet
 - [x] 完善多线程
 - [x] 添加压力测试
 - [x] 提升trie
+- [ ] 添加常用中间件(限流,统计),完善日志
