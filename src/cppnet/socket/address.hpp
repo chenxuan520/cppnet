@@ -6,6 +6,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #else
+#include <stdint.h>
 #include <winsock2.h>
 using socklen_t = int;
 #endif
