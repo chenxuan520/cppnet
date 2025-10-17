@@ -17,6 +17,11 @@
 
 namespace cppnet {
 
+// advance statement
+class HttpServer;
+class HttpContext;
+using HttpCallback = std::function<void(HttpContext &)>;
+
 class HttpContext {
 public:
   HttpContext(HttpReq &req, HttpResp &resp, std::shared_ptr<Socket> &soc)
@@ -29,9 +34,11 @@ public:
   /*
    * @brief: whether continue, use in middware
    * */
-  inline void Next() { is_continue_ = true; }
+  inline void Next() {
+    Run(func_pos_ + 1);
+    is_continue_ = false;
+  }
   inline void Abort() { is_continue_ = false; }
-  inline bool is_continue() { return is_continue_; }
   /*
    * @brief: get inline data
    */
@@ -53,14 +60,24 @@ public:
   Socket &soc() { return *soc_; }
 
 private:
+  /*
+   * @brief: run all route func,inside func
+   */
+  void Run(int run_func_pos);
+
+private:
   HttpReq &req_;
   HttpResp &resp_;
   std::shared_ptr<Socket> soc_ = nullptr;
-  bool is_continue_ = false;
+  bool is_continue_ = true;
   std::unordered_map<std::string, std::any> inline_data_;
-};
+  std::vector<HttpCallback> route_funcs_;
+  int func_pos_ = 0;
 
-using HttpCallback = std::function<void(HttpContext &)>;
+private:
+  // for call run func
+  friend class HttpServer;
+};
 
 struct HttpTrieData {
   HttpCallback callback = nullptr;

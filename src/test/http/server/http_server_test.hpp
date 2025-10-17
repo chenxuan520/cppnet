@@ -232,6 +232,12 @@ TEST(HttpServer, Middleware) {
     ctx.Set("temp", temp);
     ctx.Next();
   };
+  atomic<int> abort_count = 0;
+  auto abort_func = [&abort_count](HttpContext &ctx) {
+    DEBUG("use abort");
+    abort_count++;
+    ctx.Abort();
+  };
 
   server.Use(count_func);
 
@@ -247,6 +253,13 @@ TEST(HttpServer, Middleware) {
               },
               count_func});
 
+  server.GET("/abort", {[&](HttpContext &ctx) {
+                          ctx.resp().Text(HttpStatusCode::OK, "hello world");
+                        },
+                        abort_func,
+                        [&](HttpContext &ctx) { FATAL("not end after abort"); },
+                        abort_func});
+
   // sync run server
   GO_JOIN([&] { server.Run(); });
 
@@ -257,6 +270,13 @@ TEST(HttpServer, Middleware) {
   HttpReq req;
   HttpResp resp;
 
+  req.GET("/abort");
+  rc = client.Send(req, resp);
+  MUST_TRUE(rc == 0, client.err_msg());
+  MUST_TRUE(resp.status_code() == HttpStatusCode::OK,
+            "get wrong status code " +
+                HttpStatusCodeUtil::ConvertToStr(resp.status_code()));
+
   req.GET("/hello");
   rc = client.Send(req, resp);
   MUST_TRUE(rc == 0, client.err_msg());
@@ -266,7 +286,9 @@ TEST(HttpServer, Middleware) {
   MUST_TRUE(resp.body() == "hello world", "get wrong body " + resp.body());
   DEBUG("resp: " << resp.body());
 
-  MUST_TRUE(count == 2, "get wrong count " + to_string(count));
+  MUST_TRUE(count == 4, "get wrong count " + to_string(count));
+  MUST_TRUE(abort_count == 1,
+            "get wrong abort count " + to_string(abort_count));
 }
 
 #ifdef CPPNET_OPENSSL

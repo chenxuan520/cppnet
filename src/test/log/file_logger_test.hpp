@@ -66,6 +66,10 @@ TEST(FileLogger, FirstWrite) {
 }
 
 BENCHMARK(FileLogger, WriteRate) {
+#ifdef __APPLE__
+  // not use mac for benchmark
+  SKIP()
+#endif
   const std::string file_path = "file_benct_test.log";
   const std::string write_msg = "[test]:test-for-benchmark";
   auto logger = std::make_shared<FileLogger>();

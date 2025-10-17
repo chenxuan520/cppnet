@@ -9,6 +9,19 @@
 
 namespace cppnet {
 
+void HttpContext::Run(int run_func_pos) {
+  if (run_func_pos >= route_funcs_.size()) {
+    return;
+  }
+  for (int i = run_func_pos; i < route_funcs_.size(); i++) {
+    func_pos_ = i;
+    route_funcs_[i](*this);
+    if (!this->is_continue_) {
+      break;
+    }
+  }
+}
+
 int HttpGroup::GET(const std::string &path, HttpCallback callback,
                    const std::vector<std::shared_ptr<HttpFilter>> &filters) {
   auto new_filters = filters;
@@ -358,8 +371,8 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
   }
   auto path = req.route().GetPath();
   auto method = req.method();
-  logger_->Info("req: " + HttpMethodUtil::ConvertToStr(method) + " " + path +
-                " soc:" + std::to_string(event_soc.fd()));
+  logger_->Debug("req: " + HttpMethodUtil::ConvertToStr(method) + " " + path +
+                 " soc:" + std::to_string(event_soc.fd()));
 
   // step2:find route and run func
   HttpContext ctx(req, resp, soc);
@@ -379,14 +392,12 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
             }
           }
           if (route_func) {
-            route_func(ctx);
-            if (!is_continue_) {
-              return false;
-            }
+            ctx.route_funcs_.push_back(route_func);
           }
         }
         return true;
       });
+  ctx.Run(0);
 
   // step3:build resp and send
   if (resp.status_code() == HttpStatusCode::UNKNOWN) {
@@ -405,7 +416,7 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
     soc->Close();
     return;
   }
-  logger_->Info(
+  logger_->Debug(
       "resp: " + HttpStatusCodeUtil::ConvertToStr(resp.status_code()) +
       " soc:" + std::to_string(event_soc.fd()) + kEndl);
 }
