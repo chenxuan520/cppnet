@@ -4,7 +4,6 @@
 ![](https://chenxuanweb.top/cppnet/cppnet.png)
 ## Author
 - **chenxuan**
-> ![](http://cdn.androidftp.top/test/2025101017224732pasteboard.paste)
 ## Repository Address
 - [github](https://github.com/chenxuan520/cppnet)
 - [gitee](https://gitee.com/chenxuan520/cppnet)

@@ -4,6 +4,7 @@
 #include "test.h"
 #include "utils/file.hpp"
 #include <atomic>
+#include <string>
 
 using namespace cppnet;
 using namespace std;
@@ -224,13 +225,14 @@ TEST(HttpServer, Middleware) {
   auto rc = server.Init(addr);
   MUST_TRUE(rc == 0, server.err_msg());
 
+  int temp_var = 10;
   atomic<int> count = 0;
-  auto count_func = [&count](HttpContext &ctx) {
+  auto count_func = [&count, &temp_var](HttpContext &ctx) {
     DEBUG("use count");
     count++;
-    int temp = 10;
-    ctx.Set("temp", temp);
+    ctx.Set("temp", temp_var);
     ctx.Next();
+    temp_var = ctx.Get<int>("temp");
   };
   atomic<int> abort_count = 0;
   auto abort_func = [&abort_count](HttpContext &ctx) {
@@ -242,16 +244,16 @@ TEST(HttpServer, Middleware) {
   server.Use(count_func);
 
   server.GET("/hello",
-             {count_func,
-              [&](HttpContext &ctx) {
+             {count_func, [&](HttpContext &ctx) {
                 ctx.resp().Text(HttpStatusCode::OK, "hello world");
                 auto val = ctx.Get<int>("temp");
                 MUST_TRUE(val == 10, "get wrong value " + to_string(val));
                 auto str_tmp = ctx.Get<std::string>("temp");
                 MUST_TRUE(str_tmp == "", "get wrong value " + str_tmp);
+                ctx.Set("temp", 20);
+                DEBUG("temp: " << ctx.Get<int>("temp"));
                 server.Stop();
-              },
-              count_func});
+              }});
 
   server.GET("/abort", {[&](HttpContext &ctx) {
                           ctx.resp().Text(HttpStatusCode::OK, "hello world");
@@ -286,9 +288,10 @@ TEST(HttpServer, Middleware) {
   MUST_TRUE(resp.body() == "hello world", "get wrong body " + resp.body());
   DEBUG("resp: " << resp.body());
 
-  MUST_TRUE(count == 4, "get wrong count " + to_string(count));
+  MUST_TRUE(count == 3, "get wrong count " + to_string(count));
   MUST_TRUE(abort_count == 1,
             "get wrong abort count " + to_string(abort_count));
+  MUST_TRUE(temp_var == 20, "temp_var is " + to_string(temp_var) + " not 20");
 }
 
 #ifdef CPPNET_OPENSSL

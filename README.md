@@ -5,7 +5,6 @@
 ![](https://chenxuanweb.top/cppnet/cppnet.png)
 ## Author
 - **chenxuan**
-> ![](http://cdn.androidftp.top/test/2025101017224732pasteboard.paste)
 ## 仓库地址
 - [github](https://github.com/chenxuan520/cppnet)
 - [gitee](https://gitee.com/chenxuan520/cppnet)
