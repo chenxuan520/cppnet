@@ -66,7 +66,7 @@ TEST(FileLogger, FirstWrite) {
 }
 
 BENCHMARK(FileLogger, WriteRate) {
-#ifdef __APPLE__
+#ifndef __linux__
   // not use mac for benchmark
   SKIP()
 #endif
