@@ -12,6 +12,7 @@
 #include <ctime>
 #include <iostream>
 #include <memory>
+#include <string>
 #include <unistd.h>
 #include <vector>
 using namespace std;
@@ -26,17 +27,21 @@ void RunWithConfig(Config &config) {
   }
 
   if (config.is_guard) {
-    ProcessCtrl::Guard([](int exit_code, bool is_normal_exit) -> bool {
-      if (!is_normal_exit) {
-        cout << "child exit code:" << exit_code
-             << " not normal exit:" << is_normal_exit << endl;
-        return true;
-      } else {
-        cout << "child exit code:" << exit_code
-             << " normal exit:" << is_normal_exit << endl;
-        return false;
-      }
-    });
+    int exit_time = 0;
+    ProcessCtrl::Guard(
+        [&exit_time](int exit_code, bool is_normal_exit) -> bool {
+          exit_time++;
+          File::Write("server.exit", to_string(exit_time));
+          if (!is_normal_exit) {
+            cout << "child exit code:" << exit_code
+                 << " not normal exit:" << is_normal_exit << endl;
+            return true;
+          } else {
+            cout << "child exit code:" << exit_code
+                 << " normal exit:" << is_normal_exit << endl;
+            return false;
+          }
+        });
   }
 
   // get now time str
@@ -112,7 +117,7 @@ void RunWithConfig(Config &config) {
     auto file_logger = make_shared<FileLogger>();
 
     std_logger->set_level(Logger::Level(config.log_level));
-    logger->set_level(Logger::Level(config.log_level));
+    file_logger->set_level(Logger::Level(config.log_level));
 
     file_logger->Init(config.log_path);
     logger->Init({std_logger, file_logger});
