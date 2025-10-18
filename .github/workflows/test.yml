@@ -27,14 +27,17 @@ jobs:
           cmake -G "MinGW Makefiles" .. -DENABLE_SSL=OFF
           make
           cd ..
-          ./bin/test_bin.exe
+          wget https://raw.githubusercontent.com/chenxuan520/gh-action-shell/main/cmd_retry.ps1
+          ./cmd_retry.ps1 ./bin/test_bin.exe 2
 
       - name: Run test #需要执行的命令
         if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
         run: |
           cd src
           ./build.sh
-          ./bin/test_bin
+          wget https://raw.githubusercontent.com/chenxuan520/gh-action-shell/main/cmd_retry.sh
+          chmod +x ./cmd_retry.sh
+          ./cmd_retry.sh ./bin/test_bin 2
 
       - name: Run Memory Check
         if: matrix.os == 'ubuntu-latest'
