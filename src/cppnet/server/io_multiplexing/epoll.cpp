@@ -7,8 +7,6 @@
 
 namespace cppnet {
 
-Epoll::TriggerType Epoll::trigger_type_ = Epoll::TriggerType::kLevelTrigger;
-
 int Epoll::Init() {
   epoll_fd_ = CreateEpoll();
   if (epoll_fd_.status() != Socket::kInit) {

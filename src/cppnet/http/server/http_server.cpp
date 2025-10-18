@@ -331,7 +331,8 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
     if (soc->err_no() == EAGAIN || soc->err_no() == EWOULDBLOCK) {
       logger_->Error("[soc.ReadUntil]: read timeout");
     } else {
-      logger_->Error("[soc.ReadUntil]:" + soc->err_msg());
+      logger_->Error("[soc.ReadUntil]:" + soc->err_msg() +
+                     " soc:" + std::to_string(event_soc.fd()));
     }
     server.RemoveSoc(event_soc);
     soc->Close();

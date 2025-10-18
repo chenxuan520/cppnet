@@ -19,9 +19,6 @@ private:
 
 private:
   Socket epoll_fd_;
-
-private:
-  static TriggerType trigger_type_;
 };
 
 } // namespace cppnet

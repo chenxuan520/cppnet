@@ -180,7 +180,8 @@ std::shared_ptr<SSLSocket> SSLContext::CreateSSLSocket() {
   return CreateSSLSocket(soc);
 }
 
-std::shared_ptr<SSLSocket> SSLContext::AcceptSSL(const Socket &soc) {
+std::shared_ptr<SSLSocket> SSLContext::AcceptSSL(const Socket &soc,
+                                                 SSLSocket::Mode soc_mode) {
   auto new_ssl = SSL_new(ssl_ctx_);
   if (new_ssl == nullptr) {
     err_msg_ = "[syserr]:create ssl failed";
@@ -190,12 +191,12 @@ std::shared_ptr<SSLSocket> SSLContext::AcceptSSL(const Socket &soc) {
   auto rc = SSL_accept(new_ssl);
   if (rc < 0) {
     err_msg_ = std::string("[syserr]:ssl accept failed ") +
-               ERR_error_string(ERR_get_error(), nullptr);
+               ERR_error_string(ERR_get_error(), nullptr) + std::to_string(rc);
     SSL_free(new_ssl);
     ERR_clear_error();
     return nullptr;
   }
-  return std::make_shared<SSLSocket>(new_ssl, soc);
+  return std::make_shared<SSLSocket>(new_ssl, soc, soc_mode);
 }
 
 int SSLContext::Close() {

@@ -48,7 +48,9 @@ public:
   /**
    * @brief: Accept socket ssl.
    */
-  std::shared_ptr<SSLSocket> AcceptSSL(const Socket &soc);
+  std::shared_ptr<SSLSocket>
+  AcceptSSL(const Socket &soc,
+            SSLSocket::Mode soc_mode = SSLSocket::Mode::kQuickly);
   /**
    * @brief: close ssl context
    */

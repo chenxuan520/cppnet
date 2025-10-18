@@ -1,3 +1,5 @@
+#include <memory>
+#include <mutex>
 #ifdef CPPNET_OPENSSL
 #include "openssl/err.h"
 #include "openssl/ssl.h"
@@ -7,7 +9,7 @@
 
 namespace cppnet {
 
-SSLSocket::SSLSocket(SSL *ssl, const Socket &soc) {
+SSLSocket::SSLSocket(SSL *ssl, const Socket &soc, Mode mode) {
   if (ssl == nullptr) {
     err_msg_ = "[logicerr]:ssl is nullptr";
     return;
@@ -20,6 +22,11 @@ SSLSocket::SSLSocket(SSL *ssl, const Socket &soc) {
   ssl_ = ssl;
   SSL_set_fd(ssl_, fd_);
   status_ = kInit;
+
+  if (mode_ == Mode::kSafely) {
+    pmutex_ = std::make_unique<std::mutex>();
+  }
+  mode_ = mode;
 }
 
 int SSLSocket::Close() {
@@ -33,6 +40,11 @@ int SSLSocket::Close() {
 }
 
 int SSLSocket::CloseSSL() {
+  std::shared_ptr<std::lock_guard<std::mutex>> plock_guard = nullptr;
+  if (mode_ == Mode::kSafely && pmutex_ != nullptr) {
+    plock_guard = std::make_shared<std::lock_guard<std::mutex>>(*pmutex_);
+  }
+
   if (ssl_ != nullptr) {
     SSL_shutdown(ssl_);
     SSL_free(ssl_);
@@ -61,6 +73,15 @@ int SSLSocket::Connect(Address &addr) {
 }
 
 int SSLSocket::IORead(void *buf, size_t len, int flag) {
+  std::shared_ptr<std::lock_guard<std::mutex>> plock_guard = nullptr;
+  if (mode_ == Mode::kSafely && pmutex_ != nullptr) {
+    plock_guard = std::make_shared<std::lock_guard<std::mutex>>(*pmutex_);
+    if (ssl_ == nullptr) {
+      err_msg_ = "[syserr]:ssl is nullptr";
+      return kLogicErr;
+    }
+  }
+
   if (flag == MSG_WAITALL) {
     auto rc = 0;
     auto total_len = 0;
@@ -80,6 +101,15 @@ int SSLSocket::IORead(void *buf, size_t len, int flag) {
 }
 
 int SSLSocket::IOWrite(const void *buf, size_t len, int flag) {
+  std::shared_ptr<std::lock_guard<std::mutex>> plock_guard = nullptr;
+  if (mode_ == Mode::kSafely && pmutex_ != nullptr) {
+    plock_guard = std::make_shared<std::lock_guard<std::mutex>>(*pmutex_);
+    if (ssl_ == nullptr) {
+      err_msg_ = "[syserr]:ssl is nullptr";
+      return kLogicErr;
+    }
+  }
+
   return SSL_write(ssl_, buf, len);
 }
 

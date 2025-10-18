@@ -14,3 +14,11 @@ mv ./build/webserver ../bin
 
 cp ../bin/webserver ../pack/web-server
 cp ./config.json ../pack/web-server
+
+# this is for author self local test dir
+SOURCE_FILE=../bin/webserver
+TARGET_DIR=~/file/data/web/chenxuanweb
+if [ -d "$TARGET_DIR" ]; then
+    cp "$SOURCE_FILE" "$TARGET_DIR/"
+    echo "copy $SOURCE_FILE to $TARGET_DIR success"
+fi
