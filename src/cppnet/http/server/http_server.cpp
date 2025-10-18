@@ -2,6 +2,7 @@
 #include "../../utils/const.hpp"
 #include "../../utils/file.hpp"
 #include "filter/http_method_filter.hpp"
+#include "utils/date.hpp"
 #include <functional>
 #include <memory>
 #include <string>
@@ -114,39 +115,42 @@ int HttpGroup::StaticDir(
         auto route = ctx.req().route().GetPath();
         auto pos = route.find(path);
         if (pos == std::string::npos) {
-          logger_->Warn("[logicerr]:static dir path error " +
-                        ctx.req().route().GetPath() + " " + path);
+          logger_->Debug("[StaticDir]:static dir path error " +
+                         ctx.req().route().GetPath() + " " + path);
           ctx.resp().NotFound();
+          ctx.Abort();
           return;
         }
         auto aim_path = route.substr(pos + path.size());
         // avoid path like /static/../xxx
         if (aim_path.find("..") != std::string::npos) {
-          logger_->Warn("[logicerr]:static dir path error " + aim_path);
+          logger_->Debug("[StaticDir]:static dir path error " + aim_path);
           ctx.resp().NotFound();
+          ctx.Abort();
           return;
         }
         auto file_path = dir_path + "/" + aim_path;
         auto exist = File::Exist(file_path);
         if (!exist) {
-          logger_->Warn("[logicerr]:static dir not exist " + file_path);
-          ctx.Next();
+          logger_->Debug("[StaticDir]:static dir not exist " + file_path);
           return;
         }
         auto rc = File::Read(file_path, ctx.resp().body());
         if (rc != kSuccess) {
-          logger_->Error(file_path + " read error");
+          logger_->Error("[StaticDir]:" + file_path + " read error");
           ctx.resp().NotFound();
+          ctx.Abort();
           return;
         }
-        logger_->Info("static_dir: return static dir success " + file_path);
+        logger_->Debug("[StaticDir]: return static dir success " + file_path);
         ctx.resp().header().SetLongConnection(true);
         ctx.resp().Success(
             HttpHeader::ConvertFileType(File::Suffix(file_path)));
+        ctx.Abort();
       },
       new_filters, false);
   if (rc != kSuccess) {
-    logger_->Error("[logicerr]:register static dir error");
+    logger_->Error("[StaticDir]:register static dir error");
     return rc;
   }
   return kSuccess;
@@ -164,18 +168,18 @@ int HttpGroup::StaticFile(
       [=](HttpContext &ctx) {
         auto exist = File::Exist(file_path);
         if (!exist) {
-          logger_->Warn("[logicerr]:static file not exist " + file_path);
+          logger_->Debug("[StaticFile]:static file not exist " + file_path);
           ctx.resp().NotFound();
-          ctx.Next();
           return;
         }
         auto rc = File::Read(file_path, ctx.resp().body());
         if (rc != kSuccess) {
-          logger_->Error("[logicerr]:" + file_path + " read error");
+          logger_->Error("[StaticFile]:" + file_path + " read error");
           ctx.resp().NotFound();
+          ctx.Abort();
           return;
         }
-        logger_->Info("static_file: return static file success " + file_path);
+        logger_->Debug("[StaticFile]: return static file success " + file_path);
         ctx.resp().header().SetLongConnection(true);
 
         auto suffix = File::Suffix(file_path);
@@ -183,10 +187,11 @@ int HttpGroup::StaticFile(
             HttpHeader::ConvertFileType(suffix), suffix);
         ctx.resp().header().SetContentType(type_str);
         ctx.resp().Success();
+        ctx.Abort();
       },
       new_filters);
   if (rc != kSuccess) {
-    logger_->Error("[logicerr]:register static file error");
+    logger_->Error("[StaticFile]:register static file error");
     return rc;
   }
   return kSuccess;
@@ -218,7 +223,7 @@ int HttpServer::Run() {
     logger_->Info("http server run in http://" + server_.addr().ToString());
   }
 #else
-  logger_->Info("http server run in http://" + server_.addr().ToString());
+  logger_->Debug("http server run in http://" + server_.addr().ToString());
 #endif
   auto rc = server_.EventLoop();
   if (rc != RC::kSuccess) {
@@ -251,8 +256,8 @@ void HttpServer::HandleAccept(TcpServer &server, Socket &event_soc) {
     event_soc.Close();
     return;
   }
-  logger_->Info("accept from " + recv_addr.ToString() +
-                " soc: " + std::to_string(event_soc.fd()));
+  logger_->Debug("accept from " + recv_addr.ToString() +
+                 " soc: " + std::to_string(event_soc.fd()));
 
   if (read_timeout_.first != 0 || read_timeout_.second != 0) {
     event_soc.SetReadTimeout(read_timeout_.first, read_timeout_.second);
@@ -278,8 +283,8 @@ void HttpServer::HandleAccept(TcpServer &server, Socket &event_soc) {
 void HttpServer::HandleLeave(TcpServer &server, Socket &event_soc) {
   Address recv_addr;
   event_soc.GetAddr(recv_addr);
-  logger_->Info("leave from " + recv_addr.ToString() +
-                " soc: " + std::to_string(event_soc.fd()));
+  logger_->Debug("leave from " + recv_addr.ToString() +
+                 " soc: " + std::to_string(event_soc.fd()));
 #ifdef CPPNET_OPENSSL
   if (ssl_context_ &&
       ssl_sockets_map_.find(event_soc.fd()) != ssl_sockets_map_.end()) {
@@ -293,6 +298,9 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
   const std::string kCRLF = "\r\n";
   const std::string kEndl = "\n";
   std::shared_ptr<Socket> soc = nullptr;
+  Address recv_addr;
+  event_soc.GetAddr(recv_addr);
+
 #ifdef CPPNET_OPENSSL
   if (ssl_context_) {
     if (ssl_sockets_map_.find(event_soc.fd()) != ssl_sockets_map_.end()) {
@@ -340,7 +348,7 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
     resp.BadRequest(req.err_msg());
     resp.Build(resp_buf);
     soc->Write(resp_buf);
-    logger_->Info(
+    logger_->Debug(
         "resp: " + HttpStatusCodeUtil::ConvertToStr(resp.status_code()) +
         " soc:" + std::to_string(event_soc.fd()) + kEndl);
     server.RemoveSoc(event_soc);
@@ -416,6 +424,12 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
     soc->Close();
     return;
   }
+
+  // standardized log format
+  logger_->Info("[cppnet] " + Date::GetNow() + " | " +
+                std::to_string(int(resp.status_code())) + " | " +
+                recv_addr.ToString() + " | " +
+                HttpMethodUtil::ConvertToStr(method) + " | " + path);
   logger_->Debug(
       "resp: " + HttpStatusCodeUtil::ConvertToStr(resp.status_code()) +
       " soc:" + std::to_string(event_soc.fd()) + kEndl);

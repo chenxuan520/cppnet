@@ -110,6 +110,10 @@ void RunWithConfig(Config &config) {
     std::shared_ptr<MultiLogger> logger = std::make_shared<MultiLogger>();
     auto std_logger = make_shared<StdLogger>();
     auto file_logger = make_shared<FileLogger>();
+
+    std_logger->set_level(Logger::Level(config.log_level));
+    logger->set_level(Logger::Level(config.log_level));
+
     file_logger->Init(config.log_path);
     logger->Init({std_logger, file_logger});
 

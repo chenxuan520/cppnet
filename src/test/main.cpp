@@ -10,6 +10,7 @@
 #include "ssl/ssl_context_test.hpp"
 #include "test.h"
 #include "timer/timer_test.hpp"
+#include "utils/date_test.hpp"
 #include "utils/file_test.hpp"
 #include "utils/host_test.hpp"
 #include "utils/string_test.hpp"

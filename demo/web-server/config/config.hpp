@@ -46,6 +46,7 @@ struct Config {
   bool is_background = false;
   bool is_guard = false;
   std::string log_path = "";
+  int log_level = 0;
   std::vector<RedirectConfig> redirects;
   std::vector<StaticConfig> statics;
   SSLConfig ssl;
@@ -55,6 +56,7 @@ struct Config {
     is_background = json["is_background"].bool_val;
     is_guard = json["is_guard"].bool_val;
     log_path = json["log_path"].str_val;
+    log_level = json["log_level"].int_val;
     for (int i = 0; i < json["redirects"].arr.size(); i++) {
       RedirectConfig redirect;
       redirect.ParseFromJson(json["redirects"][i]);

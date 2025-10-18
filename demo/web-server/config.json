@@ -4,6 +4,7 @@
 	"is_background":false,
 	"is_guard":false,
 	"log_path":"./server.log",
+	"log_level": 0,
 	"redirects":[
 		{
 			"route":"/hello",
