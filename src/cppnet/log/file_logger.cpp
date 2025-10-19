@@ -1,6 +1,7 @@
 #include "file_logger.hpp"
 #include "../utils/const.hpp"
 #include "../utils/file.hpp"
+#include "utils/date.hpp"
 
 namespace cppnet {
 
@@ -59,7 +60,7 @@ void FileLogger::Debug(const std::string &msg) {
   if (level_ > Logger::Level::kDebug || cur_buffer_ == nullptr) {
     return;
   }
-  cur_buffer_->data += "[DEBUG]" + GetNowTime() + "|" + msg + "\n";
+  cur_buffer_->data += "[DEBUG]" + Date::GetNow() + "|" + msg + "\n";
   CheckFlush();
 }
 
@@ -67,7 +68,7 @@ void FileLogger::Info(const std::string &msg) {
   if (level_ > Logger::Level::kInfo || cur_buffer_ == nullptr) {
     return;
   }
-  cur_buffer_->data += "[INFO]" + GetNowTime() + "|" + msg + "\n";
+  cur_buffer_->data += "[INFO]" + Date::GetNow() + "|" + msg + "\n";
   CheckFlush();
 }
 
@@ -75,7 +76,7 @@ void FileLogger::Warn(const std::string &msg) {
   if (level_ > Logger::Level::kWarn || cur_buffer_ == nullptr) {
     return;
   }
-  cur_buffer_->data += "[WARN]" + GetNowTime() + "|" + msg + "\n";
+  cur_buffer_->data += "[WARN]" + Date::GetNow() + "|" + msg + "\n";
   CheckFlush();
 }
 
@@ -83,7 +84,7 @@ void FileLogger::Error(const std::string &msg) {
   if (level_ > Logger::Level::kError || cur_buffer_ == nullptr) {
     return;
   }
-  cur_buffer_->data += "[ERROR]" + GetNowTime() + "|" + msg + "\n";
+  cur_buffer_->data += "[ERROR]" + Date::GetNow() + "|" + msg + "\n";
   CheckFlush();
 }
 
@@ -91,7 +92,7 @@ void FileLogger::Fatal(const std::string &msg) {
   if (level_ > Logger::Level::kFatal || cur_buffer_ == nullptr) {
     return;
   }
-  cur_buffer_->data += "[FATAL]" + GetNowTime() + "|" + msg + "\n";
+  cur_buffer_->data += "[FATAL]|" + msg + "\n";
   CheckFlush();
 }
 
@@ -133,14 +134,6 @@ void FileLogger::FlushBuffer(std::string file_path,
   buffer->data.clear();
   buffer->need_flush = false;
   buffer->last_flush_time = time(nullptr);
-}
-
-std::string FileLogger::GetNowTime() {
-  static char buf[64];
-  time_t now = time(nullptr);
-  struct tm *tm_now = localtime(&now);
-  strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", tm_now);
-  return std::string(buf);
 }
 
 } // namespace cppnet

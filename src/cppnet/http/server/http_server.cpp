@@ -2,7 +2,6 @@
 #include "../../utils/const.hpp"
 #include "../../utils/file.hpp"
 #include "filter/http_method_filter.hpp"
-#include "utils/date.hpp"
 #include <functional>
 #include <memory>
 #include <string>
@@ -251,7 +250,8 @@ void HttpServer::HandleAccept(TcpServer &server, Socket &event_soc) {
   Address recv_addr;
   auto rc = event_soc.GetAddr(recv_addr);
   if (rc != RC::kSuccess) {
-    logger_->Error("[event_soc.GetAddr]:" + event_soc.err_msg());
+    logger_->Error("[event_soc.GetAddr]:" + event_soc.err_msg() +
+                   " soc:" + std::to_string(event_soc.fd()));
     server.RemoveSoc(event_soc);
     event_soc.Close();
     return;
@@ -270,7 +270,8 @@ void HttpServer::HandleAccept(TcpServer &server, Socket &event_soc) {
   if (ssl_context_) {
     auto ssl_socket = ssl_context_->AcceptSSL(event_soc);
     if (ssl_socket == nullptr) {
-      logger_->Error("[ssl_context.AcceptSSL]:" + ssl_context_->err_msg());
+      logger_->Error("[ssl_context.AcceptSSL]:" + ssl_context_->err_msg() +
+                     " soc:" + std::to_string(event_soc.fd()));
       server.RemoveSoc(event_soc);
       event_soc.Close();
       return;
@@ -298,8 +299,6 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
   const std::string kCRLF = "\r\n";
   const std::string kEndl = "\n";
   std::shared_ptr<Socket> soc = nullptr;
-  Address recv_addr;
-  event_soc.GetAddr(recv_addr);
 
 #ifdef CPPNET_OPENSSL
   if (ssl_context_) {
@@ -322,17 +321,19 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
   std::string buf;
   auto len = soc->ReadUntil(buf, kCRLF + kCRLF);
   if (len == 0) {
-    logger_->Error("[soc.ReadUntil]: peer close before read complete");
+    logger_->Error("[soc.ReadUntil]: peer close before read complete ,soc:" +
+                   std::to_string(soc->fd()));
     server.RemoveSoc(event_soc);
     soc->Close();
     return;
   }
   if (len < 0) {
     if (soc->err_no() == EAGAIN || soc->err_no() == EWOULDBLOCK) {
-      logger_->Error("[soc.ReadUntil]: read timeout");
+      logger_->Error("[soc.ReadUntil]: read timeout ,soc:" +
+                     std::to_string(soc->fd()));
     } else {
       logger_->Error("[soc.ReadUntil]:" + soc->err_msg() +
-                     " soc:" + std::to_string(event_soc.fd()));
+                     " soc:" + std::to_string(soc->fd()));
     }
     server.RemoveSoc(event_soc);
     soc->Close();
@@ -427,9 +428,9 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
   }
 
   // standardized log format
-  logger_->Info("[cppnet] " + Date::GetNow() + " | " +
-                std::to_string(int(resp.status_code())) + " | " +
-                recv_addr.ToString() + " | " +
+  logger_->Info("[cppnet] | " + std::to_string(int(resp.status_code())) +
+                " | " + soc->GetAddr().ToString() + " " +
+                std::to_string(soc->fd()) + " | " +
                 HttpMethodUtil::ConvertToStr(method) + " | " + path);
   logger_->Debug(
       "resp: " + HttpStatusCodeUtil::ConvertToStr(resp.status_code()) +

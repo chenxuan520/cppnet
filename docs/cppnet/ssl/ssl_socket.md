@@ -1,8 +1,11 @@
 # cppnet::SSLSocket
-## SSLSocket(SSL \*ssl, const Socket &soc)
+## SSLSocket(SSL \*ssl, const Socket &soc, Mode mode = Mode::kQuickly)
 - 参数：
     - `ssl`：OpenSSL 的 SSL 指针。
     - `soc`：普通套接字对象。
+    - `mode`: socket 模式
+        - kQuickly: 快捷模式, 默认此模式, 多线程并发操作同一个 soc 可能段错误。
+        - kSafely:  安全模式, 此时对这个 socket 的操作都会加锁, 并发安全。
 - 返回值：无
 - 作用：构造一个 SSLSocket 对象，关联给定的 SSL 指针和套接字。
 ## int Connect(Address &addr) override

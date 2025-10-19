@@ -39,9 +39,10 @@
 - 参数：无
 - 返回值：指向 `SSLSocket` 的智能指针。
 - 作用：创建一个新的 SSL 套接字。
-## std::shared_ptr\<SSLSocket\> AcceptSSL(const Socket &soc)
+## std::shared_ptr\<SSLSocket\> AcceptSSL(const Socket &soc,SSLSocket::Mode soc_mode = SSLSocket::Mode::kQuickly)
 - 参数：
     - `soc`：普通套接字对象。
+    - `soc_mode`: ssl soc 类型。
 - 返回值：指向 `SSLSocket` 的智能指针。
 - 作用：接受一个连接并创建一个 SSL 套接字。
 ## int Close()
