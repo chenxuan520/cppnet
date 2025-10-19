@@ -25,3 +25,4 @@ cppjson
 vegeta*
 *.bin
 plot.html
+local_dev.sh

@@ -6,6 +6,7 @@
 #include "log/multi_logger.hpp"
 #include "log/std_logger.hpp"
 #include "process_ctrl.hpp"
+#include "utils/date.hpp"
 #include "utils/file.hpp"
 #include "utils/version.hpp"
 #include <csignal>
@@ -31,7 +32,10 @@ void RunWithConfig(Config &config) {
     ProcessCtrl::Guard(
         [&exit_time](int exit_code, bool is_normal_exit) -> bool {
           exit_time++;
-          File::Write("server.exit", to_string(exit_time));
+          File::Write("server.exit", to_string(exit_time) + ", last time at " +
+                                         Date::GetNow() + " exit_code " +
+                                         to_string(exit_code) + " is_normal " +
+                                         to_string(is_normal_exit));
           if (!is_normal_exit) {
             cout << "child exit code:" << exit_code
                  << " not normal exit:" << is_normal_exit << endl;

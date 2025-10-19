@@ -191,7 +191,8 @@ std::shared_ptr<SSLSocket> SSLContext::AcceptSSL(const Socket &soc,
   auto rc = SSL_accept(new_ssl);
   if (rc < 0) {
     err_msg_ = std::string("[syserr]:ssl accept failed ") +
-               ERR_error_string(ERR_get_error(), nullptr) + std::to_string(rc);
+               ERR_error_string(ERR_get_error(), nullptr) + " rc " +
+               std::to_string(rc);
     SSL_free(new_ssl);
     ERR_clear_error();
     return nullptr;
