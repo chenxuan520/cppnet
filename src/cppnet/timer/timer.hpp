@@ -2,7 +2,7 @@
 
 #include "../socket/socket.hpp"
 #ifdef __APPLE__
-#include <thread>
+#include <dispatch/dispatch.h>
 #endif
 
 namespace cppnet {
@@ -46,8 +46,10 @@ public:
   int Close() override;
 
 private:
+  // pipe write end, driven by GCD timer; read end is fd_ in base Socket
   int send_fd_ = -1;
-  std::thread thread_;
+  // GCD timer source; nullptr before Init / after Close
+  dispatch_source_t timer_ = nullptr;
 #endif
 };
 

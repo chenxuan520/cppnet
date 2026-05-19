@@ -7,7 +7,7 @@
 using namespace cppnet;
 using namespace std;
 
-Address addr{"127.0.0.1", 8080};
+Address addr{"127.0.0.1", 19981};
 TcpServer server{addr};
 
 TEST(TcpServer, SigleClient) {
@@ -113,7 +113,7 @@ TEST(TcpServer, MultiClient) {
         string ip;
         uint16_t port = 0;
         addr_cli.GetIPAndPort(ip, port);
-        MUST_TRUE(port != 8080, "port need not equal 8080");
+        MUST_TRUE(port != 19981, "port need not equal 19981");
         DEBUG(fd.fd() << " accept " << ip << ":" << port);
         // accept
       } else if (event == TcpServer::kEventRead) {
@@ -217,7 +217,7 @@ TEST(TcpServer, MultiThread) {
       string ip;
       uint16_t port = 0;
       addr_cli.GetIPAndPort(ip, port);
-      MUST_TRUE(port != 8080, "port need not equal 8080");
+      MUST_TRUE(port != 19981, "port need not equal 19981");
       DEBUG(fd.fd() << " accept " << ip << ":" << port);
 
     } else if (event == TcpServer::kEventRead) {
@@ -314,7 +314,7 @@ TEST(TcpServer, MixMode) {
         string ip;
         uint16_t port = 0;
         addr_cli.GetIPAndPort(ip, port);
-        MUST_TRUE(port != 8080, "port need not equal 8080");
+        MUST_TRUE(port != 19981, "port need not equal 19981");
         // DEBUG(fd.fd() << " accept " << ip << ":" << port);
         // accept
       } else if (event == TcpServer::kEventRead) {

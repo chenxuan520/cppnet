@@ -15,7 +15,7 @@ using namespace cppnet;
 
 TEST(SSLContext, SSLConnect) {
   SSLContext ssl_ctx;
-  Address addr{"127.0.0.1", 8080};
+  Address addr{"127.0.0.1", 19981};
   auto rc = ssl_ctx.InitSvrFile("./test/ssl/cert_demo.pem",
                                 "./test/ssl/cert_key.pem");
   MUST_TRUE(rc == 0, ssl_ctx.err_msg());
@@ -88,7 +88,7 @@ TEST(SSLContext, SSLConnectData) {
 }
 
 TEST(SSLContext, SSLServer) {
-  Address addr{"127.0.0.1", 8080};
+  Address addr{"127.0.0.1", 19981};
   string msg = "hello";
 
   TcpServer server(addr);

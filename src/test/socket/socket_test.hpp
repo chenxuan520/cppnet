@@ -7,7 +7,7 @@
 using namespace cppnet;
 
 TEST(Socket, UDP) {
-  Address addr{"127.0.0.1", 8080};
+  Address addr{"127.0.0.1", 19981};
   int rc = 0;
 
   Socket socket_recv, socket_send;
@@ -43,7 +43,7 @@ TEST(Socket, UDP) {
 }
 
 TEST(Socket, CompleteRead) {
-  Address addr{"127.0.0.1", 8080};
+  Address addr{"127.0.0.1", 19981};
   int rc = 0;
   const int max_connect_queue = 10;
   std::string msg = "hello world";
@@ -123,7 +123,7 @@ TEST(Socket, ReadTimeout) {
   SKIP();
 #endif
 
-  Address addr{"127.0.0.1", 8080};
+  Address addr{"127.0.0.1", 19981};
   int rc = 0;
   const int max_connect_queue = 10;
   std::string msg = "hello world";
@@ -154,7 +154,7 @@ TEST(Socket, ReadTimeout) {
 }
 
 TEST(Socket, ReadUntil) {
-  Address addr{"127.0.0.1", 8080};
+  Address addr{"127.0.0.1", 19981};
   int rc = 0;
   const int max_connect_queue = 10;
   std::string msg = "hello world,cpp";

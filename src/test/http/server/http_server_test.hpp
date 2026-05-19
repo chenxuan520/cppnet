@@ -11,7 +11,7 @@ using namespace std;
 
 TEST(HttpServer, HelloWorld) {
   HttpServer server;
-  Address addr{"127.0.0.1", 8080};
+  Address addr{"127.0.0.1", 19981};
   auto rc = server.Init(addr);
   MUST_TRUE(rc == 0, server.err_msg());
 
@@ -54,7 +54,7 @@ TEST(HttpServer, Static) {
 #ifdef _WIN32
   Address addr{"127.0.0.1", (uint16_t)(rand() % 1000 + 8000)};
 #else
-  Address addr{"127.0.0.1", 8080};
+  Address addr{"127.0.0.1", 19981};
 #endif
   auto rc = server.Init(addr);
   MUST_TRUE(rc == 0, server.err_msg());
@@ -173,7 +173,7 @@ TEST(HttpServer, Group) {
 #ifdef _WIN32
   Address addr{"127.0.0.1", (uint16_t)(rand() % 1000 + 8000)};
 #else
-  Address addr{"127.0.0.1", 8080};
+  Address addr{"127.0.0.1", 19981};
 #endif
   HttpServer server;
   auto rc = server.Init(addr);
@@ -219,7 +219,7 @@ TEST(HttpServer, Middleware) {
 #ifdef _WIN32
   Address addr{"127.0.0.1", (uint16_t)(rand() % 1000 + 8000)};
 #else
-  Address addr{"127.0.0.1", 8080};
+  Address addr{"127.0.0.1", 19981};
 #endif
   HttpServer server;
   auto rc = server.Init(addr);
@@ -309,7 +309,7 @@ TEST(HttpServer, HttpsServer) {
       return;
     }
     server.set_logger(std::make_shared<StdLogger>());
-    Address addr{"127.0.0.1", 8080};
+    Address addr{"127.0.0.1", 19981};
     std::shared_ptr<SSLContext> ssl_context = std::make_shared<SSLContext>();
     rc = ssl_context->InitSvrFile("./test/ssl/cert_demo.pem",
                                   "./test/ssl/cert_key.pem");
