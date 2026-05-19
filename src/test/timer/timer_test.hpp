@@ -57,10 +57,11 @@ TEST(Timer, CreateTimer) {
   // 1e7 = 10ms, 100ms = 1e8
   // 1s = 1e9
   DEBUG("timer event count: " << count);
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
   // tight 100us / 10ms window is sensitive to host load; under CI's
-  // valgrind run it can drop to ~70. Use a loose envelope that still
-  // catches gross regressions (timer not firing, or firing wildly).
+  // valgrind run it can drop to ~70, and macOS GCD has its own jitter.
+  // Use a loose envelope that still catches gross regressions (timer not
+  // firing, or firing wildly).
   MUST_TRUE(count >= 20 && count <= 200,
             "timer event count wrong " + to_string(count));
 #endif
