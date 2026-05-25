@@ -12,6 +12,7 @@
 
 #ifdef CPPNET_OPENSSL
 #include "../../ssl/ssl_context.hpp"
+#include <mutex>
 #include <unordered_map>
 #endif
 
@@ -228,6 +229,14 @@ public:
    * @param: 0 stand for block until end
    */
   void SetWriteTimeout(unsigned timeout_sec, unsigned timeout_usec);
+  /**
+   * @brief: set bounded SSL handshake read timeout (seconds).
+   *         A slow or silent client must not be allowed to block the worker
+   *         thread (or the single event loop) forever during SSL_accept.
+   *         Pass 0 to disable (NOT recommended for production).
+   *         Default: 10 seconds. Only effective in SSL mode.
+   */
+  void SetSSLHandshakeTimeout(unsigned timeout_sec);
 
 #ifdef CPPNET_OPENSSL
 public:
@@ -242,6 +251,11 @@ public:
 
 private:
   std::shared_ptr<SSLContext> ssl_context_ = nullptr;
+  // Map of fd -> SSLSocket. Accessed concurrently by worker threads in
+  // kMultiThread mode (Accept/Read/Leave each touch the map); the mutex
+  // serializes those accesses. Critical sections only touch the map itself:
+  // the shared_ptr is copied out and used outside the lock.
+  std::mutex ssl_sockets_map_mtx_;
   std::unordered_map<int, std::shared_ptr<SSLSocket>> ssl_sockets_map_;
 #endif
 
@@ -259,6 +273,8 @@ private:
   bool is_continue_ = false;
   std::pair<int, int> read_timeout_{0, 0};
   std::pair<int, int> write_timeout_{0, 0};
+  // Sane default so a stalled SSL handshake cannot pin a worker forever.
+  unsigned ssl_handshake_timeout_sec_ = 10;
 };
 
 } // namespace cppnet

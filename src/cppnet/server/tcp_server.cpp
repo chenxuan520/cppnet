@@ -2,10 +2,36 @@
 #include "../utils/const.hpp"
 #include "io_multiplexing/io_multiplexing_factory.hpp"
 
+#include <mutex>
 #include <string.h>
 #include <unistd.h>
 
+#ifndef _WIN32
+#include <signal.h>
+#endif
+
 namespace cppnet {
+
+namespace {
+// Ignore SIGPIPE once, process-wide. Without this, writing to a peer that has
+// closed the connection raises SIGPIPE and kills the entire server. Be polite:
+// if the user has already installed their own handler we leave it alone.
+void EnsureSigPipeIgnored() {
+#ifndef _WIN32
+  static std::once_flag once;
+  std::call_once(once, []() {
+    struct sigaction old_action;
+    if (sigaction(SIGPIPE, nullptr, &old_action) == 0 &&
+        old_action.sa_handler == SIG_DFL) {
+      struct sigaction action{};
+      action.sa_handler = SIG_IGN;
+      sigemptyset(&action.sa_mask);
+      sigaction(SIGPIPE, &action, nullptr);
+    }
+  });
+#endif
+}
+} // namespace
 
 TcpServer::TcpServer(const std::string &ip, uint16_t port) : addr_(ip, port) {}
 
@@ -258,6 +284,7 @@ int TcpServer::WakeUp() {
 }
 
 int TcpServer::Init() {
+  EnsureSigPipeIgnored();
   loop_flag_ = true;
   listenfd_ = CreateSocket();
   if (listenfd_.status() != Socket::kInit) {

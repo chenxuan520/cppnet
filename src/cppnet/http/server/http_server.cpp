@@ -259,16 +259,21 @@ void HttpServer::HandleAccept(TcpServer &server, Socket &event_soc) {
   logger_->Debug("accept from " + recv_addr.ToString() +
                  " soc: " + std::to_string(event_soc.fd()));
 
-  if (read_timeout_.first != 0 || read_timeout_.second != 0) {
-    event_soc.SetReadTimeout(read_timeout_.first, read_timeout_.second);
-  }
   if (write_timeout_.first != 0 || write_timeout_.second != 0) {
     event_soc.SetWriteTimeout(write_timeout_.first, write_timeout_.second);
   }
 
 #ifdef CPPNET_OPENSSL
   if (ssl_context_) {
-    auto ssl_socket = ssl_context_->AcceptSSL(event_soc);
+    // Apply a bounded read timeout BEFORE SSL_accept so a silent client
+    // cannot block this worker (or the single event loop) indefinitely.
+    if (ssl_handshake_timeout_sec_ > 0) {
+      event_soc.SetReadTimeout(ssl_handshake_timeout_sec_, 0);
+    }
+    // kSafely so concurrent SSL_read/write on the same SSL* is serialized
+    // (needed in any multi-threaded layout above us).
+    auto ssl_socket =
+        ssl_context_->AcceptSSL(event_soc, SSLSocket::Mode::kSafely);
     if (ssl_socket == nullptr) {
       logger_->Error("[ssl_context.AcceptSSL]:" + ssl_context_->err_msg() +
                      " soc:" + std::to_string(event_soc.fd()));
@@ -276,9 +281,27 @@ void HttpServer::HandleAccept(TcpServer &server, Socket &event_soc) {
       event_soc.Close();
       return;
     }
-    ssl_sockets_map_[event_soc.fd()] = ssl_socket;
+    {
+      std::lock_guard<std::mutex> g(ssl_sockets_map_mtx_);
+      ssl_sockets_map_[event_soc.fd()] = ssl_socket;
+    }
+    // Restore the user-configured read timeout for the actual HTTP request
+    // reading (0/0 means "no timeout", matching the original default).
+    if (ssl_handshake_timeout_sec_ > 0) {
+      event_soc.SetReadTimeout(read_timeout_.first, read_timeout_.second);
+    }
   }
 #endif
+
+  // For non-SSL path the read timeout has not been set above; do it now so
+  // both code paths end up with the same socket configuration.
+  if (
+#ifdef CPPNET_OPENSSL
+      !ssl_context_ &&
+#endif
+      (read_timeout_.first != 0 || read_timeout_.second != 0)) {
+    event_soc.SetReadTimeout(read_timeout_.first, read_timeout_.second);
+  }
 }
 
 void HttpServer::HandleLeave(TcpServer &server, Socket &event_soc) {
@@ -287,10 +310,19 @@ void HttpServer::HandleLeave(TcpServer &server, Socket &event_soc) {
   logger_->Debug("leave from " + recv_addr.ToString() +
                  " soc: " + std::to_string(event_soc.fd()));
 #ifdef CPPNET_OPENSSL
-  if (ssl_context_ &&
-      ssl_sockets_map_.find(event_soc.fd()) != ssl_sockets_map_.end()) {
-    ssl_sockets_map_[event_soc.fd()]->CloseSSL();
-    ssl_sockets_map_.erase(event_soc.fd());
+  if (ssl_context_) {
+    std::shared_ptr<SSLSocket> ssl_soc;
+    {
+      std::lock_guard<std::mutex> g(ssl_sockets_map_mtx_);
+      auto it = ssl_sockets_map_.find(event_soc.fd());
+      if (it != ssl_sockets_map_.end()) {
+        ssl_soc = it->second;
+        ssl_sockets_map_.erase(it);
+      }
+    }
+    if (ssl_soc) {
+      ssl_soc->CloseSSL();
+    }
   }
 #endif
 }
@@ -302,14 +334,15 @@ void HttpServer::HandleRead(TcpServer &server, Socket &event_soc) {
 
 #ifdef CPPNET_OPENSSL
   if (ssl_context_) {
-    if (ssl_sockets_map_.find(event_soc.fd()) != ssl_sockets_map_.end()) {
-      soc = ssl_sockets_map_[event_soc.fd()];
-    } else {
+    std::lock_guard<std::mutex> g(ssl_sockets_map_mtx_);
+    auto it = ssl_sockets_map_.find(event_soc.fd());
+    if (it == ssl_sockets_map_.end()) {
       logger_->Error("[logicerr]:ssl socket not found");
       server.RemoveSoc(event_soc);
       event_soc.Close();
       return;
     }
+    soc = it->second;
   } else {
     soc = std::make_shared<Socket>(event_soc);
   }
@@ -461,6 +494,10 @@ void HttpServer::SetReadTimeout(unsigned timeout_sec, unsigned timeout_usec) {
 
 void HttpServer::SetWriteTimeout(unsigned timeout_sec, unsigned timeout_usec) {
   write_timeout_ = std::make_pair(timeout_sec, timeout_usec);
+}
+
+void HttpServer::SetSSLHandshakeTimeout(unsigned timeout_sec) {
+  ssl_handshake_timeout_sec_ = timeout_sec;
 }
 
 #ifdef CPPNET_OPENSSL

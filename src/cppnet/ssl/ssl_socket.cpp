@@ -23,10 +23,13 @@ SSLSocket::SSLSocket(SSL *ssl, const Socket &soc, Mode mode) {
   SSL_set_fd(ssl_, fd_);
   status_ = kInit;
 
+  // NOTE: assign mode_ BEFORE checking it; previously the check used the
+  // default-initialized mode_ (kQuickly) and pmutex_ was never created,
+  // silently disabling the SSL serialization lock.
+  mode_ = mode;
   if (mode_ == Mode::kSafely) {
     pmutex_ = std::make_unique<std::mutex>();
   }
-  mode_ = mode;
 }
 
 int SSLSocket::Close() {
