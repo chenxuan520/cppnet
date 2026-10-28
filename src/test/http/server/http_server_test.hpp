@@ -4,6 +4,8 @@
 #include "test.h"
 #include "utils/file.hpp"
 #include <atomic>
+#include <chrono>
+#include <thread>
 #include <string>
 
 using namespace cppnet;
@@ -47,6 +49,97 @@ TEST(HttpServer, HelloWorld) {
                 HttpStatusCodeUtil::ConvertToStr(resp.status_code()));
   MUST_TRUE(resp.body() == "hello world", "get wrong body " + resp.body());
   DEBUG("resp: " << resp.body());
+}
+
+TEST(HttpServer, MethodFilter) {
+  HttpServer server;
+  Address addr{"127.0.0.1", 19982};
+  auto rc = server.Init(addr);
+  MUST_TRUE(rc == 0, server.err_msg());
+
+  server.GET("/only-get", [&](HttpContext &ctx) {
+    ctx.resp().Text(HttpStatusCode::OK, "get");
+    server.Stop();
+  });
+  server.POST("/only-post", [&](HttpContext &ctx) {
+    ctx.resp().Text(HttpStatusCode::OK, "post");
+  });
+
+  // sync run server
+  GO_JOIN([&] { server.Run(); });
+
+  HttpClient client;
+  rc = client.Init(addr);
+  MUST_TRUE(rc == 0, client.err_msg());
+  HttpReq req;
+  HttpResp resp;
+
+  // a GET route must not accept POST
+  req.POST("/only-get", "x");
+  rc = client.Send(req, resp);
+  MUST_TRUE(rc == 0, client.err_msg());
+  MUST_TRUE(resp.status_code() == HttpStatusCode::NOT_FOUND,
+            "POST on GET route got " +
+                HttpStatusCodeUtil::ConvertToStr(resp.status_code()));
+
+  // a POST route must not accept GET
+  req.Clear();
+  resp.Clear();
+  req.GET("/only-post");
+  rc = client.Send(req, resp);
+  MUST_TRUE(rc == 0, client.err_msg());
+  MUST_TRUE(resp.status_code() == HttpStatusCode::NOT_FOUND,
+            "GET on POST route got " +
+                HttpStatusCodeUtil::ConvertToStr(resp.status_code()));
+
+  // matching methods still work
+  req.Clear();
+  resp.Clear();
+  req.GET("/only-get");
+  rc = client.Send(req, resp);
+  MUST_TRUE(rc == 0, client.err_msg());
+  MUST_TRUE(resp.body() == "get", "get wrong body " + resp.body());
+  client.Close();
+}
+
+TEST(HttpServer, ShortGarbageRequest) {
+  HttpServer server;
+  Address addr{"127.0.0.1", 19983};
+  auto rc = server.Init(addr);
+  MUST_TRUE(rc == 0, server.err_msg());
+
+  server.GET("/hello", [&](HttpContext &ctx) {
+    ctx.resp().Text(HttpStatusCode::OK, "hello world");
+    server.Stop();
+  });
+
+  // sync run server
+  GO_JOIN([&] { server.Run(); });
+
+  // a lone "\n" (shorter than "\r\n\r\n") used to make ReadUntil throw
+  // std::out_of_range and terminate the whole process
+  for (auto garbage : {"\n", "\r\n", "\n\n\n"}) {
+    Socket soc;
+    rc = soc.Init();
+    MUST_TRUE(rc == 0, soc.err_msg());
+    rc = soc.Connect(addr);
+    MUST_TRUE(rc == 0, soc.err_msg());
+    soc.Write(garbage);
+    soc.Close();
+  }
+  std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+  // server must still be alive and serving
+  HttpClient client;
+  rc = client.Init(addr);
+  MUST_TRUE(rc == 0, client.err_msg());
+  HttpReq req;
+  HttpResp resp;
+  req.GET("/hello");
+  rc = client.Send(req, resp);
+  MUST_TRUE(rc == 0, client.err_msg());
+  MUST_TRUE(resp.body() == "hello world", "get wrong body " + resp.body());
+  client.Close();
 }
 
 TEST(HttpServer, Static) {

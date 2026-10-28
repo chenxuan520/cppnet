@@ -28,7 +28,7 @@ int HttpGroup::GET(const std::string &path, HttpCallback callback,
   auto method_filter = std::make_shared<HttpMethodFilter>();
   method_filter->Init(HttpMethod::GET);
   new_filters.push_back(method_filter);
-  return RegisterHandler(path, callback, filters);
+  return RegisterHandler(path, callback, new_filters);
 }
 
 int HttpGroup::GET(const std::string &path,
@@ -49,7 +49,7 @@ int HttpGroup::POST(const std::string &path, HttpCallback callback,
   auto method_filter = std::make_shared<HttpMethodFilter>();
   method_filter->Init(HttpMethod::POST);
   new_filters.push_back(method_filter);
-  return RegisterHandler(path, callback, filters);
+  return RegisterHandler(path, callback, new_filters);
 }
 
 int HttpGroup::POST(const std::string &path,

@@ -152,8 +152,12 @@ int Socket::ReadUntil(std::string &buf, const std::string &delim) {
   }
   auto delim_len = delim.size();
   char ch = 0;
-  while (ch != delim[delim_len - 1] ||
-         buf.substr(buf.size() - delim.size()) != delim) {
+  // buf.size() must be checked before comparing the tail: when the buffer is
+  // shorter than the delimiter, buf.size() - delim_len underflows and
+  // substr() throws std::out_of_range, which a single "\n" from a client
+  // could trigger to crash the whole server.
+  while (ch != delim[delim_len - 1] || buf.size() < delim_len ||
+         buf.compare(buf.size() - delim_len, delim_len, delim) != 0) {
     auto rc = IORead(&ch, 1);
     if (rc <= 0) {
       return rc;
