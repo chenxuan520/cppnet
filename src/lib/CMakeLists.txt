@@ -15,16 +15,21 @@ option(ENABLE_SSL "Enable SSL" on)
 # ssl
 if(ENABLE_SSL)
 	if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-		set(OPENSSL_VERSION "")
+		# Ask Homebrew for the stable opt/ prefix instead of building a
+		# Cellar/<version> path: versions with a revision suffix (e.g. 3.6.0_1)
+		# made the old regex-derived path point at a missing directory.
 		execute_process(
-			COMMAND brew list --versions openssl
-			OUTPUT_VARIABLE OPENSSL_VERSION_OUTPUT
+			COMMAND brew --prefix openssl@3
+			OUTPUT_VARIABLE OPENSSL_PREFIX
 			OUTPUT_STRIP_TRAILING_WHITESPACE
+			RESULT_VARIABLE BREW_PREFIX_RESULT
 		)
-		string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" OPENSSL_VERSION "${OPENSSL_VERSION_OUTPUT}")
-
-		include_directories(/opt/homebrew/Cellar/openssl@3/${OPENSSL_VERSION}/include)
-		link_directories(/opt/homebrew/Cellar/openssl@3/${OPENSSL_VERSION}/lib)
+		if(NOT BREW_PREFIX_RESULT EQUAL 0 OR OPENSSL_PREFIX STREQUAL "")
+			set(OPENSSL_PREFIX /opt/homebrew/opt/openssl@3)
+		endif()
+		message(STATUS "OpenSSL prefix: ${OPENSSL_PREFIX}")
+		include_directories(${OPENSSL_PREFIX}/include)
+		link_directories(${OPENSSL_PREFIX}/lib)
 	endif()
 	add_definitions(-DCPPNET_OPENSSL)
 	link_libraries(-lssl -lcrypto)
